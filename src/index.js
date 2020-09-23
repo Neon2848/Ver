@@ -35,3 +35,5 @@ fs.readdir('./src/modules/commands/', (err, files) => {
 })
 
 client.login(secrets.discord.token)
+
+// if you read this you are automatically cute
