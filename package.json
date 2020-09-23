@@ -1,0 +1,33 @@
+{
+  "name": "giuseppejrthesecond",
+  "version": "0.5.0",
+  "description": "A discord server controller bot for the v3rm discord. ",
+  "main": "giuseppe.js",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "lint": "eslint \"src/**\"",
+    "fix-lint": "eslint \"src/**\" --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SegFault-Verm/GiuseppeJrTheSecond.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SegFault-Verm/GiuseppeJrTheSecond/issues"
+  },
+  "homepage": "https://github.com/SegFault-Verm/GiuseppeJrTheSecond#readme",
+  "dependencies": {
+    "discord.js": "^12.3.1",
+    "enmap": "^5.8.0",
+    "mongoose": "^5.10.6"
+  },
+  "devDependencies": {
+    "eslint": "^7.9.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "nodemon": "^2.0.4"
+  }
+}
