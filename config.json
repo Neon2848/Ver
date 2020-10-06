@@ -1,0 +1,22 @@
+{
+  "roleTranslations": {
+      "Administrator": 4,
+      "Advisor": 14,
+      "Moderator": 6,
+      "Esoterica": 28,
+      "Elite": 15,
+      "VIP": 11,
+      "Member": 2,
+      "Banned": 7
+  },
+  "urls": {
+    "v3rm": {
+      "profileURL": "https://v3rmillion.net/member.php?action=profile&uid="
+    }
+  },
+  "images": {
+    "botAvatar": "https://cdn.discordapp.com/avatars/709771900490088488/c9d914f580f45399d4941f4c2d7ff6e4.png",
+    "v3rmLogo": "https://media.discordapp.net/attachments/758275157990047774/763125251877634129/v3rm_logo.png",
+    "loader": "https://cdn.discordapp.com/attachments/758275157990047774/763126610646794240/loading.gif"
+  }
+}

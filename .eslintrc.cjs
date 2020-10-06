@@ -14,6 +14,6 @@ module.exports = {
     'no-unused-vars': 'warn',
     'no-console': ['warn'],
     semi: [2, 'never'], // WhY nO sEmi cOlon?? https://blog.izs.me/2010/12/an-open-letter-to-javascript-leaders-regarding
-    'import/extensions': 0,
+    'linebreak-style': 0,
   },
 }
