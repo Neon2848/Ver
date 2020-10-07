@@ -7,6 +7,7 @@ const Discord = require('discord.js')
  */
 module.exports = (client, message) => {
   if (message.author.bot) return
+  if (message.channel.type === 'dm') return
 
   // Commands
   if (message.content.indexOf(client.secrets.discord.prefix) !== 0) return
