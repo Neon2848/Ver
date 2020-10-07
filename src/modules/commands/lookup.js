@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 const lookup = require('../functions/lookup')
 const config = require('../../../config.json')
+const secrets = require('../../../secrets.json')
 
 const sendError = (errMsg, caller, errTitle = 'Lookup Error') => {
   const emb = {
@@ -29,7 +30,7 @@ const kickUser = (member, editable) => {
 
 const getID = (args) => {
   const cleanArg = args[0].replace(/<@!/, '').replace('/>/', '').match(/[0-9]{12,32}/) // Match id or <@!id>
-  if (!cleanArg || !cleanArg[0]) return -1
+  if (!cleanArg || !cleanArg[0]) return null
   return cleanArg[0]
 }
 
@@ -54,6 +55,8 @@ exports.run = (client, message, args) => { // eslint-disable-line no-unused-vars
       }
 
       editable.channel.send(`<@${discordid}> is: ${config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } }).then(editable.delete())
-    }).catch((err) => sendError(err, { message: editable, edit: true, timeout: 10000 }))
+    }).catch((err) => sendError(err.message
+      .replace(`${secrets.v3rm.api.base}`, 'apibase')
+      .replace(`${secrets.v3rm.api.lookup}`, 'lookup'), { message: editable, edit: true, timeout: 10000 }))
   })
 }
