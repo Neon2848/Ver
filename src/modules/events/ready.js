@@ -8,5 +8,9 @@ module.exports = (client) => {
   mongo.connect()
   // eslint-disable-next-line no-console
   console.log(`Connected. ${client.user.tag}!`)
-  // mongo.log('global', 'info', 'connected', undefined, { user: client.user.tag })
+
+  const servers = client.guilds.cache.array().map((g) => ({ serverId: g.id, serverName: g.name }))
+  mongo.setupGuilds(servers)
+
+  mongo.log('global', 'info', 'connected', undefined, { user: client.user.tag })
 }

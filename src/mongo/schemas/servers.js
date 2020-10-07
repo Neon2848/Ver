@@ -4,6 +4,7 @@ const { Schema } = mongoose
 
 const serversSchema = new Schema({
   serverId: String,
+  serverName: String,
   logs: {
     type: Array,
     default: {
@@ -16,6 +17,11 @@ const serversSchema = new Schema({
       },
       data: Object,
     },
+  },
+  settings: {
+    lastLookup: { type: Date, default: Date.now },
+    lookupTimeout: { type: Number, default: 30 },
+    allowUsersToLookup: { type: Boolean, default: false },
   },
 })
 

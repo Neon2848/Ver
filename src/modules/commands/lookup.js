@@ -34,13 +34,17 @@ const getID = (args) => {
   return cleanArg[0]
 }
 
-exports.run = (client, message, args) => { // eslint-disable-line no-unused-vars
+exports.run = (client, message, args, type = 'lookup') => { // eslint-disable-line no-unused-vars
   if (!message.member || !message.member.hasPermission('KICK_MEMBERS')) return
   const discordid = getID(args)
   if (!discordid) return sendError('Input malformatted', { message })
 
   message.reply({ embed: { color: 16674701, author: { name: 'Looking Up User...', icon_url: config.images.loader } } }).then((editable) => {
-    lookup(discordid).then((details) => {
+    lookup(
+      discordid,
+      editable.guild.id,
+      { bypass: message.member.hasPermission('KICK_MEMBERS'), type },
+    ).then((details) => {
       const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
 
       if (guildMember && !details.roles.includes('Administrator')) { // Member we're looking for is in the server, so update roles and username.
