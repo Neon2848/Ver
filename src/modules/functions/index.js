@@ -56,12 +56,12 @@ const basicLookup = async (member) => {
   })
   if (!details) return
   if (details.roles.includes('Banned') || !details.roles.length) {
-    basicKickUser(member, 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.', member.guild.id)
+    basicKickUser(member, 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.', member.guild.id).filter((r) => !!r)
     return
   }
   const rolesToAdd = details.roles.map((role) => member.guild.roles.cache.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member'))
   member.setNickname(member.user.username === details.username ? `${member.user.username}\u200E` : details.username)
-  member.roles.add(rolesToAdd)
+  if (rolesToAdd.length) member.roles.add(rolesToAdd)
 }
 
 module.exports = {

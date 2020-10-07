@@ -28,12 +28,12 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
       })
     } else {
       const gRoles = editable.guild.roles.cache
-      const rolesToAdd = details.roles.map((role) => gRoles.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member'))
+      const rolesToAdd = details.roles.map((role) => gRoles.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member')).filter((r) => !!r)
       // Might not have "member" ug if VIP/Elite. Needed for heirarchical perms.
       rolesToAdd.push(gRoles.find((r) => r.name === 'Member'))
       const msgDetails = { message: editable, timeout: 5000 }
       guildMember.setNickname(guildMember.user.username === details.username ? `${guildMember.user.username}\u200E` : details.username).catch((e) => sendResult(`Error setting nickname: \`${e}\``, msgDetails, 'Lookup error'))
-      guildMember.roles.add(rolesToAdd).catch((e) => sendResult(`Unable to set this users roles: \`${e}\``, msgDetails, 'Lookup error'))
+      if (rolesToAdd.length) guildMember.roles.add(rolesToAdd).catch((e) => sendResult(`Unable to set this users roles: \`${e}\``, msgDetails, 'Lookup error'))
     }
   }
   editable.channel.send(`<@${discordid}> is: ${config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } }).then(() => { if (deleting) editable.delete() })
