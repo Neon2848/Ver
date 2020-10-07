@@ -7,7 +7,6 @@ const {
 } = require('../functions')
 
 exports.run = async (client, message, args, type = 'lookup') => { // eslint-disable-line no-unused-vars
-  if (!message || !message.channel) return
   const discordid = getFirstTagID(args)
   if (!discordid) return sendResult('Input malformatted', { message })
   let deleting = true
@@ -28,8 +27,10 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
         log: 'User does not have permissions on site.',
       })
     } else {
-      const rolesToAdd = details.roles
-        .map((role) => editable.guild.roles.cache.find((guildRole) => guildRole.name === role))
+      const gRoles = editable.guild.roles.cache
+      const rolesToAdd = details.roles.map((role) => gRoles.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member'))
+      // Might not have "member" ug if VIP/Elite. Needed for heirarchical perms.
+      rolesToAdd.push(gRoles.find((r) => r.name === 'Member'))
       const msgDetails = { message: editable, timeout: 5000 }
       guildMember.setNickname(guildMember.user.username === details.username ? `${guildMember.user.username}\u200E` : details.username).catch((e) => sendResult(`Error setting nickname: \`${e}\``, msgDetails, 'Lookup error'))
       guildMember.roles.add(rolesToAdd).catch((e) => sendResult(`Unable to set this users roles: \`${e}\``, msgDetails, 'Lookup error'))

@@ -17,7 +17,6 @@ const doUnlink = async (discordid, editable) => {
 }
 
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
-  if (!message || !message.channel || !message.member) return
   const editable = await message.channel.send(genSpinner('Attempting to unlink...'))
 
   if (message.cleanContent !== '!unlink') {
