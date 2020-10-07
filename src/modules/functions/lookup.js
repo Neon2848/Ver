@@ -11,7 +11,6 @@ const lookup = (discordid) => new Promise((resolve, reject) => {
     .then((res) => res.json())
     .then((json) => {
       if (json.error) reject(json.message)
-
       const allGroups = new Set([
         parseInt(json.usergroup, 10),
         parseInt(json.displaygroup, 10),
@@ -20,24 +19,15 @@ const lookup = (discordid) => new Promise((resolve, reject) => {
 
       const translationGroups = Object.entries(config.roleTranslations)
       const roles = []
-
       allGroups.forEach((group) => {
         translationGroups.some((translation) => {
           if (translation[1] === group) return roles.push(translation[0])
           return false
         })
       })
-
-      resolve({
-        username: json.username,
-        uid: json.uid,
-        roles,
-      })
+      resolve({ username: json.username, uid: json.uid, roles })
     })
-    .catch((err) => {
-      knownErrors.fetchingData(err)
-      reject(err)
-    })
+    .catch((err) => { knownErrors.fetchingData(err); reject(err) })
 })
 
 module.exports = lookup
