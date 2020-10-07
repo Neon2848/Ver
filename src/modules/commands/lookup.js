@@ -29,7 +29,7 @@ const kickUser = (member, editable) => {
 
 const getID = (args) => {
   const cleanArg = args[0].replace(/<@!/, '').replace('/>/', '').match(/[0-9]{12,32}/) // Match id or <@!id>
-  if (!cleanArg || !cleanArg[0]) return -1
+  if (!cleanArg || !cleanArg[0]) return null
   return cleanArg[0]
 }
 
