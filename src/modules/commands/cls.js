@@ -22,6 +22,15 @@ const genFilters = (aFilters, argsLength) => {
   // Filters for "words"
   aFilters.inQuotes.forEach((word) => ffs.push((_) => _.content.split(' ').includes(word)))
 
+  // Filters for has:file/embed/image/sound/video
+  aFilters.hasArgs.forEach((has) => ffs.push((_) => {
+    if (has === 'embed') return !!_.embeds
+    if (has === 'file') return !!_.attachments
+
+    const proxyURL = _.embeds[0]?.thumbnail?.proxyURL || _.attachments.first()?.proxyURL || ''
+    return has.test(proxyURL)
+  }))
+
   let totalMatchingArgs = 0
   Object.values(aFilters).forEach((v) => { totalMatchingArgs += v.length })
   return { filters: ffs, tooManyArgs: argsLength > totalMatchingArgs, regexError: null }
@@ -57,8 +66,8 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     /* eslint-disable no-useless-escape */
     return sendResult(
       'There was an issue with one of your arguments. Here are some examples:\ ```js\n\
-!cls 500 @FromUser "badword1" "badWord2" \`/regex1/\` \`/regex2/\`\n!cls 5\n!cls @FromUser\n!cls "badword"```\n\
-      Deletes messages matching all filters. All filters are optional, and the number defaults to 99. Multiple "hasWord" and `/matchesRegex/` are allowed.',
+!cls 500 @FromUser "badword1" "badWord2" \`/regex1/\` \`/regex2/\`\n!cls 5\n!cls @FromUser\n!cls "badword"\n!cls has:embed has:attachment```\n\
+      Deletes messages matching all filters. All filters are optional, and the number defaults to 99. Multiple `"hasWord"` and ``/matchesRegex/`` are allowed',
       { message: pendingMsg, edit: true, timeout: 30000 },
       'Format Issue',
     )

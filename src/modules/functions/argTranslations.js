@@ -1,5 +1,9 @@
+const config = require('../../../config.json')
+
 // Match arg where only digits exist in the arg.
 const numbers = (args) => args.filter((arg) => /^[0-9]{1,17}$/.test(arg))
+// It's physically impossible for a number to be >17 digits.
+// JK this is just a hacky solution to the fact that user snowflakes are 18+ digits.
 
 // Match 123456789123456789 or <@123456789123456789>
 const users = (args) => {
@@ -19,7 +23,7 @@ const users = (args) => {
 }
 
 // Match "quotes" "with-basic" "ASCII!" "inside" (asci 33, 35 - 126)
-const inQuotes = (args) => args.filter((arg) => /^"[!\21-\x7E]+"$/gm.test(arg))
+const inQuotes = (args) => args.filter((arg) => /^"[!\21-\x7E]+"$/gm.test(arg)).map((a) => a.substring(1, a.length - 1))
 
 // Match regex `/regex/` and convert to regular expression (or error).
 const regexs = (args) => {
@@ -30,9 +34,18 @@ const regexs = (args) => {
   return convertToRegex
 }
 
+// Match only has:thing
+const hasArgs = (args) => args.filter((arg) => /^has:(link|embed|file|video|image|sound)$/.test(arg))
+  .map((a) => a.replace('has:', ''))
+  .map((a) => {
+    if (a === 'embed' || a === 'file') return a
+    return new RegExp(`\\.(${config.attachmentTypes[a].join('|')})$`)
+  })
+
 module.exports = (args) => ({
   numbers: numbers(args),
   users: users(args),
   inQuotes: inQuotes(args),
   regexs: regexs(args),
+  hasArgs: hasArgs(args),
 })
