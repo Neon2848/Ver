@@ -2,13 +2,6 @@ const config = require('../../../config.json')
 const knownErrors = require('../knownErrors')
 const lookup = require('./lookup')
 
-const getFirstTagID = (args) => {
-  if (!args.length) return null
-  const cleanArg = args[0].replace(/<@!/, '').replace('/>/', '').match(/[0-9]{12,32}/) // Match id or <@!id>
-  if (!cleanArg || !cleanArg[0]) return null
-  return cleanArg[0]
-}
-
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'
   if (err === 'User does not exist') return 'This user is not currently linked.'
@@ -65,7 +58,6 @@ const basicLookup = async (member) => {
 }
 
 module.exports = {
-  getFirstTagID,
   sendResult,
   kickUser,
   genSpinner,

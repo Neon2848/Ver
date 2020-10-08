@@ -2,6 +2,7 @@
 const Discord = require('discord.js')
 const { getSettings } = require('../../mongo/connect')
 const knownErrors = require('../knownErrors')
+const getArgs = require('../functions/argTranslations')
 
 /**
  * @param {Discord.Client} client bot client
@@ -21,9 +22,13 @@ module.exports = async (client, message) => {
 
   // Commands
   if (message.content.indexOf(client.secrets.discord.prefix) !== 0) return
-  const args = message.content.slice(client.secrets.discord.prefix.length).trim().split(/ +/g)
-  const command = args.shift().toLowerCase()
+  const rawArgs = message.content.slice(client.secrets.discord.prefix.length).trim().split(/ +/g)
+  const command = rawArgs.shift().toLowerCase()
   const cmd = client.commands.get(command)
   if (!cmd) return
+  const args = {
+    raw: rawArgs,
+    argMap: getArgs(rawArgs),
+  }
   cmd.run(client, message, args)
 }
