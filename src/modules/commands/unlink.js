@@ -1,6 +1,4 @@
-const {
-  getFirstTagID, sendResult, genSpinner, kickUser,
-} = require('../functions')
+const { sendResult, genSpinner, kickUser } = require('../functions')
 const unlink = require('../functions/unlink')
 
 const doUnlink = async (discordid, editable) => {
@@ -20,7 +18,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   const editable = await message.channel.send(genSpinner('Attempting to unlink...'))
 
   if (message.cleanContent !== '!unlink') {
-    const id = getFirstTagID(args)
+    const id = args.argMap.users[0] || null
     if (!message.member.hasPermission('KICK_MEMBERS') || !id) {
       sendResult('You have formatted this command incorrectly. To unlink yourself, just say `!unlink`', { message: editable, edit: true }, 'Unable to unlink.')
     } else doUnlink(id, editable)

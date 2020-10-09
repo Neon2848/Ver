@@ -2,12 +2,10 @@
 const lookup = require('../functions/lookup')
 const config = require('../../../config.json')
 const secrets = require('../../../secrets.json')
-const {
-  getFirstTagID, sendResult, kickUser, genSpinner,
-} = require('../functions')
+const { sendResult, kickUser, genSpinner } = require('../functions')
 
 exports.run = async (client, message, args, type = 'lookup') => { // eslint-disable-line no-unused-vars
-  const discordid = getFirstTagID(args)
+  const discordid = args.argMap.users[0] || null
   if (!discordid) return sendResult('Input malformatted', { message })
   let deleting = true
 
