@@ -44,7 +44,7 @@ const genSpinner = (spinnerInfo) => (
 )
 
 const basicUserSetup = async (details, member) => {
-  const rolesToAdd = details.roles.map((role) => member.guild.roles.cache.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member'))
+  const rolesToAdd = details.roles.map((role) => member.guild.roles.cache.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member')).filter((r) => !!r)
   await member.setNickname(member.user.username === details.username ? `${member.user.username}\u200E` : details.username).catch((e) => { throw e })
   if (rolesToAdd.length) await member.roles.add(rolesToAdd).catch((e) => { throw e })
   return member
