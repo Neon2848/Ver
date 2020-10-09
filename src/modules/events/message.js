@@ -4,29 +4,17 @@ const { getSettings } = require('../../mongo/connect')
 const knownErrors = require('../knownErrors')
 const getArgs = require('../functions/argTranslations')
 
-/**
- * @param {Discord.Client} client bot client
- * @param {Discord.Message} message received message
- */
-module.exports = async (client, message) => {
-  if (message.author.bot
-      || message.channel.type === 'dm'
-      || !message.member
-      || !message.channel
-      || !message.guild
-  ) return
-
-  // Assign roles
+const assignRoles = async (message) => {
   const { channelWelcome } = await getSettings(message.guild.id)
   if (message.channel.name === channelWelcome) {
     if (/^i agree$/gmi.test(message.cleanContent) && !message.member.roles.cache.find((r) => r.name === 'Member')) {
       message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id, 'assigning roles'))
     }
     message.delete()
-    return
   }
+}
 
-  // Commands
+const runAllCommands = (client, message) => {
   if (message.content.indexOf(client.secrets.discord.prefix) !== 0) return
   const rawArgs = message.content.slice(client.secrets.discord.prefix.length).trim().split(/ +/g)
   const command = rawArgs.shift().toLowerCase()
@@ -37,4 +25,16 @@ module.exports = async (client, message) => {
     argMap: getArgs(rawArgs),
   }
   cmd.run(client, message, args)
+}
+
+module.exports = async (client, message) => {
+  if (message.author.bot
+      || message.channel.type === 'dm'
+      || !message.member
+      || !message.channel
+      || !message.guild
+  ) return
+
+  assignRoles(message)
+  runAllCommands(client, message)
 }
