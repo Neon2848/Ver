@@ -3,6 +3,7 @@ const knownErrors = require('../knownErrors')
 
 const maxChunk = 100
 
+// eslint-disable-next-line max-lines-per-function
 const genFilters = (aFilters, argsLength) => {
   const ffs = []
 
@@ -50,11 +51,13 @@ const deleteMessages = async (pendingMsg, numToCrawl, filt) => {
 }
 
 const sendUserErrors = (message, errorDetails = null) => {
-  if (errorDetails !== null) return sendResult(
-    `Your regular expression was invalid: \n\n**${errorDetails.name}:**\n\`${errorDetails.message}\``,
-    { message, edit: true, timeout: 30000 },
-    'Regex Error',
-  )
+  if (errorDetails !== null) {
+    return sendResult(
+      `Your regular expression was invalid: \n\n**${errorDetails.name}:**\n\`${errorDetails.message}\``,
+      { message, edit: true, timeout: 30000 },
+      'Regex Error',
+    )
+  }
   /* eslint-disable no-useless-escape */
   return sendResult(
     'There was an issue with one of your arguments. Here are some examples:\ ```js\n\
@@ -74,7 +77,6 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
 
   if (regexError) return sendUserErrors(pendingMsg, regexError)
   if (tooManyArgs) return sendUserErrors(pendingMsg)
-
   if (numToClear < maxChunk) {
     const deletedMessages = await deleteMessages(pendingMsg, numToClear + 1, filters)
     return sendResult(`Successfully deleted \`${deletedMessages}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
@@ -84,7 +86,6 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   while (remaining > 0) {
     remaining += 1 // Add 1 each iteration for the pending message.
     const thisChunk = Math.min(maxChunk, remaining)
-    // needed below, I spent 2 hours trying to do this recursively.
     // eslint-disable-next-line no-await-in-loop
     const deletedMessages = await deleteMessages(pendingMsg, thisChunk, filters)
     successes += deletedMessages

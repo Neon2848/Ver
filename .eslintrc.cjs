@@ -16,5 +16,6 @@ module.exports = {
     semi: [2, 'never'], // WhY nO sEmi cOlon?? https://blog.izs.me/2010/12/an-open-letter-to-javascript-leaders-regarding
     'linebreak-style': 0,
     'no-multi-str': 0,
+    'max-lines-per-function': ['warn', { max: 25 }],
   },
 }

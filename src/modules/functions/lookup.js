@@ -1,8 +1,6 @@
-const fetch = require('node-fetch')
-const secrets = require('../../../secrets.json')
 const config = require('../../../config.json')
-const knownErrors = require('../knownErrors')
 const mongo = require('../../mongo/connect')
+const v3rmApi = require('./apiCall')
 
 const lookup = async (discordid, serverId, options) => {
   const {
@@ -13,23 +11,16 @@ const lookup = async (discordid, serverId, options) => {
   if (timeUntil < 0 && !options.bypass) throw new Error(`This command can be used again in \`${-timeUntil}\` second(s)`)
   mongo.setSetting(serverId, 'lastLookup', Date.now())
 
-  const res = await fetch(`${secrets.v3rm.api.base}/${secrets.v3rm.api.lookup}?id=${discordid}`, {
-    method: 'get',
-    headers: { 'Content-Type': 'application/json' },
-  }).catch((_) => { knownErrors.fetchingData(_); throw _ })
-
-  const json = await res.json()
-  if (json.error) throw new Error(json.message)
+  const json = await v3rmApi('lookup', `?id=${discordid}`)
   const allGroups = new Set([
     parseInt(json.usergroup, 10),
     parseInt(json.displaygroup, 10),
     ...json.additionalgroups.map((_) => parseInt(_, 10)),
   ])
 
-  const translationGroups = Object.entries(config.roleTranslations)
   const roles = []
   allGroups.forEach((group) => {
-    translationGroups.some((translation) => {
+    Object.entries(config.roleTranslations).some((translation) => {
       if (translation[1] === group) return roles.push(translation[0])
       return false
     })

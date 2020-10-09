@@ -2,7 +2,9 @@
 const lookup = require('../functions/lookup')
 const config = require('../../../config.json')
 const secrets = require('../../../secrets.json')
-const { sendResult, kickUser, genSpinner } = require('../functions')
+const {
+  sendResult, kickUser, genSpinner, basicUserSetup,
+} = require('../functions')
 
 exports.run = async (client, message, args, type = 'lookup') => { // eslint-disable-line no-unused-vars
   const discordid = args.argMap.users[0] || null
@@ -22,14 +24,7 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
         channel: 'The user does not have access to the site. They have now been removed from the server',
         log: 'User does not have permissions on site.',
       })
-    } else {
-      const gRoles = editable.guild.roles.cache
-      const rolesToAdd = details.roles.map((role) => gRoles.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member')).filter((r) => !!r)
-      rolesToAdd.push(gRoles.find((r) => r.name === 'Member')) // Might not have "member" ug if VIP/Elite. Needed for heirarchical perms.
-      const msgDetails = { message: editable, timeout: 5000 }
-      guildMember.setNickname(guildMember.user.username === details.username ? `${guildMember.user.username}\u200E` : details.username).catch((e) => sendResult(`Error setting nickname: \`${e}\``, msgDetails, 'Lookup error'))
-      if (rolesToAdd.length) guildMember.roles.add(rolesToAdd).catch((e) => sendResult(`Unable to set this users roles: \`${e}\``, msgDetails, 'Lookup error'))
-    }
+    } else basicUserSetup(details, guildMember).catch((e) => { sendResult(`There was an issue setting nickname or roles: \`${e}\``, { message: editable, timeout: 5000 }, 'Lookup error') })
   }
   editable.channel.send(`<@${discordid}> is: ${config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } }).then(() => { if (deleting) editable.delete() })
 }
