@@ -1,4 +1,5 @@
 const { genSpinner, sendResult } = require('../functions')
+const knownErrors = require('../knownErrors')
 
 const maxChunk = 100
 
@@ -44,8 +45,25 @@ const deleteMessages = async (pendingMsg, numToCrawl, filt) => {
     filteredMessages = filteredMessages.filter(filter)
   })
 
-  const deletedMessages = await pendingMsg.channel.bulkDelete(filteredMessages, true)
-  return deletedMessages.size
+  const deletedMessages = await pendingMsg.channel.bulkDelete(filteredMessages, true).catch((e) => knownErrors(pendingMsg.channel, e, 'bulk deleting'))
+  return deletedMessages.size || 0
+}
+
+const sendUserErrors = (message, errorDetails = null) => {
+  if (errorDetails !== null) return sendResult(
+    `Your regular expression was invalid: \n\n**${errorDetails.name}:**\n\`${errorDetails.message}\``,
+    { message, edit: true, timeout: 30000 },
+    'Regex Error',
+  )
+  /* eslint-disable no-useless-escape */
+  return sendResult(
+    'There was an issue with one of your arguments. Here are some examples:\ ```js\n\
+!cls 500 @FromUser "badword1" "badWord2" \`/regex1/\` \`/regex2/\`\n!cls 5\n!cls @FromUser\n!cls "badword"\n!cls has:embed has:attachment```\n\
+    Deletes messages matching all filters. All filters are optional, and the number defaults to 99. Multiple `"hasWord"` and ``/matchesRegex/`` are allowed',
+    { message, edit: true, timeout: 30000 },
+    'Format Issue',
+  )
+  /* eslint-enable no-useless-escape */
 }
 
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
@@ -54,32 +72,15 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   const numToClear = aFilters.numbers[0] ? parseInt(aFilters.numbers[0], 10) : 99
   const { filters, tooManyArgs, regexError } = genFilters(aFilters, args.raw.length)
 
-  if (regexError) {
-    return sendResult(
-      `Your regular expression was invalid: \n\n**${regexError.name}:**\n\`${regexError.message}\``,
-      { message: pendingMsg, edit: true, timeout: 30000 },
-      'Regex Error',
-    )
-  }
-
-  if (tooManyArgs) {
-    /* eslint-disable no-useless-escape */
-    return sendResult(
-      'There was an issue with one of your arguments. Here are some examples:\ ```js\n\
-!cls 500 @FromUser "badword1" "badWord2" \`/regex1/\` \`/regex2/\`\n!cls 5\n!cls @FromUser\n!cls "badword"\n!cls has:embed has:attachment```\n\
-      Deletes messages matching all filters. All filters are optional, and the number defaults to 99. Multiple `"hasWord"` and ``/matchesRegex/`` are allowed',
-      { message: pendingMsg, edit: true, timeout: 30000 },
-      'Format Issue',
-    )
-    /* eslint-enable no-useless-escape */
-  }
+  if (regexError) return sendUserErrors(pendingMsg, regexError)
+  if (tooManyArgs) return sendUserErrors(pendingMsg)
 
   if (numToClear < maxChunk) {
     const deletedMessages = await deleteMessages(pendingMsg, numToClear + 1, filters)
-    return sendResult(`Successfully deleted \`${deletedMessages}\` from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
+    return sendResult(`Successfully deleted \`${deletedMessages}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
   }
   let successes = 0
-  let remaining = numToClear
+  let remaining = numToClear + 1
   while (remaining > 0) {
     remaining += 1 // Add 1 each iteration for the pending message.
     const thisChunk = Math.min(maxChunk, remaining)
@@ -90,5 +91,5 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     remaining -= thisChunk
     pendingMsg.edit(genSpinner(`Fetched ${(numToClear - remaining)} of ${numToClear} messages. Successfully deleted ${successes}.`))
   }
-  return sendResult(`Successfully deleted \`${successes}\` from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
+  return sendResult(`Successfully deleted \`${(successes)}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
 }

@@ -9,9 +9,13 @@ const getArgs = require('../functions/argTranslations')
  * @param {Discord.Message} message received message
  */
 module.exports = async (client, message) => {
-  if (message.author.bot) return
-  if (message.channel.type === 'dm') return
-  if (!message.member || !message.channel || !message.guild) return
+  if (message.author.bot
+      || message.channel.type === 'dm'
+      || !message.member
+      || !message.channel
+      || !message.guild
+  ) return
+
   // Assign roles
   const { channelWelcome } = await getSettings(message.guild.id)
   if (message.channel.name === channelWelcome) {
