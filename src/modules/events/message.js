@@ -12,12 +12,14 @@ module.exports = async (client, message) => {
   if (message.author.bot) return
   if (message.channel.type === 'dm') return
   if (!message.member || !message.channel || !message.guild) return
-
   // Assign roles
   const { channelWelcome } = await getSettings(message.guild.id)
-  if (message.channel.name === channelWelcome && /^i agree$/gmi.test(message.cleanContent)) {
-    if (!message.member.roles.cache.find((r) => r.name === 'Member')) message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id))
+  if (message.channel.name === channelWelcome) {
+    if (/^i agree$/gmi.test(message.cleanContent) && !message.member.roles.cache.find((r) => r.name === 'Member')) {
+      message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id, 'assigning roles'))
+    }
     message.delete()
+    return
   }
 
   // Commands
