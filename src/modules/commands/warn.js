@@ -24,16 +24,15 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   const editable = await message.channel.send(genSpinner('Attempting to warn...'))
   const id = args.argMap.users[0] || null
 
-  let buildError = ''
-  if (!id) buildError = 'You did not provide a valid user to warn'
+  let buildError = id ? '' : 'You did not provide a valid user to warn'
   const justQuote = /([“"])(.+)(\1)/gm.exec(message.cleanContent)
-  if (!justQuote || !justQuote[2]) buildError += `${(buildError ? '.\n' : '')} You did not provide a valid warn reason`
+  if (!justQuote[2]) buildError += `${(buildError ? '.\n' : '')} You did not provide a valid warn reason`
 
   if (buildError.length) {
     sendResult(buildError, { message: editable, edit: true }, 'Unable to warn.')
     return
   }
 
-  const warned = await doWarn(id, justQuote[2], editable).catch((e) => sendResult(`Failed to warn user: ${e}`, { message: editable, edit: true }, 'Unable to warn'))
+  const warned = await doWarn(id, justQuote[2], editable)
   if (warned) sendResult(`<@${id}> has been warned for: \`${justQuote[2]}\``, { message: editable, edit: true }, 'User warned')
 }
