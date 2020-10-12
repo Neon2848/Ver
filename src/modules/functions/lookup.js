@@ -11,7 +11,7 @@ const lookup = async (discordid, serverId, options) => {
   if (timeUntil < 0 && !options.bypass) throw new Error(`This command can be used again in \`${-timeUntil}\` second(s)`)
   mongo.setSetting(serverId, 'lastLookup', Date.now())
 
-  const json = await v3rmApi('lookup', `?id=${discordid}`)
+  const json = await v3rmApi('lookup', `?id=${encodeURIComponent(discordid)}`)
   const allGroups = new Set([
     parseInt(json.usergroup, 10),
     parseInt(json.displaygroup, 10),
