@@ -69,8 +69,8 @@ const quoteRegex = (msg) => {
 const buildModerationError = (id, quote, length = null, lengthNeeded = false) => {
   let tmpError = ''
   if (!id) tmpError += 'You did not provide a valid user'
-  if (!quote) tmpError += `${!id ? '.\n' : ''}You did not provide a valid reason`
-  if (!length && lengthNeeded) tmpError += `${(!id || !quote) ? '.\n' : ''}You did not provide a valid length`
+  if (!quote) tmpError += '\nYou did not provide a valid reason'
+  if (!length && lengthNeeded) tmpError += '\nYou did not provide a valid length'
   return tmpError
 }
 
