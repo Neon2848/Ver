@@ -20,8 +20,15 @@ const doWarn = async (discordid, reason, editable) => {
 
 const quoteRegex = (msg) => {
   const regParts = new RegExp(/([“"])(.+)(\1)/, 'gm').exec(msg)
-  if(regParts) return regParts[2]
+  if (regParts) return regParts[2]
   return null
+}
+
+const buildError = (id, quote) => {
+  let tmpError = ''
+  if (!id) tmpError += 'You did not provide a valid user to warn'
+  if (!quote) tmpError += `${id ? '.\n' : ''}You did not provide a valid warn reason`
+  return tmpError
 }
 
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
@@ -30,11 +37,9 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   const spinner = genSpinner('Attempting to warn...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
-
-  let buildError = id ? '' : 'You did not provide a valid user to warn'
   const justQuote = quoteRegex(message.cleanContent)
-  if (!justQuote) buildError += `${(buildError ? '.\n' : '')} You did not provide a valid warn reason`
-  if (buildError.length) {
+
+  if (buildError(id, justQuote).length) {
     sendResult(buildError, { message: editable, edit: true }, 'Unable to warn.')
     return
   }
