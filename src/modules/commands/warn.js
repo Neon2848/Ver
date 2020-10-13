@@ -1,8 +1,19 @@
 const { sendResult, genSpinner, kickUser } = require('../functions')
 const warn = require('../functions/warn')
 
+const warnFailedIntercept = async (e, message, reason) => {
+  if (e.message !== 'This user is already at 100% warning level') return false
+  await sendResult(`This user is currently at 100% warning level. React below to ban them for \`3\` or \`7\` days for the same reason, or react with \`x\` to cancel.\
+  (Generally aim for 3 days unless they have been banned recently or the offence is more significant).\n\n\
+  \`\`\`Reason: ${reason}\`\`\`\nFeel free to \`!ban\` manually instead`, { message, edit: true }, 'Unable to warn.')
+  message.react('3️⃣').then(message.react('7️⃣').then(message.react('❌')))
+  return true
+}
+
 const doWarn = async (discordid, reason, editable) => {
-  const attemptWarn = await warn(discordid, reason).catch((e) => { sendResult(e.message, { message: editable, edit: true }, 'Unable to warn.') }).catch((e) => { throw e })
+  const attemptWarn = await warn(discordid, reason).catch((e) => {
+    if (!warnFailedIntercept(e, editable, reason)) sendResult(e.message, { message: editable, edit: true }, 'Unable to warn.')
+  })
   if (!attemptWarn) return null
 
   if (attemptWarn.isBeingBanned) {
@@ -27,7 +38,7 @@ const quoteRegex = (msg) => {
 const buildError = (id, quote) => {
   let tmpError = ''
   if (!id) tmpError += 'You did not provide a valid user to warn'
-  if (!quote) tmpError += `${id ? '.\n' : ''}You did not provide a valid warn reason`
+  if (!quote) tmpError += `${!id ? '.\n' : ''}You did not provide a valid warn reason`
   return tmpError
 }
 
@@ -38,12 +49,13 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
   const justQuote = quoteRegex(message.cleanContent)
+  const bError = buildError(id, justQuote)
 
   if (buildError(id, justQuote).length) {
-    sendResult(buildError, { message: editable, edit: true }, 'Unable to warn.')
+    sendResult(bError, { message: editable, edit: true }, 'Unable to warn.')
     return
   }
 
-  const warned = await doWarn(id, justQuote[2], editable)
-  if (warned) sendResult(`<@${id}> has been warned for: \`${justQuote[2]}\``, { message: editable, edit: true }, 'User warned')
+  const warned = await doWarn(id, justQuote, editable)
+  if (warned) sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true }, 'User warned')
 }
