@@ -22,6 +22,13 @@ const banPrompt = async (reaction, sender, message, desc, client) => {
 
 }
 
+const botReactions = async (client, parts) => {
+  const embedDesc = parts.message.embeds?.[0]?.description || null
+  if (embedDesc && embedDesc.indexOf('React below to ban them for') > -1) {
+    return await banPrompt(parts.messageReaction, parts.sendMember, parts.message, embedDesc, client)
+  }
+}
+
 module.exports = async (client, messageReaction, sender) => {
   if (sender.bot || !messageReaction.message || !messageReaction.message.member) return
   const message = messageReaction.message
@@ -30,7 +37,6 @@ module.exports = async (client, messageReaction, sender) => {
   if (!sendMember) return
 
   if(recipient.id === client.user.id) {
-    const embedDesc = message.embeds?.[0]?.description || null
-    if (embedDesc && embedDesc.indexOf('React below to ban them for') > -1) await banPrompt(messageReaction, sendMember, message, embedDesc, client)
+    return await botReactions(client, { messageReaction, sendMember, message })
   }
 }
