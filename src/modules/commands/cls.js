@@ -83,7 +83,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   }
   let successes = 0
   let remaining = numToClear + 1
-  while (remaining > 0) {
+  while (remaining > 1) {
     remaining += 1 // Add 1 each iteration for the pending message.
     const thisChunk = Math.min(maxChunk, remaining)
     // eslint-disable-next-line no-await-in-loop
@@ -92,5 +92,5 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     remaining -= thisChunk
     pendingMsg.edit(genSpinner(`Fetched ${(numToClear - remaining)} of ${numToClear} messages. Successfully deleted ${successes}.`))
   }
-  return sendResult(`Successfully deleted \`${(successes)}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
+  return sendResult(`Successfully deleted \`${(successes + 1)}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
 }
