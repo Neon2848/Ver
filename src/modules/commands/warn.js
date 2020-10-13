@@ -1,4 +1,6 @@
-const { sendResult, genSpinner, kickUser } = require('../functions')
+const {
+  sendResult, genSpinner, kickUser, buildModerationError, quoteRegex,
+} = require('../functions')
 const warn = require('../functions/api/warn')
 
 const warnFailedIntercept = async (e, message, reason) => {
@@ -23,28 +25,14 @@ const doWarn = async (discordid, reason, editable) => {
     const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
     if (guildMember) {
       kickUser(guildMember, editable, {
-        dm: 'You have been kicked from the our server because you just received a site warning which took you to 100% warning level.',
+        dm: `You have been kicked because you just received a site warning: \`${reason}\`, and are now at max warning level.`,
         channel: `Kicked <@${discordid}>, who is at 100% warning level.`,
-        log: 'User kicked for max warn level.',
+        log: `Max warning level: ${reason}`,
       })
     }
   }
   return attemptWarn
 }
-
-const quoteRegex = (msg) => {
-  const regParts = new RegExp(/([“"])(.+)(\1)/, 'gm').exec(msg)
-  if (regParts) return regParts[2]
-  return null
-}
-
-const buildError = (id, quote) => {
-  let tmpError = ''
-  if (!id) tmpError += 'You did not provide a valid user to warn'
-  if (!quote) tmpError += `${!id ? '.\n' : ''}You did not provide a valid warn reason`
-  return tmpError
-}
-
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
   if (!message.member.hasPermission('KICK_MEMBERS')) return
 
@@ -52,9 +40,9 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
   const justQuote = quoteRegex(message.cleanContent)
-  const bError = buildError(id, justQuote)
+  const bError = buildModerationError(id, justQuote)
 
-  if (buildError(id, justQuote).length) {
+  if (bError.length) {
     sendResult(bError, { message: editable, edit: true }, 'Unable to warn.')
     return
   }
