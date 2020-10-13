@@ -1,14 +1,13 @@
 /* eslint-disable consistent-return */
-const lookup = require('../functions/lookup')
+const lookup = require('../functions/api/lookup')
 const config = require('../../../config.json')
-const secrets = require('../../../secrets.json')
 const {
   sendResult, kickUser, genSpinner, basicUserSetup,
 } = require('../functions')
 
 const sendError = (err, editable) => {
   sendResult(
-    err.message.replace(`${secrets.v3rm.api.base}`, 'apibase').replace(`${secrets.v3rm.api.lookup}`, 'lookup'),
+    err.message,
     { message: editable, edit: true, timeout: 10000 },
     'Lookup error',
   )

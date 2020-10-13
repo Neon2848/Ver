@@ -13,8 +13,8 @@ const users = (args) => {
   // but I'm not too fussed.
   const reg = new RegExp('^(?:<@!?)?([0-9]{18,20})(?:>)?$', 'gm')
   return args.filter((arg) => {
-    const isValid = reg.test(arg)
     reg.lastIndex = 0
+    const isValid = reg.test(arg)
     return isValid
   }).map((filteredArg) => {
     reg.lastIndex = 0
@@ -42,10 +42,37 @@ const hasArgs = (args) => args.filter((arg) => /^has:(link|embed|file|video|imag
     return new RegExp(`\\.(${config.attachmentTypes[a].join('|')})$`)
   })
 
+const timeReg = new RegExp('^([1-9][0-9]{0,9})([hdwmy])$', 'gm')
+const timeArgs = (args) => args.filter((arg) => {
+  timeReg.lastIndex = 0
+  const isValid = timeReg.test(arg)
+  return isValid
+})
+
+const shorthandMSMap = {
+  h: 60 * 60 * 1000,
+  d: 24 * 60 * 60 * 1000,
+  w: 7 * 24 * 60 * 60 * 1000,
+  m: 4 * 7 * 24 * 60 * 60 * 1000,
+  y: 12 * 4 * 7 * 24 * 60 * 60 * 1000,
+}
+
+const convertTimeArgs = (args) => {
+  const tA = timeArgs(args)
+  const conv = tA.map((a) => {
+    timeReg.lastIndex = 0
+    const timeParts = timeReg.exec(a)
+    const msLength = timeParts[1] * shorthandMSMap[timeParts[2]]
+    return Date.now() + msLength
+  })
+  return conv
+}
+
 module.exports = (args) => ({
   numbers: numbers(args),
   users: users(args),
   inQuotes: inQuotes(args),
   regexs: regexs(args),
   hasArgs: hasArgs(args),
+  timeArgs: convertTimeArgs(args),
 })

@@ -1,11 +1,12 @@
 const config = require('../../../config.json')
 const knownErrors = require('../knownErrors')
-const lookup = require('./lookup')
+const lookup = require('./api/lookup')
+const secrets = require('../../../secrets.json')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'
   if (err === 'User does not exist') return 'This user is not currently linked.'
-  return `${err}.`
+  return `${err.replace(`${secrets.v3rm.api.base}`, 'apibase')}.`
 }
 
 const sendResult = (resultMsg, caller, resultTitle) => {
@@ -59,10 +60,26 @@ const basicLookup = async (member) => {
   return basicUserSetup(details, member)
 }
 
+const quoteRegex = (msg) => {
+  const regParts = new RegExp(/([“"])(.+)(\1)/, 'gm').exec(msg)
+  if (regParts) return regParts[2]
+  return null
+}
+
+const buildModerationError = (id, quote, length = null, lengthNeeded = false) => {
+  let tmpError = ''
+  if (!id) tmpError += 'You did not provide a valid user'
+  if (!quote) tmpError += '\nYou did not provide a valid reason'
+  if (!length && lengthNeeded) tmpError += '\nYou did not provide a valid length'
+  return tmpError
+}
+
 module.exports = {
   sendResult,
   kickUser,
   genSpinner,
   basicLookup,
   basicUserSetup,
+  buildModerationError,
+  quoteRegex,
 }
