@@ -1,6 +1,8 @@
 const { sendResult, genSpinner, kickUser } = require('../functions')
 const warn = require('../functions/warn')
 
+const quoteRegex = new RegExp(/([“"])(.+)(\1)/, 'gm')
+
 const doWarn = async (discordid, reason, editable) => {
   const attemptWarn = await warn(discordid, reason).catch((e) => { sendResult(e.message, { message: editable, edit: true }, 'Unable to warn.') }).catch((e) => { throw e })
   if (!attemptWarn) return null
