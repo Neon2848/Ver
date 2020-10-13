@@ -3,22 +3,23 @@ const {
 } = require('../functions')
 const warn = require('../functions/api/warn')
 
-const warnFailedIntercept = async (e, message, reason) => {
+const warnFailedIntercept = async (e, message, reason, discordid) => {
   if (e.message !== 'This user is already at 100% warning level') return false
-  await sendResult(`This user is currently at 100% warning level. React below to ban them for \`3\` or \`7\` days for the same reason, or react with \`x\` to cancel.\
-  (Generally aim for 3 days unless they have been banned recently or the offence is more significant).\n\n\
+  await sendResult(`<@${discordid}> is currently at 100% warning level. React below to ban them for \`3\` or \`7\` days for the same reason, or react with \`x\` to cancel.\
+  (Generally aim for 3 days unless they have been banned recently or the offense is more significant).\n\n\
   \`\`\`Reason: ${reason}\`\`\`\nFeel free to \`!ban\` manually instead`, { message, edit: true }, 'Unable to warn.')
   message.react('3️⃣').then(message.react('7️⃣').then(message.react('❌')))
   return true
 }
 
-const catchWarnError = async (e, message, reason) => {
-  const interceptedWarn = await warnFailedIntercept(e, message, reason)
+const catchWarnError = async (e, message, reason, discordid) => {
+  const interceptedWarn = await warnFailedIntercept(e, message, reason, discordid)
   if (!interceptedWarn) sendResult(e.message, { message, edit: true }, 'Unable to warn.')
 }
 
 const doWarn = async (discordid, reason, editable) => {
-  const attemptWarn = await warn(discordid, reason).catch((e) => catchWarnError(e, editable))
+  const attemptWarn = await warn(discordid, reason)
+    .catch((e) => catchWarnError(e, editable, reason, discordid))
   if (!attemptWarn) return null
 
   if (attemptWarn.isBeingBanned) {

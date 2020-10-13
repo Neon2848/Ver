@@ -9,6 +9,12 @@ const errorReasonTransform = (err) => {
   return `${err.replace(`${secrets.v3rm.api.base}`, 'apibase')}.`
 }
 
+const unsafeDelete = (msg, t) => {
+  msg.delete({ timeout: t }).catch(() => {
+    // swallow error, message may have already been deleted. doesn't matter.
+  })
+}
+
 const sendResult = (resultMsg, caller, resultTitle) => {
   const emb = {
     embed: {
@@ -20,8 +26,8 @@ const sendResult = (resultMsg, caller, resultTitle) => {
   const send = caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb)
   send.then((_) => {
     if (caller.timeout) {
-      if (caller.edit) return caller.message.delete({ timeout: caller.timeout })
-      return _.delete({ timeout: caller.timeout })
+      if (caller.edit) return unsafeDelete(caller.message, caller.timeout)
+      return unsafeDelete(_, caller.timeout)
     }
     return true
   })
@@ -62,7 +68,7 @@ const basicLookup = async (member) => {
 
 const quoteRegex = (msg) => {
   const regParts = new RegExp(/([“"])(.+)(\1)/, 'gm').exec(msg)
-  if (regParts) return regParts[2]
+  if (regParts) return regParts[2].replace(/`/gm, '')
   return null
 }
 

@@ -19,18 +19,18 @@ const doBan = async (discordid, reason, days, editable) => {
   }
   return attemptBan
 }
-
-exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+exports.run = async (client, message, args, externalQuote = null) => {
   if (!message.member.hasPermission('KICK_MEMBERS')) return
   const spinner = genSpinner('Attempting to ban...')
   const editable = await message.channel.send(spinner)
 
   const id = args.argMap.users[0] || null
-  const banMS = args.argMap.timeArgs[0] || null
+  const banMS = args.argMap.timeArgs?.[0] || null
   const banDays = msToDays(banMS)
   const chooseBanDays = banDays || args.argMap.numbers[0] || null
 
-  const justQuote = quoteRegex(message.cleanContent)
+  const justQuote = quoteRegex(`"${externalQuote}"` || message.cleanContent)
   const bError = buildModerationError(id, justQuote, chooseBanDays > 0 ? chooseBanDays : null, true)
 
   if (bError.length) {
