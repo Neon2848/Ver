@@ -10,13 +10,13 @@ const warnFailedIntercept = async (e, message, reason) => {
   return true
 }
 
+const catchWarnError = (e, message, reason) => {
+  const interceptedWarn = warnFailedIntercept(e, message, reason)
+  if (!interceptedWarn) sendResult(e.message, { message, edit: true }, 'Unable to warn.')
+}
+
 const doWarn = async (discordid, reason, editable) => {
-  const attemptWarn = await warn(discordid, reason).catch((e) => {
-    const interceptedWarn = warnFailedIntercept(e, editable, reason)
-    if (!interceptedWarn) {
-      sendResult(e.message, { message: editable, edit: true }, 'Unable to warn.')
-    }
-  })
+  const attemptWarn = await warn(discordid, reason).catch((e) => catchWarnError(e))
   if (!attemptWarn) return null
 
   if (attemptWarn.isBeingBanned) {
