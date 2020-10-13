@@ -1,6 +1,8 @@
 const { sendResult, genSpinner, kickUser } = require('../functions')
 const warn = require('../functions/warn')
 
+const quoteRegex = new RegExp(/([“"])(.+)(\1)/, 'gm')
+
 const doWarn = async (discordid, reason, editable) => {
   const attemptWarn = await warn(discordid, reason).catch((e) => { sendResult(e.message, { message: editable, edit: true }, 'Unable to warn.') }).catch((e) => { throw e })
   if (!attemptWarn) return null
@@ -18,16 +20,22 @@ const doWarn = async (discordid, reason, editable) => {
   return attemptWarn
 }
 
+const quoteRegex = (msg) => {
+  const regParts = new RegExp(/([“"])(.+)(\1)/, 'gm').exec(msg)
+  if(regParts) return regParts[2]
+  return null
+}
+
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
   if (!message.member.hasPermission('KICK_MEMBERS')) return
 
-  const editable = await message.channel.send(genSpinner('Attempting to warn...'))
+  const spinner = genSpinner('Attempting to warn...')
+  const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
 
   let buildError = id ? '' : 'You did not provide a valid user to warn'
-  const justQuote = /([“"])(.+)(\1)/gm.exec(message.cleanContent)
-  if (!justQuote[2]) buildError += `${(buildError ? '.\n' : '')} You did not provide a valid warn reason`
-
+  const justQuote = quoteRegex(message.cleanContent)
+  if (!justQuote) buildError += `${(buildError ? '.\n' : '')} You did not provide a valid warn reason`
   if (buildError.length) {
     sendResult(buildError, { message: editable, edit: true }, 'Unable to warn.')
     return
