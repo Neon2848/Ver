@@ -1,6 +1,6 @@
 const config = require('../../../config.json')
 const knownErrors = require('../knownErrors')
-const lookup = require('./lookup')
+const lookup = require('./api/lookup')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'

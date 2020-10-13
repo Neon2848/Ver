@@ -1,5 +1,5 @@
 /* eslint-disable consistent-return */
-const lookup = require('../functions/lookup')
+const lookup = require('../functions/api/lookup')
 const config = require('../../../config.json')
 const secrets = require('../../../secrets.json')
 const {

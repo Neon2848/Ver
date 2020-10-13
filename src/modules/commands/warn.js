@@ -1,5 +1,5 @@
 const { sendResult, genSpinner, kickUser } = require('../functions')
-const warn = require('../functions/warn')
+const warn = require('../functions/api/warn')
 
 const warnFailedIntercept = async (e, message, reason) => {
   if (e.message !== 'This user is already at 100% warning level') return false
@@ -10,13 +10,13 @@ const warnFailedIntercept = async (e, message, reason) => {
   return true
 }
 
-const catchWarnError = (e, message, reason) => {
-  const interceptedWarn = warnFailedIntercept(e, message, reason)
+const catchWarnError = async (e, message, reason) => {
+  const interceptedWarn = await warnFailedIntercept(e, message, reason)
   if (!interceptedWarn) sendResult(e.message, { message, edit: true }, 'Unable to warn.')
 }
 
 const doWarn = async (discordid, reason, editable) => {
-  const attemptWarn = await warn(discordid, reason).catch((e) => catchWarnError(e))
+  const attemptWarn = await warn(discordid, reason).catch((e) => catchWarnError(e, editable))
   if (!attemptWarn) return null
 
   if (attemptWarn.isBeingBanned) {
