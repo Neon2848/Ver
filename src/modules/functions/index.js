@@ -42,9 +42,10 @@ const kickUser = (member, editable, reasons) => {
 }
 
 const basicKickUser = (member, reason, gid) => {
+  if (member.user.bot) return
   member.send(reason).finally(() => {
     member.kick('User does not have permissions on site').catch((_) => knownErrors.userOperation(_, gid))
-  })
+  }).catch(() => {})
 }
 
 const genSpinner = (spinnerInfo) => (

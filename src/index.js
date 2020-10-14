@@ -5,10 +5,12 @@ const Enmap = require('enmap')
 const fs = require('fs')
 const mongo = require('./mongo/connect')
 const secrets = require('../secrets.json')
+const config = require('../config.json')
 
 const client = new Discord.Client()
 
 client.secrets = secrets
+client.config = config
 
 fs.readdir('./src/modules/events/', (err, files) => {
   if (err) return mongo.log('global', 'error', 'readdir', 'reading events directory', err)
@@ -27,8 +29,9 @@ fs.readdir('./src/modules/commands/', (err, files) => {
   if (err) return mongo.log('global', 'error', 'readdir', 'reading commands directory', err)
   files.forEach((file) => {
     if (!file.endsWith('.js')) return
+    if (file.startsWith('_') && !client.config.v3rmAPI) return
     const props = require(`./modules/commands/${file}`)
-    const commandName = file.split('.')[0]
+    const commandName = file.replace('_', '').split('.')[0]
     client.commands.set(commandName, props)
   })
   return files

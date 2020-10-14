@@ -1,6 +1,5 @@
 /* eslint-disable consistent-return */
 const lookup = require('../functions/api/lookup')
-const config = require('../../../config.json')
 const {
   sendResult, kickUser, genSpinner,
 } = require('../functions')
@@ -37,6 +36,6 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
 
   const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
   const kickedMember = updateOrKickMember(guildMember, editable, details)
-  editable.channel.send(`<@${discordid}> is: ${config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } })
+  editable.channel.send(`<@${discordid}> is: ${client.config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } })
     .then(() => { if (kickedMember) editable.delete() })
 }

@@ -16,8 +16,8 @@ const assignRoles = async (message) => {
 }
 
 const runAllCommands = (client, message) => {
-  if (message.content.indexOf(client.secrets.discord.prefix) !== 0) return
-  const rawArgs = message.content.slice(client.secrets.discord.prefix.length).trim().split(/ +/g)
+  if (message.content.indexOf(client.config.prefix) !== 0) return
+  const rawArgs = message.content.slice(client.config.prefix.length).trim().split(/ +/g)
   const command = rawArgs.shift().toLowerCase()
   const cmd = client.commands.get(command)
   if (!cmd) return
@@ -41,6 +41,6 @@ module.exports = async (client, message) => {
   ) return
 
   runTasks()
-  assignRoles(message)
+  if (client.config.v3rmAPI) assignRoles(message)
   runAllCommands(client, message)
 }
