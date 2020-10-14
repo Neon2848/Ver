@@ -58,7 +58,7 @@ const basicUserSetup = async (details, member) => {
 }
 
 const basicLookup = async (member) => {
-  const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' })
+  const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => {})
   if (!details) return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
   if (details.roles.includes('Banned') || !details.roles.length) {
     return basicKickUser(member, 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.', member.guild.id)
