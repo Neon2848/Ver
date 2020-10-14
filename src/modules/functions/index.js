@@ -2,6 +2,7 @@ const config = require('../../../config.json')
 const knownErrors = require('../knownErrors')
 const lookup = require('./api/lookup')
 const secrets = require('../../../secrets.json')
+const { addtoRoleQueue, attemptRoleQueue } = require('./api/userSetup')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'
@@ -50,20 +51,15 @@ const genSpinner = (spinnerInfo) => (
   { embed: { color: 16674701, author: { name: spinnerInfo, icon_url: config.images.loader } } }
 )
 
-const basicUserSetup = async (details, member) => {
-  const rolesToAdd = details.roles.map((role) => member.guild.roles.cache.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member')).filter((r) => !!r)
-  await member.setNickname(member.user.username === details.username ? `${member.user.username}\u200E` : details.username).catch((e) => { throw e })
-  if (rolesToAdd.length) await member.roles.add(rolesToAdd).catch((e) => { throw e })
-  return member
-}
-
 const basicLookup = async (member) => {
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' })
   if (!details) return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
   if (details.roles.includes('Banned') || !details.roles.length) {
     return basicKickUser(member, 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.', member.guild.id)
   }
-  return basicUserSetup(details, member)
+  await addtoRoleQueue(member.id, member, details.username, details.roles)
+  const finishedMember = await attemptRoleQueue()
+  return finishedMember
 }
 
 const quoteRegex = (msg) => {
@@ -85,7 +81,6 @@ module.exports = {
   kickUser,
   genSpinner,
   basicLookup,
-  basicUserSetup,
   buildModerationError,
   quoteRegex,
 }

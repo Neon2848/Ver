@@ -3,6 +3,7 @@ const Discord = require('discord.js')
 const { getSettings } = require('../../mongo/connect')
 const knownErrors = require('../knownErrors')
 const getArgs = require('../functions/argTranslations')
+const { attemptRoleQueue } = require('../functions/api/userSetup')
 
 const assignRoles = async (message) => {
   const { channelWelcome } = await getSettings(message.guild.id)
@@ -27,6 +28,10 @@ const runAllCommands = (client, message) => {
   cmd.run(client, message, args)
 }
 
+const runTasks = async () => {
+  await attemptRoleQueue()
+}
+
 module.exports = async (client, message) => {
   if (message.author.bot
       || message.channel.type === 'dm'
@@ -35,6 +40,7 @@ module.exports = async (client, message) => {
       || !message.guild
   ) return
 
+  runTasks()
   assignRoles(message)
   runAllCommands(client, message)
 }
