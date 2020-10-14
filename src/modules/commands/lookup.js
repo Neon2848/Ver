@@ -2,8 +2,9 @@
 const lookup = require('../functions/api/lookup')
 const config = require('../../../config.json')
 const {
-  sendResult, kickUser, genSpinner, basicUserSetup,
+  sendResult, kickUser, genSpinner,
 } = require('../functions')
+const { basicUserSetup } = require('../functions/api/userSetup')
 
 const sendError = (err, editable) => {
   sendResult(
