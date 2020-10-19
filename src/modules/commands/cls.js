@@ -70,11 +70,11 @@ const sendUserErrors = (message, errorDetails = null) => {
 }
 
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
+  if (!message.member.hasPermission('KICK_MEMBERS')) return null
   const pendingMsg = await message.channel.send(genSpinner('Deleting messages from this channel.'))
   const aFilters = args.argMap
   const numToClear = aFilters.numbers[0] ? parseInt(aFilters.numbers[0], 10) : 99
   const { filters, tooManyArgs, regexError } = genFilters(aFilters, args.raw.length)
-
   if (regexError) return sendUserErrors(pendingMsg, regexError)
   if (tooManyArgs) return sendUserErrors(pendingMsg)
   if (numToClear < maxChunk) {

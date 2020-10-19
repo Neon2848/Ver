@@ -4,6 +4,7 @@ const { getSettings } = require('../../mongo/connect')
 const knownErrors = require('../knownErrors')
 const getArgs = require('../functions/argTranslations')
 const { attemptRoleQueue } = require('../functions/api/userSetup')
+const { messageStatQueue } = require('../functions/stats')
 
 const assignRoles = async (message) => {
   const { channelWelcome } = await getSettings(message.guild.id)
@@ -28,8 +29,9 @@ const runAllCommands = (client, message) => {
   cmd.run(client, message, args)
 }
 
-const runTasks = async () => {
+const runTasks = async (client, message) => {
   await attemptRoleQueue()
+  await messageStatQueue(client, message)
 }
 
 module.exports = async (client, message) => {
@@ -40,7 +42,7 @@ module.exports = async (client, message) => {
       || !message.guild
   ) return
 
-  runTasks()
   if (client.config.v3rmAPI) assignRoles(message)
   runAllCommands(client, message)
+  runTasks(client, message)
 }

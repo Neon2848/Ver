@@ -30,7 +30,7 @@ exports.run = async (client, message, args, externalQuote = null) => {
   const banDays = msToDays(banMS)
   const chooseBanDays = banDays || args.argMap.numbers[0] || null
 
-  const justQuote = quoteRegex(`"${externalQuote}"` || message.cleanContent)
+  const justQuote = quoteRegex(externalQuote ? `"${externalQuote}"` : message.cleanContent)
   const bError = buildModerationError(id, justQuote, chooseBanDays > 0 ? chooseBanDays : null, true)
 
   if (bError.length) {
