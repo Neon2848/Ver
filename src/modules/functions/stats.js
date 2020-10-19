@@ -30,27 +30,19 @@ const storeStatQueue = async () => {
 
 const addOneToStatQueue = async (id, createdAt, serverId, opt) => {
   const existingInQueue = findFromStatQueue(id, serverId, createdAt)
-  if (existingInQueue) {
-    const eMember = statQueue[existingInQueue]
-    statQueue[existingInQueue] = {
-      serverId,
-      id,
-      date: createdAt,
-      messages: eMember.messages + (opt.receiving ? 0 : 1),
-      pTo: eMember.pTo + (opt.receiving ? 1 : 0),
-      pFrom: eMember.pFrom + (opt.pinging ? 1 : 0),
-    }
-  } else {
-    statQueue.push({
-      serverId,
-      id,
-      date: createdAt,
-      messages: opt.receiving ? 0 : 1,
-      pTo: opt.receiving ? 1 : 0,
-      pFrom: opt.pinging ? 1 : 0,
-    })
+  const eMember = statQueue[existingInQueue] || { messages: 0, pFrom: 0, pTo: 0 }
+
+  const incObj = {
+    serverId,
+    id,
+    date: createdAt,
+    messages: eMember.messages + opt.receiving ? 0 : 1,
+    pTo: eMember.pTo + opt.receiving ? 1 : 0,
+    pFrom: eMember.pFrom + opt.pinging ? 1 : 0,
   }
-  return true
+
+  if (existingInQueue) statQueue[existingInQueue] = incObj
+  else statQueue.push(incObj)
 }
 
 const messageStatQueue = async (client, message) => {
@@ -68,7 +60,7 @@ const messageStatQueue = async (client, message) => {
   pingPromises.push(addOneToStatQueue(id, createdAt, serverId, { pinging: !!pings?.size || 0 }))
   await Promise.all(pingPromises)
 
-  if (statQueue.length >= 10) await storeStatQueue()
+  if (statQueue.length >= 5) await storeStatQueue()
 }
 
 module.exports = { messageStatQueue }
