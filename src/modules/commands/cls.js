@@ -69,20 +69,9 @@ const sendUserErrors = (message, errorDetails = null) => {
   /* eslint-enable no-useless-escape */
 }
 
-exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
-  const pendingMsg = await message.channel.send(genSpinner('Deleting messages from this channel.'))
-  const aFilters = args.argMap
-  const numToClear = aFilters.numbers[0] ? parseInt(aFilters.numbers[0], 10) : 99
-  const { filters, tooManyArgs, regexError } = genFilters(aFilters, args.raw.length)
-
-  if (regexError) return sendUserErrors(pendingMsg, regexError)
-  if (tooManyArgs) return sendUserErrors(pendingMsg)
-  if (numToClear < maxChunk) {
-    const deletedMessages = await deleteMessages(pendingMsg, numToClear + 1, filters)
-    return sendResult(`Successfully deleted \`${deletedMessages}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
-  }
+const clsLoop = async (start, pendingMsg, filters, numToClear) => {
   let successes = 0
-  let remaining = numToClear + 1
+  let remaining = start
   while (remaining > 1) {
     remaining += 1 // Add 1 each iteration for the pending message.
     const thisChunk = Math.min(maxChunk, remaining)
@@ -93,4 +82,22 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     pendingMsg.edit(genSpinner(`Fetched ${(numToClear - remaining)} of ${numToClear} messages. Successfully deleted ${successes}.`))
   }
   return sendResult(`Successfully deleted \`${(successes + 1)}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
+}
+
+exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
+  if (!message.member.hasPermission('KICK_MEMBERS')) return null
+
+  const pendingMsg = await message.channel.send(genSpinner('Deleting messages from this channel.'))
+  const aFilters = args.argMap
+  const numToClear = aFilters.numbers[0] ? parseInt(aFilters.numbers[0], 10) : 99
+  const { filters, tooManyArgs, regexError } = genFilters(aFilters, args.raw.length)
+
+  if (tooManyArgs || regexError) return sendUserErrors(pendingMsg, regexError)
+  if (numToClear < maxChunk) {
+    const deletedMessages = await deleteMessages(pendingMsg, numToClear + 1, filters)
+    return sendResult(`Successfully deleted \`${deletedMessages}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')
+  }
+
+  const loop = await clsLoop(numToClear + 1, pendingMsg, filters, numToClear)
+  return loop
 }

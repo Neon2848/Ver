@@ -27,7 +27,7 @@ const doWarn = async (discordid, reason, editable) => {
     if (guildMember) {
       kickUser(guildMember, editable, {
         dm: `You have been kicked because you just received a site warning: \`${reason}\`, and are now at max warning level.`,
-        channel: `Kicked <@${discordid}>, who is at 100% warning level.`,
+        channel: `Kicked <@${discordid}>, who is at 100% warning level`,
         log: `Max warning level: ${reason}`,
       })
     }

@@ -14,13 +14,6 @@ const connect = () => {
   })
 }
 
-/**
- * @param {String} server server id
- * @param {String} type type of log [warning|error]
- * @param {String} action what it was doing
- * @param {String} issue what the problem was
- * @param {Object} data raw data
- */
 const log = (server, type, action, issue, data) => {
   Servers.updateOne({ serverId: server }, {
     $push: {
