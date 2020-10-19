@@ -92,8 +92,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
   const numToClear = aFilters.numbers[0] ? parseInt(aFilters.numbers[0], 10) : 99
   const { filters, tooManyArgs, regexError } = genFilters(aFilters, args.raw.length)
 
-  if (regexError) return sendUserErrors(pendingMsg, regexError)
-  if (tooManyArgs) return sendUserErrors(pendingMsg)
+  if (tooManyArgs || regexError) return sendUserErrors(pendingMsg, regexError)
   if (numToClear < maxChunk) {
     const deletedMessages = await deleteMessages(pendingMsg, numToClear + 1, filters)
     return sendResult(`Successfully deleted \`${deletedMessages}\` messages from this channel`, { message: pendingMsg, edit: true }, 'Messages Deleted')

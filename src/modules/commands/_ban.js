@@ -26,8 +26,7 @@ exports.run = async (client, message, args, externalQuote = null) => {
   const spinner = genSpinner('Attempting to ban...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
-  const banMS = args.argMap.timeArgs?.[0] || null
-  const banDays = msToDays(banMS)
+  const banDays = msToDays(args.argMap.timeArgs?.[0])
   const chooseBanDays = banDays || args.argMap.numbers[0] || null
   const justQuote = quoteRegex(externalQuote ? `"${externalQuote}"` : message.cleanContent)
   const bError = buildModerationError(id, justQuote, chooseBanDays > 0 ? chooseBanDays : null, true)
