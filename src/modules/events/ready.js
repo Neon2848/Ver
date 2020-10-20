@@ -1,5 +1,6 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const mongo = require('../../mongo/connect')
+const log = require('../../mongo/log')
 
 /**
  * @param {Discord.Client} client bot client
@@ -12,5 +13,5 @@ module.exports = (client) => {
   const servers = client.guilds.cache.array().map((g) => ({ serverId: g.id, serverName: g.name }))
   mongo.setupGuilds(servers)
 
-  mongo.log('global', 'info', 'connected', undefined, { user: client.user.tag })
+  log('global', 'info', 'connected', undefined, { user: client.user.tag })
 }
