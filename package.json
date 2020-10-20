@@ -27,7 +27,9 @@
     "discord.js": "^12.4.0",
     "enmap": "^5.8.0",
     "mongoose": "^5.10.9",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "path": "^0.12.7",
+    "recursive-readdir": "^2.2.2"
   },
   "devDependencies": {
     "eslint": "^7.11.0",

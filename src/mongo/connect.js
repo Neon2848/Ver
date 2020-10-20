@@ -38,7 +38,7 @@ const setupGuilds = (guilds) => {
         serverName: guild.serverName,
       },
     }
-    const options = { upsert: true, useFindAndModify: false }
+    const options = { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false }
     Servers.findOneAndUpdate(query, update, options, ((err, succ) => {
       if (err) log(guild.serverId, 'error', 'setting up a guild', err.message, guild)
       return succ

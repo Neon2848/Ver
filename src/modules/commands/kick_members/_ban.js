@@ -1,7 +1,7 @@
-const ban = require('../functions/api/ban')
+const ban = require('../../functions/api/ban')
 const {
   genSpinner, buildModerationError, quoteRegex, sendResult, kickUser,
-} = require('../functions')
+} = require('../../functions')
 
 const msToDays = (date) => (date ? Math.round((date - Date.now()) / (24 * 60 * 60 * 1000)) : null)
 
@@ -29,8 +29,6 @@ const chooseBanDays = (args) => {
 
 // eslint-disable-next-line no-unused-vars
 exports.run = async (client, message, args, externalQuote = null) => {
-  if (!message.member.hasPermission('KICK_MEMBERS')) return null
-
   const spinner = genSpinner('Attempting to ban...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
