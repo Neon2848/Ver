@@ -4,6 +4,7 @@ const Discord = require('discord.js')
 const Enmap = require('enmap')
 const fs = require('fs')
 const mongo = require('./mongo/connect')
+const log = require('./mongo/log')
 const secrets = require('../secrets.json')
 const config = require('../config.json')
 
@@ -13,7 +14,7 @@ client.secrets = secrets
 client.config = config
 
 fs.readdir('./src/modules/events/', (err, files) => {
-  if (err) return mongo.log('global', 'error', 'readdir', 'reading events directory', err)
+  if (err) return log('global', 'error', 'readdir', 'reading events directory', err)
   files.forEach((file) => {
     if (!file.endsWith('.js')) return
     const event = require(`./modules/events/${file}`)
@@ -26,7 +27,7 @@ fs.readdir('./src/modules/events/', (err, files) => {
 
 client.commands = new Enmap()
 fs.readdir('./src/modules/commands/', (err, files) => {
-  if (err) return mongo.log('global', 'error', 'readdir', 'reading commands directory', err)
+  if (err) return log('global', 'error', 'readdir', 'reading commands directory', err)
   files.forEach((file) => {
     if (!file.endsWith('.js')) return
     if (file.startsWith('_') && !client.config.v3rmAPI) return
