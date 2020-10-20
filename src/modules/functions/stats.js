@@ -39,14 +39,10 @@ const addOneToStatQueue = async (id, createdAt, serverId, opt) => {
   const existingInQueue = findFromStatQueue(id, serverId, createdAt)
   const eMember = statQueue[existingInQueue] || { messages: 0, pFrom: 0, pTo: 0 }
 
-  // TODO: This fake date is just to populate the database during development.
-  const fakeDate = new Date(createdAt - Math.floor(Math.random() * 2629800000) + 1)
-  fakeDate.setHours(0, 0, 0, 0)
-
   const incObj = {
     serverId,
     id,
-    date: fakeDate,
+    date: createdAt,
     messages: eMember.messages + (opt.receiving ? 0 : 1),
     pTo: eMember.pTo + (opt.receiving ? 1 : 0),
     pFrom: eMember.pFrom + (opt.pinging ? 1 : 0),
@@ -59,7 +55,7 @@ const addOneToStatQueue = async (id, createdAt, serverId, opt) => {
 const messageStatQueue = async (client, message) => {
   const serverId = message.guild.id
   const { member: { id }, createdAt } = message
-  createdAt.setHours(0, 0, 0, 0)
+  createdAt.setHours(createdAt.getHours(), 0, 0, 0)
 
   const pings = message.mentions.users.filter((u) => u.id !== message.member.id)
   const pingPromises = pings.map((p) => addOneToStatQueue(
@@ -72,7 +68,7 @@ const messageStatQueue = async (client, message) => {
   await Promise.all(pingPromises)
 
   statQueueMetric.set(statQueue.length)
-  if (statQueue.length >= 15) await storeStatQueue()
+  if (statQueue.length >= client.config.memory.maxStatQueue) await storeStatQueue()
 }
 
 module.exports = { messageStatQueue }
