@@ -3,7 +3,6 @@
 const Discord = require('discord.js')
 const Enmap = require('enmap')
 const fs = require('fs')
-const mongo = require('./mongo/connect')
 const log = require('./mongo/log')
 const secrets = require('../secrets.json')
 const config = require('../config.json')

@@ -4,7 +4,10 @@
   "description": "A discord server controller bot for the v3rm discord. ",
   "main": "giuseppe.js",
   "scripts": {
-    "start": "nodemon src/index.js",
+    "start": "pm2 start src/index.js",
+    "stop": "pm2 stop src/index.js",
+    "restart": "pm2 restart src/index.js",
+    "dev": "pm2-dev src/index.js",
     "lint": "eslint \"src/**\"",
     "fix-lint": "eslint \"src/**\" --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,6 +23,7 @@
   },
   "homepage": "https://github.com/SegFault-Verm/GiuseppeJrTheSecond#readme",
   "dependencies": {
+    "@pm2/io": "^4.3.5",
     "discord.js": "^12.3.1",
     "enmap": "^5.8.0",
     "mongoose": "^5.10.9",
@@ -29,6 +33,6 @@
     "eslint": "^7.11.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.1",
-    "nodemon": "^2.0.5"
+    "pm2": "^4.5.0"
   }
 }

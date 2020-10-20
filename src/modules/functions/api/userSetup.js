@@ -1,9 +1,16 @@
+const io = require('@pm2/io')
 const knownErrors = require('../../knownErrors')
 // Various factors may cause setNickname and roles.add to fail.
 // Such factors include ratelimits and accounts with names that bug Discord.
 // This file provides a hacky, but functional solution to this.
 // Failures are stored in memory and retried 3 times, the final failure will attempt to kick.
 const failedRoleQueue = []
+
+const roleQueueMetric = io.metric({
+  name: 'Role Queue Size',
+  type: 'histogram',
+  measurement: 'mean',
+})
 
 // Upsert the user and the details we are trying to change.
 const addtoRoleQueue = async (id, member, nickChange, rolesToAdd = []) => {
@@ -26,6 +33,7 @@ const addtoRoleQueue = async (id, member, nickChange, rolesToAdd = []) => {
       id, member, rolesToAdd: new Set([...realRolesToAdd]), nickChange, attempts: 0,
     })
   }
+  roleQueueMetric.set(failedRoleQueue.length)
 }
 
 // Try to the new role/nickname
@@ -39,7 +47,6 @@ const basicUserSetup = async (details, member) => {
 // Attempt to apply the 0th index of the queue. On fail, call addToRoleQueue to upsert.
 const attemptRoleQueue = async () => {
   if (!failedRoleQueue[0]) return null
-
   const rQ = failedRoleQueue[0]
   if (!rQ.member) {
     failedRoleQueue.shift()
@@ -60,6 +67,7 @@ const attemptRoleQueue = async () => {
   })
   if (!success) return []
   failedRoleQueue.shift()
+  roleQueueMetric.set(failedRoleQueue.length)
   return rQ.member
 }
 
