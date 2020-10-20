@@ -6,9 +6,6 @@ const Stats = mongoose.model('UserStats', statsSchema)
 const addMessage = (serverId, userId, date, stats) => new Promise((resolve, reject) => {
   const query = { serverId, id: userId, date }
   const update = {
-    $set: {
-      date,
-    },
     $inc: {
       messages: stats.messages,
       pTo: stats.pTo,

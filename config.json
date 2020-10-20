@@ -1,6 +1,9 @@
 {
   "prefix": "!",
   "v3rmAPI": false,
+  "memory": {
+    "maxStatQueue": 15
+  },
   "roleTranslations": {
       "Administrator": 4,
       "Advisor": 14,
