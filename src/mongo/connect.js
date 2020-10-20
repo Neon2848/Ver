@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const secrets = require('../../secrets.json')
+const log = require('./log')
 
 const serversSchema = require('./schemas/servers.js')
 
@@ -19,7 +20,7 @@ const setSetting = (server, setting, value) => {
         [setting]: value,
       },
     },
-  }, { upsert: true }).catch((e) => console.log({ error: e, setting, value }))
+  }, { upsert: true }).catch((e) => log(server, 'error', 'setting a setting', e.message, { setting, value }))
 }
 
 const getSettings = (server) => new Promise((resolve, reject) => {
@@ -32,13 +33,16 @@ const getSettings = (server) => new Promise((resolve, reject) => {
 const setupGuilds = (guilds) => {
   guilds.forEach((guild) => {
     const query = { serverId: guild.serverId }
-    const update = { serverName: guild.serverName }
-    const options = {
-      upsert: true,
-      setDefaultsOnInsert: true,
-      useFindAndModify: false,
+    const update = {
+      $set: {
+        serverName: guild.serverName,
+      },
     }
-    Servers.findOneAndUpdate(query, update, options)
+    const options = { upsert: true, useFindAndModify: false }
+    Servers.findOneAndUpdate(query, update, options, ((err, succ) => {
+      if (err) log(guild.serverId, 'error', 'setting up a guild', e.message, guild)
+      return succ
+    }))
   })
 }
 

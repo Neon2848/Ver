@@ -4,4 +4,6 @@ const { basicLookup } = require('../functions')
 /**
  * @param {Discord.Client} client bot client
  */
-module.exports = (client, member) => { if (client.config.v3rmApi) basicLookup(member) }
+module.exports = (client, member) => {
+  if (client.config.v3rmAPI) { basicLookup(member) }
+}
