@@ -1,5 +1,5 @@
-const { genSpinner, sendResult } = require('../functions')
-const knownErrors = require('../knownErrors')
+const { genSpinner, sendResult } = require('../../functions')
+const knownErrors = require('../../knownErrors')
 
 const maxChunk = 100
 
@@ -85,8 +85,6 @@ const clsLoop = async (start, pendingMsg, filters, numToClear) => {
 }
 
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
-  if (!message.member.hasPermission('KICK_MEMBERS')) return null
-
   const pendingMsg = await message.channel.send(genSpinner('Deleting messages from this channel.'))
   const aFilters = args.argMap
   const numToClear = aFilters.numbers[0] ? parseInt(aFilters.numbers[0], 10) : 99

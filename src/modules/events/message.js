@@ -16,12 +16,18 @@ const assignRoles = async (message) => {
   }
 }
 
+const checkCmdPerms = (member, cmd) => {
+  if (!cmd) return false
+  if (cmd.permissionLevel === 'UNIVERSAL') return true
+  return member.hasPermission(cmd.permissionLevel)
+}
+
 const runAllCommands = (client, message) => {
   if (message.content.indexOf(client.config.prefix) !== 0) return
   const rawArgs = message.content.slice(client.config.prefix.length).trim().split(/ +/g)
   const command = rawArgs.shift().toLowerCase()
   const cmd = client.commands.get(command)
-  if (!cmd) return
+  if (!checkCmdPerms(message.member, cmd)) return
   const args = {
     raw: rawArgs,
     argMap: getArgs(rawArgs),

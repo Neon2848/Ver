@@ -1,7 +1,7 @@
 const {
   sendResult, genSpinner, kickUser, buildModerationError, quoteRegex,
-} = require('../functions')
-const warn = require('../functions/api/warn')
+} = require('../../functions')
+const warn = require('../../functions/api/warn')
 
 const warnFailedIntercept = async (e, message, reason, discordid) => {
   if (e.message !== 'This user is already at 100% warning level') return false
@@ -35,8 +35,6 @@ const doWarn = async (discordid, reason, editable) => {
   return attemptWarn
 }
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
-  if (!message.member.hasPermission('KICK_MEMBERS')) return
-
   const spinner = genSpinner('Attempting to warn...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
