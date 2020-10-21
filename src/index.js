@@ -30,10 +30,10 @@ client.commands = new Enmap()
 recursive('./src/modules/commands', (err, files) => {
   if (err) return log('global', 'error', 'readdir', 'reading commands directory', err)
   files.forEach((file) => {
-    if (file.startsWith('_') && !client.config.v3rmAPI) return
     const dirParts = path.dirname(file).split('\\')
     dirParts.shift() // Remove src/ from directory parts
     const fileName = path.basename(file)
+    if (fileName.startsWith('_') && !client.config.v3rmAPI) return
 
     const props = require(path.join(__dirname, [...dirParts].join('/'), fileName)) // rebuild path
     // set permission based on permisisons folder (./kick_members, etc)

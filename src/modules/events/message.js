@@ -22,7 +22,7 @@ const checkCmdPerms = (member, cmd) => {
   return member.hasPermission(cmd.permissionLevel)
 }
 
-const runAllCommands = (client, message) => {
+const runCommand = (client, message) => {
   if (message.content.indexOf(client.config.prefix) !== 0) return
   const rawArgs = message.content.slice(client.config.prefix.length).trim().split(/ +/g)
   const command = rawArgs.shift().toLowerCase()
@@ -49,6 +49,6 @@ module.exports = async (client, message) => {
   ) return
 
   if (client.config.v3rmAPI) assignRoles(message)
-  runAllCommands(client, message)
+  runCommand(client, message)
   runTasks(client, message)
 }
