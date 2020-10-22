@@ -3,6 +3,7 @@ const knownErrors = require('../knownErrors')
 const lookup = require('./api/lookup')
 const secrets = require('../../../secrets.json')
 const { addtoRoleQueue, attemptRoleQueue } = require('./api/userSetup')
+const { logMember } = require('./database/members')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'
@@ -58,6 +59,7 @@ const basicLookup = async (member) => {
   if (details.roles.includes('Banned') || !details.roles.length) {
     return basicKickUser(member, 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.', member.guild.id)
   }
+  await logMember(member.guild.id, member, details.uid)
   await addtoRoleQueue(member.id, member, details.username, details.roles)
   const finishedMember = await attemptRoleQueue()
   return finishedMember

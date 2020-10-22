@@ -1,5 +1,6 @@
 const io = require('@pm2/io')
-const { addMessage } = require('../../mongo/channelStats')
+const { addMessage } = require('../../../mongo/stats')
+const { getUserData } = require('./members')
 
 let statQueue = []
 const statQueueMetric = io.metric({
@@ -27,6 +28,7 @@ const storeStatQueue = async () => {
     stat.id,
     stat.date,
     { messages: stat.messages, pTo: stat.pTo, pFrom: stat.pFrom },
+    stat.userData,
   ))
   Promise.all(tempStatQueue).then(() => {
     // Remove only matching entries, in case statQueue has been added to.
@@ -35,7 +37,7 @@ const storeStatQueue = async () => {
   })
 }
 
-const addOneToStatQueue = async (id, createdAt, serverId, opt) => {
+const addOneToStatQueue = async (id, createdAt, serverId, opt, userData = null) => {
   const existingInQueue = findFromStatQueue(id, serverId, createdAt)
   const eMember = statQueue[existingInQueue] || { messages: 0, pFrom: 0, pTo: 0 }
 
@@ -46,6 +48,7 @@ const addOneToStatQueue = async (id, createdAt, serverId, opt) => {
     messages: eMember.messages + (opt.receiving ? 0 : 1),
     pTo: eMember.pTo + (opt.receiving ? 1 : 0),
     pFrom: eMember.pFrom + (opt.pinging ? 1 : 0),
+    userData,
   }
 
   if (existingInQueue !== null) statQueue[existingInQueue] = incObj
@@ -64,7 +67,13 @@ const messageStatQueue = async (client, message) => {
     serverId,
     { receiving: true },
   ))
-  pingPromises.push(addOneToStatQueue(id, createdAt, serverId, { pinging: !!pings?.size || 0 }))
+  pingPromises.push(addOneToStatQueue(
+    id,
+    createdAt,
+    serverId,
+    { pinging: !!pings?.size || 0 },
+    getUserData(message.member),
+  ))
   await Promise.all(pingPromises)
 
   statQueueMetric.set(statQueue.length)
