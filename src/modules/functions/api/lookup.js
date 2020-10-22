@@ -2,6 +2,17 @@ const config = require('../../../../config.json')
 const mongo = require('../../../mongo/connect')
 const v3rmApi = require('./apiCall')
 
+const translateRoles = (allGroups) => {
+  const roles = []
+  allGroups.forEach((group) => {
+    Object.entries(config.roleTranslations).some((translation) => {
+      if (translation[1] === group) return roles.push(translation[0])
+      return false
+    })
+  })
+  return roles
+}
+
 const lookup = async (discordid, serverId, options) => {
   const {
     lastLookup, lookupTimeout, allowUsersToLookup,
@@ -18,14 +29,7 @@ const lookup = async (discordid, serverId, options) => {
     ...json.additionalgroups.map((_) => parseInt(_, 10)),
   ])
 
-  const roles = []
-  allGroups.forEach((group) => {
-    Object.entries(config.roleTranslations).some((translation) => {
-      if (translation[1] === group) return roles.push(translation[0])
-      return false
-    })
-  })
-  return { username: json.username, uid: json.uid, roles }
+  return { username: json.username, uid: json.uid, roles: translateRoles(allGroups) }
 }
 
 module.exports = lookup

@@ -1,6 +1,6 @@
 {
   "prefix": "!",
-  "v3rmAPI": false,
+  "v3rmAPI": true,
   "memory": {
     "maxStatQueue": 15
   },

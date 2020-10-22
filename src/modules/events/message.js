@@ -4,7 +4,7 @@ const { getSettings } = require('../../mongo/connect')
 const knownErrors = require('../knownErrors')
 const getArgs = require('../functions/argTranslations')
 const { attemptRoleQueue } = require('../functions/api/userSetup')
-const { messageStatQueue } = require('../functions/stats')
+const { messageStatQueue } = require('../functions/database/stats')
 
 const assignRoles = async (message) => {
   const { channelWelcome } = await getSettings(message.guild.id)
