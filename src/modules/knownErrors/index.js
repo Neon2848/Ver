@@ -1,4 +1,4 @@
-const log = require('../../mongo/connect')
+const log = require('../../mongo/log')
 
 module.exports = {
   sendingMessage: (message, err) => {

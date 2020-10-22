@@ -1,6 +1,6 @@
 {
   "prefix": "!",
-  "v3rmAPI": true,
+  "v3rmAPI": false,
   "memory": {
     "maxStatQueue": 15
   },
@@ -21,8 +21,8 @@
   },
   "images": {
     "botAvatar": "https://cdn.discordapp.com/avatars/709771900490088488/c9d914f580f45399d4941f4c2d7ff6e4.png",
-    "v3rmLogo": "https://media.discordapp.net/attachments/758275157990047774/763125251877634129/v3rm_logo.png",
-    "loader": "https://cdn.discordapp.com/attachments/758275157990047774/763126610646794240/loading.gif"
+    "v3rmLogo": "https://cdn.discordapp.com/attachments/548683437524123660/768952398835744787/v3rm_logo.png",
+    "loader": "https://cdn.discordapp.com/attachments/548683437524123660/768952202681122856/loading.gif"
   },
   "attachmentTypes": {
     "image": ["jpg", "jpeg", "png", "apng", "gif", "gifv"],
