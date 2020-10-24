@@ -27,10 +27,11 @@ const doWarn = async (discordid, reason, editable) => {
     if (guildMember) {
       kickUser(guildMember, editable, {
         dm: `You have been kicked because you just received a site warning: \`${reason}\`, and are now at max warning level.`,
-        channel: `Kicked <@${discordid}>, who is at 100% warning level`,
+        channel: `Kicked <@${discordid}>, who has now been banned for being at 100% warning level`,
         log: `Max warning level: ${reason}`,
       })
     }
+    attemptWarn.isGuildMember = !!guildMember
   }
   return attemptWarn
 }
@@ -43,9 +44,13 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
 
   if (bError.length) {
     sendResult(bError, { message: editable, edit: true }, 'Unable to warn.')
-    return
+    return null
   }
 
   const warned = await doWarn(id, justQuote, editable)
-  if (warned) sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true }, 'User warned')
+  if (!warned) return null
+  if (warned.isBeingBanned && !warned.isGuildMember) {
+    return sendResult(`<@${id}> has been banned (100% warning) for: \`${justQuote}\`. They aren't in the server, so haven't been kicked`, { message: editable, edit: true }, 'User warned')
+  }
+  return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true }, 'User warned')
 }
