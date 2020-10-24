@@ -11,6 +11,7 @@ const roleQueueMetric = io.metric({
   type: 'histogram',
   measurement: 'mean',
 })
+roleQueueMetric.set(0)
 
 // Upsert the user and the details we are trying to change.
 const addtoRoleQueue = async (id, member, nickChange, rolesToAdd = []) => {
@@ -52,19 +53,19 @@ const attemptRoleQueue = async () => {
     failedRoleQueue.shift()
     return rQ.member
   }
-
   const success = await basicUserSetup({
     username: rQ.nickChange,
     roles: [...rQ.rolesToAdd],
   }, rQ.member).catch(async () => {
     if (rQ.attempts >= 2) {
       // eslint-disable-next-line no-undef
-      await rQ.member.send('There was an unexpected error assigning your roles/nickname.').finally(() => { rQ.member.kick('Unable to assign roles').catch((_) => knownErrors.userOperation(_, rQ.member.guild.id)) })
+      await rQ.member.send('There was an unexpected error assigning your roles/nickname, we can\'t let you in the server if we can\'t confirm your v3rm account.').finally(() => { rQ.member.kick('Unable to assign roles').catch((_) => knownErrors.userOperation(_, rQ.member.guild.id)) })
       failedRoleQueue.shift()
     } else {
       await addtoRoleQueue(rQ.id, rQ.member, rQ.nickChange)
     }
   })
+  roleQueueMetric.set(failedRoleQueue.length)
   if (!success) return []
   failedRoleQueue.shift()
   roleQueueMetric.set(failedRoleQueue.length)
