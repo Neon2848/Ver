@@ -5,18 +5,35 @@ const {
 
 const msToDays = (date) => (date ? Math.round((date - Date.now()) / (24 * 60 * 60 * 1000)) : null)
 
-const doBan = async (discordid, reason, days, editable) => {
-  const attemptBan = await ban(discordid, reason, days).catch((e) => sendResult(e.message, { message: editable, edit: true }, 'Unable to ban.'))
-  if (!attemptBan) return null
-
+const findAndKickMember = async (discordid, reason, days, editable, newban = true) => {
   const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
   if (guildMember) {
-    kickUser(guildMember, editable, {
-      dm: `You have been kicked because you have been banned on site for: \`${reason}\`. You can rejoin when your site ban expires, in \`${days}\` days.`,
-      channel: `Banned <@${discordid}> for \`${days}\` days for: \`${reason}\``,
-      log: `Ban command: ${reason}`,
-    })
+    if (newban) {
+      kickUser(guildMember, editable, {
+        dm: `You have been kicked because you have been banned on site for: \`${reason}\`. You can rejoin when your site ban expires, in \`${days}\` days.`,
+        channel: `Banned <@${discordid}> for \`${days}\` days for: \`${reason}\``,
+        log: `Ban command: ${reason}`,
+      })
+    } else {
+      kickUser(guildMember, editable, {
+        dm: 'You have been kicked because you are already banned onsite.',
+        channel: 'User was already banned, and has now been kicked',
+        log: 'Kicking already-banned user',
+      })
+    }
+  } else {
+    sendResult(`The user ${(newban ? 'has now been' : 'is already')} banned, and they're not in the server`, { message: editable, edit: true }, 'Unable to kick.')
   }
+}
+
+const doBan = async (discordid, reason, days, editable) => {
+  const attemptBan = await ban(discordid, reason, days).catch((e) => {
+    if (e.message === 'User already banned') return findAndKickMember(discordid, reason, days, editable, false)
+    return sendResult(e.message, { message: editable, edit: true }, 'Unable to ban.')
+  })
+  if (!attemptBan) return null
+
+  await findAndKickMember(discordid, reason, days, editable)
   return attemptBan
 }
 

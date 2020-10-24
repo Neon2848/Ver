@@ -12,7 +12,7 @@ const assignRoles = async (message) => {
     if (/^i agree$/gmi.test(message.cleanContent) && !message.member.roles.cache.find((r) => r.name === 'Member')) {
       message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id, 'assigning roles'))
     }
-    message.delete()
+    message.delete().catch(() => {})
   }
 }
 

@@ -14,6 +14,13 @@ const sendError = (err, editable) => {
   )
 }
 
+const catchUpdateError = (e, message) => {
+  let translateError = e
+  if (e.message === "Cannot read property 'guild' of undefined") translateError = new Error('The user is not currently in the server')
+  if (e.message === 'Missing Permissions') translateError = new Error('This user has a higher role then me')
+  sendResult(translateError.message, { message, timeout: 5000 }, 'Not setting roles/username.')
+}
+
 const updateOrKickMember = (guildMember, editable, details) => {
   if (details.roles.includes('Banned') || !details.roles.length) {
     kickUser(guildMember, editable, {
@@ -23,7 +30,7 @@ const updateOrKickMember = (guildMember, editable, details) => {
     })
     return false
   }
-  basicUserSetup(details, guildMember).catch((e) => { sendResult(`There was an issue setting nickname or roles: \`${e}\``, { message: editable, timeout: 5000 }, 'Lookup error') })
+  basicUserSetup(details, guildMember).catch((e) => { catchUpdateError(e, editable) })
   return true
 }
 
