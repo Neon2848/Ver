@@ -7,23 +7,19 @@ const msToDays = (date) => (date ? Math.round((date - Date.now()) / (24 * 60 * 6
 
 const findAndKickMember = async (discordid, reason, days, editable, newban = true) => {
   const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
-  if (guildMember) {
-    if (newban) {
-      kickUser(guildMember, editable, {
-        dm: `You have been kicked because you have been banned on site for: \`${reason}\`. You can rejoin when your site ban expires, in \`${days}\` days.`,
-        channel: `Banned <@${discordid}> for \`${days}\` days for: \`${reason}\``,
-        log: `Ban command: ${reason}`,
-      })
-    } else {
-      kickUser(guildMember, editable, {
-        dm: 'You have been kicked because you are already banned onsite.',
-        channel: 'User was already banned, and has now been kicked',
-        log: 'Kicking already-banned user',
-      })
-    }
-  } else {
-    sendResult(`The user ${(newban ? 'has now been' : 'is already')} banned, and they're not in the server`, { message: editable, edit: true }, 'Unable to kick.')
+  if (!guildMember) return sendResult(`The user ${(newban ? 'has now been' : 'is already')} banned, and they're not in the server`, { message: editable, edit: true }, 'Unable to kick.')
+  if (newban) {
+    return kickUser(guildMember, editable, {
+      dm: `You have been kicked because you have been banned on site for: \`${reason}\`. You can rejoin when your site ban expires, in \`${days}\` days.`,
+      channel: `Banned <@${discordid}> for \`${days}\` days for: \`${reason}\``,
+      log: `Ban command: ${reason}`,
+    })
   }
+  return kickUser(guildMember, editable, {
+    dm: 'You have been kicked because you are already banned onsite.',
+    channel: 'User was already banned, and has now been kicked',
+    log: 'Kicking already-banned user',
+  })
 }
 
 const doBan = async (discordid, reason, days, editable) => {
