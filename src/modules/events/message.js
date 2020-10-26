@@ -3,7 +3,7 @@ const Discord = require('discord.js')
 const { getSettings } = require('../../mongo/connect')
 const knownErrors = require('../knownErrors')
 const getArgs = require('../functions/argTranslations')
-const { attemptRoleQueue } = require('../functions/api/userSetup')
+const { attemptRoleQueue } = require('../functions/api/v3rm/userSetup')
 const { messageStatQueue } = require('../functions/database/stats')
 
 const assignRoles = async (message) => {

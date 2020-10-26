@@ -1,9 +1,9 @@
 /* eslint-disable consistent-return */
-const lookup = require('../../functions/api/lookup')
+const lookup = require('../../functions/api/v3rm/lookup')
 const {
   sendResult, kickUser, genSpinner,
 } = require('../../functions')
-const { basicUserSetup } = require('../../functions/api/userSetup')
+const { basicUserSetup } = require('../../functions/api/v3rm/userSetup')
 const { logMember } = require('../../functions/database/members')
 
 const sendError = (err, editable) => {

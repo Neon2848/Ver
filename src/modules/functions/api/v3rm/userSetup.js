@@ -1,5 +1,5 @@
 const io = require('@pm2/io')
-const knownErrors = require('../../knownErrors')
+const knownErrors = require('../../../knownErrors')
 // Various factors may cause setNickname and roles.add to fail.
 // Such factors include ratelimits and accounts with names that bug Discord.
 // This file provides a hacky, but functional solution to this.

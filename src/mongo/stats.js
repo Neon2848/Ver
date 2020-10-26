@@ -18,13 +18,12 @@ const addMessage = (serverId, userId, date, stats, ud = null) => new Promise((re
   Stats.findOneAndUpdate(query, update, options, (err, succ) => {
     if (err) return reject(err)
 
-    if (ud) addMember(serverId, userId, ud)
-    return resolve(succ)
+    if (ud) addMember(serverId, userId, ud).then(() => resolve(succ))
   })
 })
 
-const getServerStats = (serverId) => new Promise((resolve, reject) => {
-  const query = { serverId, date: { $gte: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)) } }
+const getServerStats = (serverId, timeframe) => new Promise((resolve, reject) => {
+  const query = { serverId, date: { $gte: new Date(Date.now() - timeframe) } }
   Stats.find(query, (err, res) => {
     if (err) return reject(err)
     return resolve(res)
