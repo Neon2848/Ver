@@ -24,7 +24,7 @@
   "homepage": "https://github.com/SegFault-Verm/GiuseppeJrTheSecond#readme",
   "dependencies": {
     "@pm2/io": "^4.3.5",
-    "discord.js": "^12.4.0",
+    "discord.js": "^12.4.1",
     "enmap": "^5.8.0",
     "mongoose": "^5.10.10",
     "node-fetch": "^2.6.1",
