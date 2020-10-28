@@ -1,9 +1,9 @@
 /* eslint-disable consistent-return */
-const lookup = require('../../functions/api/lookup')
+const lookup = require('../../functions/api/v3rm/lookup')
 const {
   sendResult, kickUser, genSpinner,
 } = require('../../functions')
-const { basicUserSetup } = require('../../functions/api/userSetup')
+const { basicUserSetup } = require('../../functions/api/v3rm/userSetup')
 const { logMember } = require('../../functions/database/members')
 
 const sendError = (err, editable) => {
@@ -36,7 +36,7 @@ const updateOrKickMember = (guildMember, editable, details) => {
 
 exports.run = async (client, message, args, type = 'lookup') => { // eslint-disable-line no-unused-vars
   const discordid = args.argMap.users[0] || null
-  if (!discordid) return sendResult('Input malformatted', { message })
+  if (!discordid) return null
   const editable = await message.reply(genSpinner('Looking up user...'))
 
   const details = await lookup(discordid, editable.guild.id, { bypass: message.member.hasPermission('KICK_MEMBERS'), type }).catch((err) => sendError(err, editable))

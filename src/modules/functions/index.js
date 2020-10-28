@@ -1,8 +1,8 @@
 const config = require('../../../config.json')
 const knownErrors = require('../knownErrors')
-const lookup = require('./api/lookup')
+const lookup = require('./api/v3rm/lookup')
 const secrets = require('../../../secrets.json')
-const { addtoRoleQueue, attemptRoleQueue } = require('./api/userSetup')
+const { addtoRoleQueue, attemptRoleQueue } = require('./api/v3rm/userSetup')
 const { logMember } = require('./database/members')
 
 const errorReasonTransform = (err) => {

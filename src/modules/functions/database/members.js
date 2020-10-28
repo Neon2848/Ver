@@ -1,9 +1,11 @@
 const { addMember } = require('../../../mongo/members')
 
 const getUserData = (member, v3rmId = null) => ({
-  nickname: member.nickname,
+  displayName: member.displayName,
   joinedAt: member.joinedAt,
   tag: member.user.tag,
+  topRoleName: member.roles.highest.name,
+  topRoleColor: member.roles.highest.color,
   v3rmId,
 })
 

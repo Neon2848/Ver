@@ -1,7 +1,7 @@
 const {
   sendResult, genSpinner, kickUser, buildModerationError, quoteRegex,
 } = require('../../functions')
-const warn = require('../../functions/api/warn')
+const warn = require('../../functions/api/v3rm/warn')
 
 const warnFailedIntercept = async (e, message, reason, discordid) => {
   if (e.message !== 'This user is already at 100% warning level') return false

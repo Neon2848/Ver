@@ -1,5 +1,5 @@
 const { sendResult, genSpinner, kickUser } = require('../../functions')
-const unlink = require('../../functions/api/unlink')
+const unlink = require('../../functions/api/v3rm/unlink')
 
 const doUnlink = async (discordid, editable) => {
   const attemptUnlink = await unlink(discordid).catch((e) => { sendResult(e.message, { message: editable, edit: true }, 'Unable to unlink.') })

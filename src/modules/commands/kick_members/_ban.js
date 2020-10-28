@@ -1,4 +1,4 @@
-const ban = require('../../functions/api/ban')
+const ban = require('../../functions/api/v3rm/ban')
 const {
   genSpinner, buildModerationError, quoteRegex, sendResult, kickUser,
 } = require('../../functions')

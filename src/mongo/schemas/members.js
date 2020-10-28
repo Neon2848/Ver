@@ -8,8 +8,11 @@ const membersSchema = new Schema({
   id: { type: String },
   v3rmId: { type: Number },
   tags: { type: Array },
-  nickname: { type: String },
+  displayName: { type: String },
   joinedAt: { type: Date },
+  topRole: { type: Object },
+  topRoleName: { type: String },
+  topRoleColor: { type: Number },
 })
 
 module.exports = membersSchema

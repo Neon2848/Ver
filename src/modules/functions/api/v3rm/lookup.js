@@ -1,5 +1,5 @@
-const config = require('../../../../config.json')
-const mongo = require('../../../mongo/connect')
+const config = require('../../../../../config.json')
+const mongo = require('../../../../mongo/connect')
 const v3rmApi = require('./apiCall')
 
 const translateRoles = (allGroups) => {

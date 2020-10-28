@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
-const secrets = require('../../../../secrets.json')
-const knownErrors = require('../../knownErrors')
+const secrets = require('../../../../../secrets.json')
+const knownErrors = require('../../../knownErrors')
 
 const interceptAPIError = (error) => {
   knownErrors.fetchingData(error)
