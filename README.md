@@ -14,7 +14,7 @@ ___
 
 ### Requirements
 * node 14.0.0 or above
-* [pm2](https://www.npmjs.com/package/pm2) should be installed globally with `npm i pm2 -g`, but you can avoid this by running `node index.js` instead of `npm run dev`.
+* [pm2](https://www.npmjs.com/package/pm2) should be installed globally with `npm i pm2 -g`, but you can avoid this by running `node src/index.js` instead of `npm run dev`.
 ### Running
 1) `npm i` to install modules.
 1) `npm run dev` to run pm2 in dev mode. `npm start` and `npm  stop` are used for deployment.

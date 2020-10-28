@@ -50,11 +50,11 @@ const timeArgs = (args) => args.filter((arg) => {
 })
 
 const shorthandMSMap = {
-  h: 60 * 60 * 1000,
-  d: 24 * 60 * 60 * 1000,
-  w: 7 * 24 * 60 * 60 * 1000,
-  m: 4 * 7 * 24 * 60 * 60 * 1000,
-  y: 12 * 4 * 7 * 24 * 60 * 60 * 1000,
+  h: 3600000,
+  d: 86400000,
+  w: 604800000,
+  m: 2629800000,
+  y: 31557600000,
 }
 
 const convertTimeArgs = (args) => {

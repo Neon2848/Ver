@@ -3,28 +3,8 @@
 // but the URL length would be a limitation.
 
 const fetch = require('node-fetch')
-const secrets = require('../../../../../secrets.json')
-const knownErrors = require('../../../knownErrors')
 
-const dtOptions = {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: 'UTC',
-  timeZoneName: 'short',
-}
-
-const barChart = (title, date) => ({
-  title: {
-    display: true,
-    text: `${title} Since: ${date.toLocaleTimeString('en-us', dtOptions)}`,
-    fontColor: 'rgba(26, 188, 156, 1)',
-    fontSize: '16',
-    fontStyle: 'bold',
-    fontFamily: "'Whitney','Helvetica Neue','Helvetica','Arial',sans-serif",
-  },
+const barChart = () => ({
   legend: {
     display: false,
   },
@@ -49,21 +29,133 @@ const barChart = (title, date) => ({
       },
     }],
   },
+  plugins: {
+    datalabels: {
+      anchor: 'end',
+      align: 'top',
+      color: '#000',
+      backgroundColor: 'rgba(249, 249, 249, 0.6)',
+      borderColor: 'rgba(251, 247, 245, 0.6)',
+      borderWidth: 1,
+      borderRadius: 2,
+    },
+  },
 })
 
-const genMessageStatJSON = (orderedUsers, orderedMessages, title, date) => ({
-  type: 'bar',
-  data: { labels: orderedUsers, datasets: [{ label: 'Messages', data: orderedMessages }] },
-  options: barChart(title, date),
+const barChartWithPings = () => ({
+  legend: {
+    labels: {
+      fontColor: 'rgba(255, 255, 255, 0.7)',
+      fontSize: 12,
+      fontStyle: 'bold',
+    },
+  },
+  scales: {
+    xAxes: [{
+      gridLines: {
+        display: false,
+      },
+      ticks: {
+        fontColor: 'rgba(255, 255, 255, 0.7)',
+        fontStyle: 'bold',
+      },
+    }],
+    yAxes: [{
+      id: 'a',
+      gridLines: {
+        color: 'rgba(255, 255, 255, 0)',
+        drawTicks: false,
+      },
+      scaleLabel: {
+        display: true,
+        labelString: 'No. Of Messages',
+        fontColor: 'rgba(255, 255, 255, 0.7)',
+      },
+      ticks: {
+        fontColor: 'rgba(255, 255, 255, 0.7)',
+        padding: 8,
+      },
+    }, {
+      id: 'b',
+      gridLines: {
+        color: 'rgba(255, 255, 255, 0.7)',
+        drawTicks: false,
+      },
+      position: 'right',
+      scaleLabel: {
+        display: true,
+        labelString: 'No. Of Pings',
+        fontColor: 'rgba(255, 255, 255, 0.7)',
+      },
+      ticks: {
+        fontColor: 'white',
+        padding: 8,
+      },
+    }],
+  },
 })
 
-module.exports = async (...args) => {
-  const res = await fetch(`https://quickchart.io/chart?c=${JSON.stringify(genMessageStatJSON(...args))}`, {
-    method: 'get',
+const lineGraph = () => ({
+  legend: {
+    labels: {
+      fontColor: 'rgba(255, 255, 255, 0.7)',
+      fontSize: 12,
+      fontStyle: 'bold',
+    },
+  },
+  scales: {
+    xAxes: [{
+      gridLines: {
+        color: 'rgba(255, 255, 255, 0.1)',
+        drawTicks: false,
+      },
+      ticks: {
+        fontColor: 'rgba(255, 255, 255, 0.5)',
+        fontStyle: 'bold',
+        padding: 8,
+      },
+    }],
+    yAxes: [{
+      gridLines: {
+        color: 'rgba(255, 255, 255, 0.1)',
+        drawTicks: false,
+      },
+      ticks: {
+        fontColor: 'rgba(255, 255, 255, 0.7)',
+        fontStyle: 'bold',
+      },
+    }],
+  },
+})
+
+const getGraph = async (data) => {
+  const res = await fetch('https://quickchart.io/chart', {
+    method: 'post',
+    body: JSON.stringify({ c: data }),
     headers: { 'Content-Type': 'application/json' },
-  }).catch(console.log)
+  }).catch((_) => { throw _ })
   const arrayBuffer = await res.arrayBuffer()
   const buffer = await Buffer.from(arrayBuffer)
-  console.log('do')
   return buffer
 }
+
+const getBar = async (orderedUsers, orderedMessages, orderedRoles, pingData) => {
+  const datasets = [{ label: 'Messages', data: orderedMessages, backgroundColor: orderedRoles }, ...pingData]
+  const res = await getGraph({
+    type: 'bar',
+    data: { labels: orderedUsers, datasets },
+    options: pingData.length ? barChartWithPings() : barChart(),
+  })
+  return res
+}
+
+const getLine = async (hours, datasets) => {
+  const res = await getGraph({
+    type: 'line',
+    data: { labels: hours, datasets },
+    options: lineGraph(),
+  })
+  return res
+}
+
+module.exports = { getBar, getLine }

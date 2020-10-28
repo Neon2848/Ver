@@ -18,16 +18,42 @@ const addMessage = (serverId, userId, date, stats, ud = null) => new Promise((re
   Stats.findOneAndUpdate(query, update, options, (err, succ) => {
     if (err) return reject(err)
 
-    if (ud) addMember(serverId, userId, ud).then(() => resolve(succ))
+    if (ud) return addMember(serverId, userId, ud).then(() => resolve(succ))
+    return true
   })
 })
 
-const getServerStats = (serverId, timeframe) => new Promise((resolve, reject) => {
-  const query = { serverId, date: { $gte: new Date(Date.now() - timeframe) } }
-  Stats.find(query, (err, res) => {
-    if (err) return reject(err)
-    return resolve(res)
-  })
-})
+const getServerStats = async (serverId, timeframe, endFrame, limit = 5) => {
+  const query = { serverId, date: { $gte: timeframe, $lte: endFrame } }
+  const allStats = await Stats.aggregate([
+    { $match: query },
+    {
+      $group: {
+        _id: '$id',
+        messages: { $sum: '$messages' },
+        pFrom: { $sum: '$pFrom' },
+        pTo: { $sum: '$pTo' },
+      },
+    },
+    {
+      $lookup: {
+        from: 'members', localField: '_id', foreignField: 'id', as: 'member',
+      },
+    },
+    { $sort: { messages: -1, pTo: -1, pFrom: -1 } },
+  ]).limit(limit).catch((_) => { throw _ })
 
-module.exports = { addMessage, getServerStats }
+  return allStats
+}
+
+const getUserStats = async (serverId, timeframe, endFrame, uid) => {
+  const query = { serverId, date: { $gte: timeframe, $lte: endFrame }, id: uid }
+
+  const allStats = await Stats.find(query)
+    .sort({ date: 1 })
+    .catch((_) => { throw _ })
+
+  return allStats
+}
+
+module.exports = { addMessage, getServerStats, getUserStats }

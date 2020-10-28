@@ -45,9 +45,9 @@ const addOneToStatQueue = async (id, createdAt, serverId, opt, userData = null) 
     serverId,
     id,
     date: createdAt,
-    messages: eMember.messages + (opt.receiving ? 0 : 1),
-    pTo: eMember.pTo + (opt.receiving ? 1 : 0),
-    pFrom: eMember.pFrom + (opt.pinging ? 1 : 0),
+    messages: eMember.messages + (opt.receiving ? 0 : 1), // They are sending a message if 1
+    pTo: eMember.pTo + (opt.receiving ? 1 : 0), // They are being pinged if 1
+    pFrom: eMember.pFrom + (opt.pinging ? 1 : 0), // They are pinging someone if 1
     userData,
   }
 
