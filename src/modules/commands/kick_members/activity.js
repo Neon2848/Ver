@@ -92,7 +92,7 @@ const sendFile = async (buffer, editable, sDF, eDF) => {
 
   const file = new MessageAttachment(buffer, 'chart.png')
   await editable.channel.send(
-    `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC. \`\`\`diff\n- Note: This is development data, and is not accurate at all. It will also be reset several times.\`\`\``,
+    `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC. \`\`\`diff\n- Note: This is development data, and is not accurate at all. The bot hasn't been running most of the time, and when it has it's only been collecting partial data. It will also be reset several times.\`\`\``,
     { files: [file] },
   ).then(() => editable.delete().catch(() => {}))
   return true
@@ -105,12 +105,8 @@ const doBarGraph = async (message, sDF, eDF, graphLength, args, editable) => {
     labels, data, colours, extraData,
   } = convertDataToBar(sStats, showPings)
 
-  const a = await new MessageAttachment(await getBar(labels, data, colours, extraData), 'chart.png')
-
-  await editable.channel.send(
-    `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC. \`\`\`diff\n- Note: This is development data, and is not accurate at all. It will also be reset several times.\`\`\``,
-    { files: [a] },
-  ).then(() => editable.delete().catch(() => {}))
+  const buffer = await getBar(labels, data, colours, extraData)
+  sendFile(buffer, editable, sDF, eDF)
 }
 
 const mapDataToHours = (h, hours, sStats) => {
@@ -164,24 +160,39 @@ const doLineGraph = async (message, sDF, eDF, args, editable) => {
   return true
 }
 
-exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
-  const dNow = Date.now()
-  if (!checkCall(message.member, dNow)) { message.delete().catch(() => {}); return false }
-  const editable = await message.reply(genSpinner('Generating graph...'))
+const graphDecisionEngine = (message, editable, dNow, argMap) => {
+  if (!checkCall(message.member, dNow)) { message.delete().catch(() => {}); return null }
 
-  const startTimeframe = args.argMap.timeArgs[0] - dNow || (7 * 24 * 60 * 60 * 1000)
+  const startTimeframe = argMap.timeArgs[0] - dNow || (7 * 24 * 60 * 60 * 1000)
   const sDF = new Date(dNow - startTimeframe)
   sDF.setHours(sDF.getHours(), 0, 0, 0)
 
-  const eDF = new Date(dNow - (args.argMap.timeArgs[1] - dNow) || dNow)
-  if (eDF <= sDF) return sendResult('That timeframe makes no sense', { message: editable, edit: true, timeout: 3000 }, 'Stats Issue')
-  const graphLength = parseInt(args.argMap.numbers[0] || 5, 10)
-  if (graphLength > 100) return sendResult('I can\'t display that much data', { message: editable, edit: true, timeout: 3000 }, 'Stats Issue')
-
-  if (args.argMap.users.length) {
-    await doLineGraph(message, sDF, eDF, args, editable)
-    return true
+  const eDF = new Date(dNow - (argMap.timeArgs[1] - dNow) || dNow)
+  if (eDF <= sDF) {
+    sendResult('That timeframe makes no sense', { message: editable, edit: true, timeout: 3000 }, 'Stats Issue')
+    return null
   }
-  doBarGraph(message, sDF, eDF, graphLength, args, editable)
+  const graphLength = parseInt(argMap.numbers[0] || 5, 10)
+  if (graphLength > 100) {
+    sendResult('I can\'t display that much data', { message: editable, edit: true, timeout: 3000 }, 'Stats Issue')
+    return null
+  }
+  return {
+    sDF, eDF, graphLength, bar: argMap.users.length,
+  }
+}
+
+exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
+  const dNow = Date.now()
+  const editable = await message.reply(genSpinner('Generating graph...'))
+
+  const decision = graphDecisionEngine(message, editable, dNow, args.argMap)
+  if (!decision) return false
+  const {
+    sDF, eDF, graphLength, bar,
+  } = decision
+
+  if (bar) await doLineGraph(message, sDF, eDF, args, editable)
+  else await doBarGraph(message, sDF, eDF, graphLength, args, editable)
   return true
 }
