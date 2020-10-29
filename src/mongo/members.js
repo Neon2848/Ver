@@ -1,22 +1,21 @@
 const mongoose = require('mongoose')
+const knownErrors = require('../modules/knownErrors')
 const membersSchema = require('./schemas/members')
 
 const Members = mongoose.model('members', membersSchema)
 
-const addMember = (serverId, id, userData) => new Promise((resolve, reject) => {
+const addMember = async (serverId, id, userData) => {
   const query = { serverId, id }
   const theMember = { lastUpdated: Date.now(), ...userData }
   const options = {
-    upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false,
+    upsert: true, new: true, setDefaultsOnInsert: true,
   }
 
-  Members.findOneAndUpdate(query, {
+  const succ = await Members.findOneAndUpdate(query, {
     $set: theMember,
     $addToSet: { tags: userData.tag },
-  }, options, (err, succ) => {
-    if (err) return reject(err)
-    return resolve(succ)
-  }).catch(reject)
-})
+  }, options).catch((err) => knownErrors.savingUser(err, serverId, { id, userData }))
+  return succ
+}
 
 module.exports = { addMember }

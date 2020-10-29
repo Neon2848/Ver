@@ -32,12 +32,14 @@ const barChart = () => ({
   plugins: {
     datalabels: {
       anchor: 'end',
-      align: 'top',
+      align: 'center',
       color: '#000',
-      backgroundColor: 'rgba(249, 249, 249, 0.6)',
-      borderColor: 'rgba(251, 247, 245, 0.6)',
+      backgroundColor: 'rgba(249, 249, 249, 1)',
+      borderColor: 'rgba(251, 247, 245, 1)',
       borderWidth: 1,
       borderRadius: 2,
+      padding: 2,
+      clamp: true,
     },
   },
 })

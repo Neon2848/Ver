@@ -4,7 +4,7 @@ const statsSchema = require('./schemas/stats')
 
 const Stats = mongoose.model('UserStats', statsSchema)
 
-const addMessage = (serverId, userId, date, stats, ud = null) => new Promise((resolve, reject) => {
+const addMessage = async (serverId, userId, date, stats, ud = null) => {
   const query = { serverId, id: userId, date }
   const update = {
     $inc: {
@@ -13,15 +13,12 @@ const addMessage = (serverId, userId, date, stats, ud = null) => new Promise((re
       pFrom: stats.pFrom,
     },
   }
-  const options = { upsert: true, useFindAndModify: false }
+  const options = { upsert: true }
 
-  Stats.findOneAndUpdate(query, update, options, (err, succ) => {
-    if (err) return reject(err)
-
-    if (ud) return addMember(serverId, userId, ud).then(() => resolve(succ))
-    return true
-  })
-})
+  await Stats.findOneAndUpdate(query, update, options)
+  await addMember(serverId, userId, ud)
+  return true
+}
 
 const getServerStats = async (serverId, timeframe, endFrame, limit = 5) => {
   const query = { serverId, date: { $gte: timeframe, $lte: endFrame } }
@@ -49,11 +46,11 @@ const getServerStats = async (serverId, timeframe, endFrame, limit = 5) => {
 const getUserStats = async (serverId, timeframe, endFrame, uid) => {
   const query = { serverId, date: { $gte: timeframe, $lte: endFrame }, id: uid }
 
-  const allStats = await Stats.find(query)
+  const succ = await Stats.find(query)
     .sort({ date: 1 })
     .catch((_) => { throw _ })
 
-  return allStats
+  return succ
 }
 
 module.exports = { addMessage, getServerStats, getUserStats }

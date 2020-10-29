@@ -16,7 +16,7 @@ const log = (server, type, action, issue, data) => {
   console.log(theLog) // Console logging for pm2.
   Logs.findOneAndUpdate({ serverId: server }, { // Also store the log in DB.
     $push: { logs: theLog },
-  }, { upsert: true, useFindAndModify: false }).catch(console.log)
+  }, { upsert: true }).catch(console.log)
 }
 
 module.exports = log

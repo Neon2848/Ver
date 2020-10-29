@@ -60,12 +60,13 @@ const messageStatQueue = async (client, message) => {
   const { member: { id }, createdAt } = message
   createdAt.setHours(createdAt.getHours(), 0, 0, 0)
 
-  const pings = message.mentions.users.filter((u) => u.id !== message.member.id)
+  const pings = message.mentions.members.filter((u) => u.id !== message.member.id)
   const pingPromises = pings.map((p) => addOneToStatQueue(
     p.id,
     createdAt,
     serverId,
     { receiving: true },
+    getUserData(p),
   ))
   pingPromises.push(addOneToStatQueue(
     id,

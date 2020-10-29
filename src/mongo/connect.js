@@ -1,8 +1,11 @@
 const mongoose = require('mongoose')
 const secrets = require('../../secrets.json')
 const log = require('./log')
-
 const serversSchema = require('./schemas/servers.js')
+
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
 
 const Servers = mongoose.model('Servers', serversSchema)
 
@@ -39,7 +42,7 @@ const setupGuilds = (guilds) => {
       },
     }
     const options = {
-      upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false,
+      upsert: true, new: true, setDefaultsOnInsert: true,
     }
     Servers.findOneAndUpdate(query, update, options, ((err, succ) => {
       if (err) log(guild.serverId, 'error', 'setting up a guild', err.message, guild)
