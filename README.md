@@ -10,14 +10,41 @@ In development.
 
 ___
 
-## Development 
+## Development
 
 ### Requirements
 * node 14.0.0 or above
 * [pm2](https://www.npmjs.com/package/pm2) should be installed globally with `npm i pm2 -g`, but you can avoid this by running `node src/index.js` instead of `npm run dev`.
+* A local mongo installation, version 4.4.1
 ### Running
-1) `npm i` to install modules.
-1) `npm run dev` to run pm2 in dev mode. `npm start` and `npm  stop` are used for deployment.
+1) Add a secrets.json file with the info below.
+2) `npm i` to install modules.
+3) `npm run dev` to run pm2 in dev mode. `npm start` and `npm  stop` are used for deployment.
+
+#### Secrets.json
+```json
+{
+    "discord": {
+        "token": ""
+    },
+    "mongo": {
+        // Authless is fine as DB is only locally accessible.
+        "server": "mongodb://127.0.0.1:27017/giuseppe"
+    },
+    "v3rm": {
+      // If you want to develop with v3rmAPI enabled, you will need to stub it.
+        "api": { 
+            "enabled": false,
+            "base": "https://apipath",
+            "lookup": "user",
+            "unlink": "unlink",
+            "warn": "warn",
+            "ban": "ban"
+        }
+    }
+}
+
+```
 
 ---
 ## Contributing

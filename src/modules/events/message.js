@@ -48,7 +48,7 @@ module.exports = async (client, message) => {
       || !message.guild
   ) return
 
-  if (client.config.v3rmAPI) assignRoles(message)
+  if (client.secrets.v3rm.api.enabled) assignRoles(message)
   runCommand(client, message)
   runTasks(client, message)
 }
