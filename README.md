@@ -6,7 +6,7 @@
 
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/SegFault-Verm/GiuseppeJrTheSecond)](https://github.com/SegFault-Verm/GiuseppeJrTheSecond/projects/1)
 
-In development.
+In development. 
 
 ___
 
