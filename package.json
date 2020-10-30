@@ -4,9 +4,7 @@
   "description": "A discord server controller bot for the v3rm discord. ",
   "main": "giuseppe.js",
   "scripts": {
-    "start": "pm2 start src/index.js",
-    "stop": "pm2 stop src/index.js",
-    "restart": "pm2 restart src/index.js",
+    "start": "node src/index.js",
     "dev": "pm2-dev src/index.js",
     "lint": "eslint \"src/**\"",
     "fix-lint": "eslint \"src/**\" --fix",

@@ -30,7 +30,7 @@ client.commands = new Enmap()
 recursive('./src/modules/commands', (err, files) => {
   if (err) return log('global', 'error', 'readdir', 'reading commands directory', err)
   files.forEach((file) => {
-    const dirParts = path.dirname(file).split('\\')
+    const dirParts = path.dirname(file).replace(/\\/g, '/').split('/')
     dirParts.shift() // Remove src/ from directory parts
     const fileName = path.basename(file)
     if (fileName.startsWith('_') && !client.config.v3rmAPI) return
