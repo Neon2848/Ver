@@ -26,34 +26,28 @@ const setSetting = (server, setting, value) => {
   }, { upsert: true }).catch((e) => log(server, 'error', 'setting a setting', e.message, { setting, value }))
 }
 
-const getSettings = (server) => new Promise((resolve, reject) => {
-  Servers.findOne({ serverId: server }, (err, resp) => {
-    if (err) reject(err)
-    resolve(resp.settings)
-  })
-})
+const getSettings = async (server) => {
+  const { settings } = await Servers.findOne({ serverId: server }).catch((e) => { throw e })
+  return settings
+}
 
-const setupGuilds = (guilds) => {
-  guilds.forEach((guild) => {
-    const query = { serverId: guild.serverId }
-    const update = {
-      $set: {
-        serverName: guild.serverName,
-      },
-    }
-    const options = {
-      upsert: true, new: true, setDefaultsOnInsert: true,
-    }
-    Servers.findOneAndUpdate(query, update, options, ((err, succ) => {
-      if (err) log(guild.serverId, 'error', 'setting up a guild', err.message, guild)
-      return succ
-    }))
-  })
+const setupOneGuild = async (guild) => {
+  const query = { serverId: guild.serverId }
+  const update = {
+    $set: {
+      serverName: guild.serverName,
+    },
+  }
+  const options = {
+    upsert: true, new: true, setDefaultsOnInsert: true,
+  }
+  const updated = await Servers.findOneAndUpdate(query, update, options).catch((err) => log(guild.serverId, 'error', 'setting up a guild', err.message, guild))
+  return updated
 }
 
 module.exports = {
   setSetting,
   getSettings,
   connect,
-  setupGuilds,
+  setupOneGuild,
 }

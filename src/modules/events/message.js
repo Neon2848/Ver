@@ -1,13 +1,12 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js')
-const { getSettings } = require('../../mongo/connect')
 const knownErrors = require('../knownErrors')
 const getArgs = require('../functions/argTranslations')
 const { attemptRoleQueue } = require('../functions/api/v3rm/userSetup')
 const { messageStatQueue } = require('../functions/database/stats')
 
 const assignRoles = async (message) => {
-  const { channelWelcome } = await getSettings(message.guild.id)
+  const { giuseppeSettings: { channelWelcome } } = message.guild
   if (message.channel.name === channelWelcome) {
     if (/^i agree$/gmi.test(message.cleanContent) && !message.member.roles.cache.find((r) => r.name === 'Member')) {
       message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id, 'assigning roles'))
@@ -16,10 +15,21 @@ const assignRoles = async (message) => {
   }
 }
 
-const checkCmdPerms = (member, cmd) => {
+const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
-  if (cmd.permissionLevel === 'UNIVERSAL') return true
-  return member.hasPermission(cmd.permissionLevel)
+
+  const { giuseppeSettings: { channelBotCommands } } = message.guild
+  const permissionLevel = cmd.permissionLevel.replace(/_BC$/, '')
+
+  // The command is a bot-commands only command
+  if (cmd.permissionLevel !== permissionLevel) {
+    if (channelBotCommands !== message.channel.name) {
+      message.delete().catch({})
+      return false
+    }
+  }
+  if (permissionLevel === 'UNIVERSAL') return true
+  return message.member.hasPermission(cmd.permissionLevel)
 }
 
 const runCommand = (client, message) => {
@@ -27,7 +37,7 @@ const runCommand = (client, message) => {
   const rawArgs = message.content.slice(client.config.prefix.length).trim().split(/ +/g)
   const command = rawArgs.shift().toLowerCase()
   const cmd = client.commands.get(command)
-  if (!checkCmdPerms(message.member, cmd)) return
+  if (!checkCmdPerms(message, cmd)) return
   const args = {
     raw: rawArgs,
     argMap: getArgs(rawArgs),
