@@ -1,7 +1,7 @@
 const ban = require('../../functions/api/v3rm/ban')
 const {
   genSpinner, buildModerationError, quoteRegex, sendResult, kickUser,
-} = require('../../functions')
+} = require('../../functions/general')
 
 const msToDays = (date) => (date ? Math.round((date - Date.now()) / (24 * 60 * 60 * 1000)) : null)
 

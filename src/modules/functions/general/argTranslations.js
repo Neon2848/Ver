@@ -1,4 +1,4 @@
-const config = require('../../../config.json')
+const config = require('../../../../config.json')
 
 // Match arg where only digits exist in the arg.
 const numbers = (args) => args.filter((arg) => /^[0-9]{1,17}$/.test(arg))

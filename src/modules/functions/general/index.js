@@ -1,9 +1,9 @@
-const config = require('../../../config.json')
-const knownErrors = require('../knownErrors')
-const lookup = require('./api/v3rm/lookup')
-const secrets = require('../../../secrets.json')
-const { addtoRoleQueue, attemptRoleQueue } = require('./api/v3rm/userSetup')
-const { logMember } = require('./database/members')
+const config = require('../../../../config.json')
+const knownErrors = require('../../knownErrors')
+const lookup = require('../api/v3rm/lookup')
+const secrets = require('../../../../secrets.json')
+const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
+const { logMember } = require('../database/members')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'

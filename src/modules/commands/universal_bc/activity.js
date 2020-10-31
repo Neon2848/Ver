@@ -1,7 +1,7 @@
 const { MessageAttachment } = require('discord.js')
 const FileType = require('file-type')
 const { getServerStats, getUserStats } = require('../../../mongo/stats')
-const { sendResult, genSpinner } = require('../../functions')
+const { sendResult, genSpinner } = require('../../functions/general')
 const { getBar, getLine } = require('../../functions/api/quickchart')
 
 let lastCall = Date.now()

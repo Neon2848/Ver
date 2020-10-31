@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js')
 const knownErrors = require('../knownErrors')
-const getArgs = require('../functions/argTranslations')
+const getArgs = require('../functions/general/argTranslations')
 const { attemptRoleQueue } = require('../functions/api/v3rm/userSetup')
 const { messageStatQueue } = require('../functions/database/stats')
 

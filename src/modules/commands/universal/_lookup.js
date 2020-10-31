@@ -2,7 +2,7 @@
 const lookup = require('../../functions/api/v3rm/lookup')
 const {
   sendResult, kickUser, genSpinner,
-} = require('../../functions')
+} = require('../../functions/general')
 const { basicUserSetup } = require('../../functions/api/v3rm/userSetup')
 const { logMember } = require('../../functions/database/members')
 

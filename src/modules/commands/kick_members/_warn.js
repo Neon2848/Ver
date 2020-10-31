@@ -1,6 +1,6 @@
 const {
   sendResult, genSpinner, kickUser, buildModerationError, quoteRegex,
-} = require('../../functions')
+} = require('../../functions/general')
 const warn = require('../../functions/api/v3rm/warn')
 
 const warnFailedIntercept = async (e, message, reason, discordid) => {

@@ -1,4 +1,4 @@
-const { genSpinner, sendResult } = require('../../functions')
+const { genSpinner, sendResult } = require('../../functions/general')
 const knownErrors = require('../../knownErrors')
 
 const maxChunk = 100
