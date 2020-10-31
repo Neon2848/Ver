@@ -160,8 +160,10 @@ const doLineGraph = async (message, sDF, eDF, args, editable) => {
   return true
 }
 
-const graphDecisionEngine = (message, editable, dNow, argMap) => {
+const graphDecisionEngine = async (message, dNow, argMap) => {
   if (!checkCall(message.member, dNow)) { message.delete().catch(() => {}); return null }
+
+  const editable = await message.reply(genSpinner('Generating graph...'))
 
   const startTimeframe = argMap.timeArgs[0] - dNow || (7 * 24 * 60 * 60 * 1000)
   const sDF = new Date(dNow - startTimeframe)
@@ -178,18 +180,17 @@ const graphDecisionEngine = (message, editable, dNow, argMap) => {
     return null
   }
   return {
-    sDF, eDF, graphLength, bar: argMap.users.length,
+    sDF, eDF, graphLength, bar: argMap.users.length, editable,
   }
 }
 
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
   const dNow = Date.now()
-  const editable = await message.reply(genSpinner('Generating graph...'))
 
-  const decision = graphDecisionEngine(message, editable, dNow, args.argMap)
+  const decision = await graphDecisionEngine(message, dNow, args.argMap)
   if (!decision) return false
   const {
-    sDF, eDF, graphLength, bar,
+    sDF, eDF, graphLength, bar, editable,
   } = decision
 
   if (bar) await doLineGraph(message, sDF, eDF, args, editable)
