@@ -3,15 +3,17 @@ const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const mongo = require('../../mongo/connect')
 const log = require('../../mongo/log')
 
-/**
- * @param {Discord.Client} client bot client
- */
 module.exports = async (client) => {
   mongo.connect()
-  // eslint-disable-next-line no-console
-  console.log(`Connected. ${client.user.tag}!`)
-  const servers = client.guilds.cache.array().map((g) => ({ serverId: g.id, serverName: g.name }))
-  mongo.setupGuilds(servers)
+
+  /* eslint-disable no-param-reassign */
+  const servers = client.guilds.cache.array()
+    .map((g) => mongo.setupOneGuild({ serverId: g.id, serverName: g.name }))
+  const resolvedServers = await Promise.all(servers)
+  resolvedServers.forEach((s) => {
+    client.guilds.cache.get(s.serverId).giuseppeSettings = s.settings
+  })
+  /* eslint-enable no-param-reassign */
 
   log('global', 'info', 'connected', undefined, { user: client.user.tag })
 }
