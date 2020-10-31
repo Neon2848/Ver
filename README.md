@@ -22,7 +22,7 @@ ___
 3) `npm run dev` to run pm2 in dev mode. `npm start` and `npm  stop` are used for deployment.
 
 #### Secrets.json
-```json
+```js
 {
     "discord": {
         "token": ""
