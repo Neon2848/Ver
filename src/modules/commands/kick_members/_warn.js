@@ -35,11 +35,11 @@ const doWarn = async (discordid, reason, editable) => {
   }
   return attemptWarn
 }
-exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
+exports.run = async (message, args, externalReason = null) => {
   const spinner = genSpinner('Attempting to warn...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
-  const justQuote = quoteRegex(message.cleanContent)
+  const justQuote = externalReason || quoteRegex(message.cleanContent)
   const bError = buildModerationError(id, justQuote)
 
   if (bError.length) {

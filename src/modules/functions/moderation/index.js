@@ -111,7 +111,7 @@ const checkFunctions = {
   exploit: (message, filter, type, v3rmLogo) => {
     const { cached, word } = cacheCheckFunction(message, filter, type)
     if (!word) return false
-    if (!cached) message.member.send(genNotice[type](word, v3rmLogo)).catch({})
+    if (!cached) message.member.send(genNotice[type](word, v3rmLogo)).catch(() => {})
     return true
   },
 
@@ -119,7 +119,7 @@ const checkFunctions = {
   sensitive: (message, filter, type, v3rmLogo) => {
     const { cached, word } = cacheCheckFunction(message, filter, type)
     if (!word || cached) return false
-    message.member.send(genNotice[type](word, v3rmLogo)).catch({})
+    message.member.send(genNotice[type](word, v3rmLogo)).catch(() => {})
     return true
   },
 
@@ -132,7 +132,7 @@ const checkWordFilters = (client, message) => {
   const keys = Object.keys(secrets.wordFilters)
   const needsDeleting = secrets.regexFilters
     .some((filter, index) => checkFunctions[keys[index]](message, filter, keys[index], v3rmLogo))
-  if (needsDeleting) message.delete().catch({})
+  if (needsDeleting) message.delete().catch(() => {})
 }
 
 module.exports = { checkWordFilters, getWordlistAsRegex }
