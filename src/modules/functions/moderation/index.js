@@ -101,7 +101,7 @@ const checkFunctions = {
       .find(((c) => c.name === message.guild.giuseppeSettings.channelSlurLog))
 
     swearLogsChannel.send(genNotice[type](message, v3rmLogo)).then((sent) => {
-      sent.react('🇲').then(() => sent.react('🇴').then(() => sent.react('❌')))
+      sent.react('🇲').then(() => sent.react('🇱').then(() => sent.react('❌')))
     })
 
     return true

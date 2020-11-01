@@ -26,7 +26,7 @@ const warnPrompt = async (reaction, sender, message, client) => {
   let warnReason = null
   if (reaction.emoji.name === '❌') emb.setFooter(`This message has been ignored by: ${sender.user.tag}.`)
   else if (reaction.emoji.name === '🇲') warnReason = '2M - Hate Speech and/or Derogatory Terms'
-  else if (reaction.emoji.name === '🇴') warnReason = '2O - Filter Evasion'
+  else if (reaction.emoji.name === '🇱') warnReason = '2L - Filter Evasion'
   else return
 
   emb.color = 0
