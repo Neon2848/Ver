@@ -1,9 +1,9 @@
-const config = require('../../../config.json')
-const knownErrors = require('../knownErrors')
-const lookup = require('./api/v3rm/lookup')
-const secrets = require('../../../secrets.json')
-const { addtoRoleQueue, attemptRoleQueue } = require('./api/v3rm/userSetup')
-const { logMember } = require('./database/members')
+const config = require('../../../../config.json')
+const knownErrors = require('../../knownErrors')
+const lookup = require('../api/v3rm/lookup')
+const secrets = require('../../../../secrets.json')
+const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
+const { logMember } = require('../database/members')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'
@@ -37,7 +37,7 @@ const sendResult = (resultMsg, caller, resultTitle) => {
 
 const kickUser = (member, editable, reasons) => {
   member.send(reasons.dm).finally(() => {
-    sendResult(reasons.channel, { message: editable, edit: true }, 'Kicking User')
+    sendResult(reasons.channel, { message: editable, edit: true, timeout: 10000 }, 'Kicking User')
     member.kick(reasons.log).catch((e) => sendResult(`Unable to kick user: \`${e}\``, { message: editable, timeout: 10000 }, 'Kick Error'))
   })
 }

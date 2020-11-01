@@ -1,6 +1,6 @@
 const {
   sendResult, genSpinner, kickUser, buildModerationError, quoteRegex,
-} = require('../../functions')
+} = require('../../functions/general')
 const warn = require('../../functions/api/v3rm/warn')
 
 const warnFailedIntercept = async (e, message, reason, discordid) => {
@@ -35,11 +35,21 @@ const doWarn = async (discordid, reason, editable) => {
   }
   return attemptWarn
 }
-exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
+
+const prepareDoWarn = async (id, justQuote, editable) => {
+  const warned = await doWarn(id, justQuote, editable)
+  if (!warned) return null
+  if (warned.isBeingBanned && !warned.isGuildMember) {
+    return sendResult(`<@${id}> has been banned (100% warning) for: \`${justQuote}\`. They aren't in the server, so haven't been kicked`, { message: editable, edit: true }, 'User warned')
+  }
+  return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true }, 'User warned')
+}
+
+exports.run = async (message, args, externalReason = null) => {
   const spinner = genSpinner('Attempting to warn...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
-  const justQuote = quoteRegex(message.cleanContent)
+  const justQuote = externalReason || quoteRegex(message.cleanContent)
   const bError = buildModerationError(id, justQuote)
 
   if (bError.length) {
@@ -47,10 +57,5 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     return null
   }
 
-  const warned = await doWarn(id, justQuote, editable)
-  if (!warned) return null
-  if (warned.isBeingBanned && !warned.isGuildMember) {
-    return sendResult(`<@${id}> has been banned (100% warning) for: \`${justQuote}\`. They aren't in the server, so haven't been kicked`, { message: editable, edit: true }, 'User warned')
-  }
-  return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true }, 'User warned')
+  return prepareDoWarn(id, justQuote, editable)
 }

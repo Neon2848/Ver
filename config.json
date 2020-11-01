@@ -28,5 +28,12 @@
     "image": ["jpg", "jpeg", "png", "apng", "gif", "gifv"],
     "video": ["mp4", "webm", "gifv"],
     "sound": ["mp3", "ogg", "wav", "flac"]
+  },
+  "characterEvasionMap": {
+    "i": "1|!ïîíìį",
+    "e": "3èéêęėēë",
+    "r": "ŕř",
+    "n": "ñń",
+    "a": "æ4"
   }
 }

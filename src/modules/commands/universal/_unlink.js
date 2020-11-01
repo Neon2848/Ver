@@ -1,4 +1,4 @@
-const { sendResult, genSpinner, kickUser } = require('../../functions')
+const { sendResult, genSpinner, kickUser } = require('../../functions/general')
 const unlink = require('../../functions/api/v3rm/unlink')
 
 const doUnlink = async (discordid, editable) => {

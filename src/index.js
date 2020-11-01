@@ -8,11 +8,20 @@ const path = require('path')
 const log = require('./mongo/log')
 const secrets = require('../secrets.json')
 const config = require('../config.json')
+const { getWordlistAsRegex } = require('./modules/functions/moderation')
 
 const client = new Discord.Client()
 
 client.secrets = secrets
 client.config = config
+
+// This maps the filters to a more dynamic regex.
+// I could just store the regex directly but it's less intuitive.
+const { config: { characterEvasionMap } } = client
+const { secrets: { wordFilters } } = client
+
+client.secrets.regexFilters = Object.values(wordFilters)
+  .map((filter) => getWordlistAsRegex(filter, characterEvasionMap))
 
 fs.readdir('./src/modules/events/', (err, files) => {
   if (err) return log('global', 'error', 'readdir', 'reading events directory', err)
