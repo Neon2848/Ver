@@ -30,8 +30,8 @@ const warnPrompt = async (reaction, sender, message, client) => {
   else return
 
   emb.color = 0
+  await message.reactions.removeAll().catch(() => {})
   if (warnReason) {
-    await message.reactions.removeAll().catch(() => {})
     emb.setFooter(`This user has been warned by ${sender.user.tag}.`)
     const user = emb.fields[0].value.replace(/[^0-9]/g, '')
     await client.commands.get('warn')
