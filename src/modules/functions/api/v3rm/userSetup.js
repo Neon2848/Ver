@@ -40,7 +40,7 @@ const addtoRoleQueue = async (id, member, nickChange, rolesToAdd = []) => {
 // Try to the new role/nickname
 const basicUserSetup = async (details, member) => {
   const rolesToAdd = details.roles.map((role) => member.guild.roles.cache.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member')).filter((r) => !!r)
-  await member.setNickname(member.user.username === details.username ? `${member.user.username}\u200E` : details.username).catch((e) => { throw e })
+  if (details.username) await member.setNickname(member.user.username === details.username ? `${member.user.username}\u200E` : details.username).catch((e) => { throw e })
   if (rolesToAdd.length) await member.roles.add(rolesToAdd).catch((e) => { throw e })
   return member
 }
@@ -59,7 +59,7 @@ const attemptRoleQueue = async () => {
   }, rQ.member).catch(async () => {
     if (rQ.attempts >= 2) {
       // eslint-disable-next-line no-undef
-      await rQ.member.send('There was an unexpected error assigning your roles/nickname, we can\'t let you in the server if we can\'t confirm your v3rm account.').finally(() => { rQ.member.kick('Unable to assign roles').catch((_) => knownErrors.userOperation(_, rQ.member.guild.id)) })
+      await rQ.member.send('There was an unexpected error assigning your roles/nickname, we can\'t let you in the server if we can\'t manage your account.').finally(() => { rQ.member.kick('Unable to assign roles').catch((_) => knownErrors.userOperation(_, rQ.member.guild.id)) })
       failedRoleQueue.shift()
     } else {
       await addtoRoleQueue(rQ.id, rQ.member, rQ.nickChange)

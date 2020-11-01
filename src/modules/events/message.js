@@ -5,6 +5,8 @@ const getArgs = require('../functions/general/argTranslations')
 const { attemptRoleQueue } = require('../functions/api/v3rm/userSetup')
 const { messageStatQueue } = require('../functions/database/stats')
 const { checkWordFilters } = require('../functions/moderation')
+const { checkPings } = require('../functions/moderation/pingAbuse')
+const { unmuteMembers } = require('../functions/moderation/mute')
 
 const assignRoles = async (message) => {
   const { giuseppeSettings: { channelWelcome } } = message.guild
@@ -49,6 +51,7 @@ const runCommand = (client, message) => {
 const runTasks = async (client, message) => {
   await attemptRoleQueue()
   await messageStatQueue(client, message)
+  await unmuteMembers(message.guild)
 }
 
 module.exports = async (client, message) => {
@@ -61,6 +64,7 @@ module.exports = async (client, message) => {
 
   if (client.secrets.v3rm.api.enabled) assignRoles(message)
   checkWordFilters(client, message)
+  checkPings(client, message)
   runCommand(client, message)
   runTasks(client, message)
 }

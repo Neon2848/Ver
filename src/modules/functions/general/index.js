@@ -79,6 +79,30 @@ const buildModerationError = (id, quote, length = null, lengthNeeded = false) =>
   return tmpError
 }
 
+/* This function handles in-memory storage of users, for things like:
+   - list of users who have already been sent a DM about the word filter
+   - list of users who have pinged someone recently
+   These caches are not vital, and don't need to be stored in the database.
+   They are set to only store 50 users at once (each).
+*/
+const inCacheUpsert = (type, message, expireSecs) => {
+  const member = message.member.id
+  const theCache = message.guild.giuseppeQueues[type]
+  let fetchIndex = -1
+  const memb = theCache.filter((entry, i) => { fetchIndex = i; return entry.member === member })
+  const date = Date.now()
+
+  // The member is currently in the cache
+  if (memb.length) {
+    if ((date - memb[0].date) / 1000 < expireSecs) return true // Their entry hasn't expired
+    theCache[fetchIndex] = { member, date } // Update their old entry, it's expired
+    return false
+  }
+  if (theCache.length > 50) theCache.shift()
+  theCache.push({ member, date })
+  return false
+}
+
 module.exports = {
   sendResult,
   kickUser,
@@ -86,4 +110,5 @@ module.exports = {
   basicLookup,
   buildModerationError,
   quoteRegex,
+  inCacheUpsert,
 }

@@ -15,6 +15,8 @@ const serversSchema = new Schema({
     channelModLog: { type: String, default: 'channellog' },
     channelSlurLog: { type: String, default: 'swore-log' },
     channelStaffVC: { type: String, default: 'Staff' },
+    roleMuted: { type: String, default: 'votemuted' },
+    roleToxic: { type: String, default: 'toxic' },
   },
 })
 
