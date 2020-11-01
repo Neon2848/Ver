@@ -4,6 +4,7 @@ const knownErrors = require('../knownErrors')
 const getArgs = require('../functions/general/argTranslations')
 const { attemptRoleQueue } = require('../functions/api/v3rm/userSetup')
 const { messageStatQueue } = require('../functions/database/stats')
+const { checkWordFilters } = require('../functions/moderation')
 
 const assignRoles = async (message) => {
   const { giuseppeSettings: { channelWelcome } } = message.guild
@@ -59,6 +60,7 @@ module.exports = async (client, message) => {
   ) return
 
   if (client.secrets.v3rm.api.enabled) assignRoles(message)
+  checkWordFilters(client, message)
   runCommand(client, message)
   runTasks(client, message)
 }
