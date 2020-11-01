@@ -1,4 +1,6 @@
-// This is heacy, and should only be called at bot start,
+const { inCacheUpsert } = require('../general')
+
+// This is heavy, and should only be called at bot start,
 // the resulting regex can be set as client.config
 const getWordlistAsRegex = (wordlist, wordFilter) => {
   const regexBlacklist = []
@@ -16,35 +18,13 @@ const getWordlistAsRegex = (wordlist, wordFilter) => {
   return new RegExp(`(${regexBlacklist.join(')|(')})`, 'mi')
 }
 
-const relaxedCache = {
-  exploit: [],
-  sensitive: [],
-}
-
-const inCache = (type, member) => {
-  let fetchIndex = -1
-  const memb = relaxedCache[type]
-    .filter((entry, i) => { fetchIndex = i; return entry.member === member })
-  const date = Date.now()
-
-  // The member is currently in the safe cache
-  if (memb.length) {
-    if ((date - memb[0].date) / 1000 < 1200) return true // Their entry hasn't expired
-    relaxedCache[type][fetchIndex] = { member, date } // Update their old entry, it's expired
-    return false
-  }
-  if (relaxedCache[type].length > 100) relaxedCache.shift()
-  relaxedCache[type].push({ member, date })
-  return false
-}
-
 const genNotice = {
   exploit: (theword, iconUrl) => ({
     embed: {
       description: `Hey there, I just deleted a message of yours because I detected the word: \`${theword}\`.\n
-        Unfortunately you're not allowed to talk about exploiting here. \
-        Discord's rules are pretty strict, and we want to make sure we're following them properly or they'll delete our server. \
-        Make sure to read the welcome channel. Your discussion might be better placed as a thread or post on the forum itself.`,
+Unfortunately you're not allowed to talk about exploiting here. \
+Discord's rules are pretty strict, and we want to make sure we're following them properly or they'll delete our server. \
+Make sure to read the welcome channel. Your discussion might be better placed as a thread or post on the forum itself.`,
       color: 13441048,
       author: { name: 'Discord TOS Violation.', icon_url: iconUrl },
     },
@@ -52,9 +32,9 @@ const genNotice = {
   sensitive: (theword, iconUrl) => ({
     embed: {
       description: `Hey there, I just deleted a message of yours because I detected the word: \`${theword}\`.\n
-        We filter some sensitive words to encourage you think about what you're saying, not be overly sexual, and not make light of serious topics.\n
-        For the next 20 minutes, I'll ignore sensitive words from you (not slurs though). Please make sure you use this privilege maturely and in a healthy way 
-        or we might have to warn you.`,
+We filter some sensitive words to encourage you think about what you're saying, not be overly sexual, and not make light of serious topics.\n
+For the next 20 minutes, I'll ignore sensitive words from you (not slurs though). Please make sure you use this privilege maturely and in a healthy way \
+or we might have to warn you.`,
       color: 13441048,
       author: { name: 'Sensitive word detected.', icon_url: iconUrl },
     },
@@ -89,7 +69,7 @@ const genNotice = {
 const cacheCheckFunction = (message, filter, type) => {
   const match = message.cleanContent.match(filter)
   if (!match) return { cached: false, word: null }
-  if (!inCache(type, message.member.id)) return { cached: false, word: match[0] }
+  if (!inCacheUpsert(type, message, 1200)) return { cached: false, word: match[0] }
   return { cached: true, word: match[0] }
 }
 
@@ -127,7 +107,6 @@ const checkFunctions = {
 }
 
 const checkWordFilters = (client, message) => {
-  if (!message.member || message.member.hasPermission('KICK_MEMBERS')) return
   const { secrets } = client
   const { config: { images: { v3rmLogo } } } = client
   const keys = Object.keys(secrets.wordFilters)

@@ -2,6 +2,7 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const mongo = require('../../mongo/connect')
 const log = require('../../mongo/log')
+const { getNextUnmuteMuteTime } = require('../../mongo/mute')
 
 module.exports = async (client) => {
   mongo.connect()
@@ -11,7 +12,15 @@ module.exports = async (client) => {
     .map((g) => mongo.setupOneGuild({ serverId: g.id, serverName: g.name }))
   const resolvedServers = await Promise.all(servers)
   resolvedServers.forEach((s) => {
-    client.guilds.cache.get(s.serverId).giuseppeSettings = s.settings
+    const objData = client.guilds.cache.get(s.serverId)
+    objData.giuseppeSettings = s.settings
+
+    getNextUnmuteMuteTime(s.serverId).then((t) => { objData.giuseppeSettings.nextUnmute = t })
+    objData.giuseppeQueues = {
+      exploit: [],
+      sensitive: [],
+      pingAbuse: [],
+    }
   })
   /* eslint-enable no-param-reassign */
 

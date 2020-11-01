@@ -4,6 +4,7 @@
   "memory": {
     "maxStatQueue": 15
   },
+  "maxPings": 2,
   "roleTranslations": {
       "Administrator": 4,
       "Advisor": 14,
