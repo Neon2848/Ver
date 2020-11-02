@@ -90,7 +90,9 @@ const inCacheUpsert = (type, message, expireSecs) => {
   const member = message.member.id
   const theCache = message.guild.giuseppeQueues[type]
   let fetchIndex = -1
-  const memb = theCache.filter((entry, i) => { fetchIndex = i; return entry.member === member })
+  const memb = theCache.filter((entry, i) => {
+    if (entry.member === member) { fetchIndex = i; return true } return false
+  })
   const date = Date.now()
 
   // The member is currently in the cache
