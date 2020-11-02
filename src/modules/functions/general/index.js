@@ -86,6 +86,18 @@ const buildModerationError = (id, quote, length = null, lengthNeeded = false) =>
    These caches are not vital, and don't need to be stored in the database.
    They are set to only store 50 users at once (each).
 */
+const inCachePerform = (memb, theCache, fetchIndex, member, date, expireSecs) => {
+  if (memb.length) {
+    if ((date - memb[0].date) / 1000 < expireSecs) return true // Their entry hasn't expired
+    // eslint-disable-next-line no-param-reassign
+    theCache[fetchIndex] = { member, date } // Update their old entry, it's expired
+    return false
+  }
+  if (theCache.length > 50) theCache.shift()
+  theCache.push({ member, date })
+  return false
+}
+
 const inCacheUpsert = (type, message, expireSecs) => {
   const member = message.member.id
   const theCache = message.guild.giuseppeQueues[type]
@@ -95,15 +107,7 @@ const inCacheUpsert = (type, message, expireSecs) => {
   })
   const date = Date.now()
 
-  // The member is currently in the cache
-  if (memb.length) {
-    if ((date - memb[0].date) / 1000 < expireSecs) return true // Their entry hasn't expired
-    theCache[fetchIndex] = { member, date } // Update their old entry, it's expired
-    return false
-  }
-  if (theCache.length > 50) theCache.shift()
-  theCache.push({ member, date })
-  return false
+  return inCachePerform(memb, theCache, fetchIndex, member, date, expireSecs)
 }
 
 const recreateEmoji = (name, guild) => {
