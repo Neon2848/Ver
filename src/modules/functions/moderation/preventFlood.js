@@ -2,18 +2,22 @@ const { sendResult } = require('../general')
 
 const applySlowmode = (messageRate, message) => {
   const { channel } = message
-  if (messageRate < 2 || channel.rateLimitPerUser > 0) return
-  channel.edit({ rateLimitPerUser: 5 }, `Message rate is currently ${messageRate}/second.`)
+  const { client: { config: { slowmode } } } = message
+  if (messageRate < slowmode.messagesPer || channel.rateLimitPerUser > 0) return
+  const mps = (messageRate / slowmode.pollingRate).toFixed(2)
+
+  channel.edit({ rateLimitPerUser: slowmode.seconds },
+    `Message rate is currently ${mps}/mps.`)
 
   sendResult(
-    `This channel is under heavy use (${(messageRate * 60).toFixed(2)} messages/minute)`,
+    `(sorry ☹️) This channel is under heavy use (${mps} messages/second)`,
     { message }, 'Slowmode Enabled',
   )
 
   setTimeout(() => {
-    sendResult('Removing automatic slowmode.', { message }, 'Slowmode Disabled')
+    sendResult('Removing automatic slowmode', { message }, 'Slowmode Disabled')
     channel.edit({ rateLimitPerUser: 0 }, 'Removing slowmode')
-  }, 60000)
+  }, slowmode.removeSlowmodeAfter)
 }
 
 const preventFlood = async (client, message) => {
@@ -27,9 +31,9 @@ const preventFlood = async (client, message) => {
 
   channel.giuseppeFloodCache.messages += 1
   const now = Date.now()
-  if (now - lastTick <= 10000) return
+  if (now - lastTick <= message.client.config.slowmode.pollingRate * 1000) return
 
-  applySlowmode((messages + 1) / 10, message)
+  applySlowmode(messages + 1, message)
 
   channel.giuseppeFloodCache.lastTick = now
   channel.giuseppeFloodCache.messages = 0

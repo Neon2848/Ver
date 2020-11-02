@@ -4,6 +4,12 @@
   "memory": {
     "maxStatQueue": 15
   },
+  "slowmode": {
+    "messagesPer": 15,
+    "pollingRate": 10,
+    "seconds": 5,
+    "removeSlowmodeAfter": 60000
+  },
   "maxPings": 2,
   "roleTranslations": {
       "Administrator": 4,
