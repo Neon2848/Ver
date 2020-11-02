@@ -7,6 +7,7 @@ const { messageStatQueue } = require('../functions/database/stats')
 const { checkWordFilters } = require('../functions/moderation')
 const { checkPings } = require('../functions/moderation/pingAbuse')
 const { unmuteMembers } = require('../functions/moderation/mute')
+const { preventFlood } = require('../functions/moderation/preventFlood')
 
 const assignRoles = async (message) => {
   const { giuseppeSettings: { channelWelcome } } = message.guild
@@ -65,6 +66,7 @@ module.exports = async (client, message) => {
   if (client.secrets.v3rm.api.enabled) assignRoles(message)
   checkWordFilters(client, message)
   checkPings(client, message)
+  preventFlood(client, message)
   runCommand(client, message)
   runTasks(client, message)
 }
