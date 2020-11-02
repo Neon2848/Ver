@@ -1,3 +1,4 @@
+const path = require('path')
 const config = require('../../../../config.json')
 const knownErrors = require('../../knownErrors')
 const lookup = require('../api/v3rm/lookup')
@@ -85,22 +86,34 @@ const buildModerationError = (id, quote, length = null, lengthNeeded = false) =>
    These caches are not vital, and don't need to be stored in the database.
    They are set to only store 50 users at once (each).
 */
-const inCacheUpsert = (type, message, expireSecs) => {
-  const member = message.member.id
-  const theCache = message.guild.giuseppeQueues[type]
-  let fetchIndex = -1
-  const memb = theCache.filter((entry, i) => { fetchIndex = i; return entry.member === member })
-  const date = Date.now()
-
-  // The member is currently in the cache
+const inCachePerform = (memb, theCache, fetchIndex, member, date, expireSecs) => {
   if (memb.length) {
     if ((date - memb[0].date) / 1000 < expireSecs) return true // Their entry hasn't expired
+    // eslint-disable-next-line no-param-reassign
     theCache[fetchIndex] = { member, date } // Update their old entry, it's expired
     return false
   }
   if (theCache.length > 50) theCache.shift()
   theCache.push({ member, date })
   return false
+}
+
+const inCacheUpsert = (type, message, expireSecs) => {
+  const member = message.member.id
+  const theCache = message.guild.giuseppeQueues[type]
+  let fetchIndex = -1
+  const memb = theCache.filter((entry, i) => {
+    if (entry.member === member) { fetchIndex = i; return true } return false
+  })
+  const date = Date.now()
+
+  return inCachePerform(memb, theCache, fetchIndex, member, date, expireSecs)
+}
+
+const recreateEmoji = (name, guild) => {
+  if (!name === 'spray' || !name === 'raysA' || !name === 'raysS') return
+  const pth = path.join(__dirname, '../../../', 'images', `${name}Backup.png`)
+  guild.emojis.create(pth, name)
 }
 
 module.exports = {
@@ -111,4 +124,5 @@ module.exports = {
   buildModerationError,
   quoteRegex,
   inCacheUpsert,
+  recreateEmoji,
 }

@@ -1,4 +1,5 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
+const { raysA } = require('../functions/moderation/raysA')
 
 /**
  * @param {Discord.Client} client bot client
@@ -59,5 +60,7 @@ module.exports = async (client, messageReaction, sender) => {
 
   if (recipient.id === client.user.id) {
     botReactions(client, { messageReaction, sendMember, message })
+  } else if (!message.channel.name !== message.guild.giuseppeSettings.welcomeChannel) {
+    raysA(client, { messageReaction, sendMember, message })
   }
 }
