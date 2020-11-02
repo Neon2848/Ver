@@ -107,14 +107,9 @@ const inCacheUpsert = (type, message, expireSecs) => {
 }
 
 const recreateEmoji = (name, guild) => {
-  let newImage = null
-  if (name === 'spray') newImage = { name: 'spray', file: 'sprayBackup.png' }
-  if (name === 'raysA') newImage = { name: 'raysA', file: 'raysABackup.png' }
-
-  if (newImage) {
-    const pth = path.join(__dirname, '../../../', 'images', newImage.file)
-    guild.emojis.create(pth, newImage.name)
-  }
+  if (!name === 'spray' || !name === 'raysA' || !name === 'raysS') return
+  const pth = path.join(__dirname, '../../../', 'images', `${name}Backup.png`)
+  guild.emojis.create(pth, name)
 }
 
 module.exports = {
