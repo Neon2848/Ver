@@ -4,20 +4,20 @@ const applySlowmode = (messageRate, message) => {
   const { channel } = message
   const { client: { config: { slowmode } } } = message
   if (messageRate < slowmode.messagesPer || channel.rateLimitPerUser > 0) return
-  const mps = (messageRate / slowmode.pollingRate).toFixed(2)
+  const mps = (messageRate / slowmode.pollingRate)
 
   channel.edit({ rateLimitPerUser: slowmode.seconds },
-    `Message rate is currently ${mps}/mps.`)
+    `Message rate is currently ${mps.toFixed(2)}/mps.`)
 
   sendResult(
-    `(sorry ☹️) This channel is under heavy use (${mps} messages/second)`,
+    `(sorry ☹️) This channel is under heavy use (${mps.toFixed(2)} messages/second). Slowmode will be disabled in ${Math.round(15000 * mps)} seconds.`,
     { message }, 'Slowmode Enabled',
   )
 
   setTimeout(() => {
     sendResult('Removing automatic slowmode', { message }, 'Slowmode Disabled')
     channel.edit({ rateLimitPerUser: 0 }, 'Removing slowmode')
-  }, slowmode.removeSlowmodeAfter)
+  }, Math.round(15000 * mps))
 }
 
 const preventFlood = async (client, message) => {

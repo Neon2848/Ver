@@ -7,8 +7,7 @@
   "slowmode": {
     "messagesPer": 8,
     "pollingRate": 4,
-    "seconds": 5,
-    "removeSlowmodeAfter": 60000
+    "seconds": 5
   },
   "maxPings": 2,
   "roleTranslations": {
@@ -42,6 +41,7 @@
     "e": "3èéêęėēë",
     "r": "ŕř",
     "n": "ñń",
-    "a": "æ4"
+    "a": "æ4",
+    "o": "0"
   }
 }
