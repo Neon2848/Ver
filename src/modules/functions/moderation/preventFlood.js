@@ -10,7 +10,7 @@ const applySlowmode = (messageRate, message) => {
     `Message rate is currently ${mps.toFixed(2)}/mps.`)
 
   sendResult(
-    `(sorry ☹️) This channel is under heavy use (${mps.toFixed(2)} messages/second). Slowmode will be disabled in ${Math.round(15000 * mps)} seconds.`,
+    `(sorry ☹️) This channel is under heavy use (${mps.toFixed(2)} messages/second). Slowmode will be disabled in ${Math.round(15 * mps)} seconds.`,
     { message }, 'Slowmode Enabled',
   )
 
