@@ -18,27 +18,25 @@ const getWordlistAsRegex = (wordlist, wordFilter) => {
   return new RegExp(`(${regexBlacklist.join(')|(')})`, 'mi')
 }
 
+const genEmbed = (description, theword, iconUrl) => ({
+  embed: {
+    description,
+    color: 13441048,
+    author: { name: 'Discord TOS Violation.', icon_url: iconUrl },
+  },
+})
+
 const genNotice = {
-  exploit: (theword, iconUrl) => ({
-    embed: {
-      description: `Hey there, I just deleted a message of yours because I detected the word: \`${theword}\`.\n
+  exploit: (theword, ...args) => genEmbed(`Hey there, I just deleted a message of yours because I detected the word: \`${theword}\`.\n
 Unfortunately you're not allowed to talk about exploiting here. \
 Discord's rules are pretty strict, and we want to make sure we're following them properly or they'll delete our server. \
-Make sure to read the welcome channel. Your discussion might be better placed as a thread or post on the forum itself.`,
-      color: 13441048,
-      author: { name: 'Discord TOS Violation.', icon_url: iconUrl },
-    },
-  }),
-  sensitive: (theword, iconUrl) => ({
-    embed: {
-      description: `Hey there, I just deleted a message of yours because I detected the word: \`${theword}\`.\n
+Make sure to read the welcome channel. Your discussion might be better placed as a thread or post on the forum itself.`, ...args),
+
+  sensitive: (tw, ...args) => genEmbed(`Hey there, I just deleted a message of yours because I detected the word: \`${tw}\`.\n
 We filter some sensitive words to encourage you think about what you're saying, not be overly sexual, and not make light of serious topics.\n
 For the next 20 minutes, I'll ignore sensitive words from you (not slurs though). Please make sure you use this privilege maturely and in a healthy way \
-or we might have to warn you.`,
-      color: 13441048,
-      author: { name: 'Sensitive word detected.', icon_url: iconUrl },
-    },
-  }),
+or we might have to warn you.`, ...args),
+
   slur: (message, iconUrl) => ({
     embed: {
       description: message.cleanContent,
@@ -107,6 +105,7 @@ const checkFunctions = {
 }
 
 const checkWordFilters = (client, message) => {
+  if (!message.member || message.member.hasPermission('KICK_MEMBERS')) return
   const { secrets } = client
   const { config: { images: { v3rmLogo } } } = client
   const keys = Object.keys(secrets.wordFilters)

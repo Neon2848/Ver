@@ -1,3 +1,4 @@
+const path = require('path')
 const config = require('../../../../config.json')
 const knownErrors = require('../../knownErrors')
 const lookup = require('../api/v3rm/lookup')
@@ -103,6 +104,17 @@ const inCacheUpsert = (type, message, expireSecs) => {
   return false
 }
 
+const recreateEmoji = (name, guild) => {
+  let newImage = null
+  if (name === 'spray') newImage = { name: 'spray', file: 'sprayBackup.png' }
+  if (name === 'raysA') newImage = { name: 'raysA', file: 'raysABackup.png' }
+
+  if (newImage) {
+    const pth = path.join(__dirname, '../../../', 'images', newImage.file)
+    guild.emojis.create(pth, newImage.name)
+  }
+}
+
 module.exports = {
   sendResult,
   kickUser,
@@ -111,4 +123,5 @@ module.exports = {
   buildModerationError,
   quoteRegex,
   inCacheUpsert,
+  recreateEmoji,
 }
