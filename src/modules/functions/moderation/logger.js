@@ -2,24 +2,28 @@ const { MessageEmbed } = require('discord.js')
 
 let logChannel = null
 const getLogChannel = (guild) => {
-  if (!logChannel) {
-    logChannel = guild.channels.cache
-      .filter((r) => r.name === guild.giuseppeSettings.channelModLog).first()
-    return logChannel
-  }
-  return logChannel
+  if (logChannel) return logChannel
+  logChannel = guild.channels.cache.filter((r) => r.name === guild.giuseppeSettings.channelModLog)
+  return logChannel.first()
 }
 
+const genUserDetails = (channelID, authorID) => [{ name: 'Sender', value: `<@${channelID}>`, inline: true }, { name: 'Channel', value: `<#${authorID}>`, inline: true }]
 const getAttachments = (message) => message.attachments.map((a) => a.proxyURL).join('\n')
+const genTextFields = (editDate, value, i) => {
+  const edited = editDate ? 'Edited to:' : 'Content:'
+  return { name: i === 0 ? edited : '\u200E', value }
+}
 
 const generateTextFields = (message, editDate = null) => {
   const { content, channel, author } = message
-  const parts = content.match(/[\s\S]{1,1024}/g) || []
-  const edited = editDate ? 'Edited to:' : 'Content:'
-  const mapped = parts.map((value, i) => ({ name: i === 0 ? edited : '\u200E', value }))
-  if (!editDate) mapped.unshift(...[{ name: 'Sender', value: `<@${author.id}>`, inline: true }, { name: 'Channel', value: `<#${channel.id}>`, inline: true }])
-  if (!editDate && message.attachments.size) mapped.push({ name: 'Attachments', value: getAttachments(message) })
-  return mapped
+  const parts = content.match(/[\s\S]{1,1024}/g)
+  if (parts.length) {
+    const mapped = parts.map((value, i) => genTextFields(editDate, value, i))
+    if (!editDate) mapped.unshift(...genUserDetails(channel.id, author.id))
+    if (!editDate && message.attachments.size) mapped.push({ name: 'Attachments', value: getAttachments(message) })
+    return mapped
+  }
+  return []
 }
 
 const logEditedMessage = (oldMessage, newMessage = null) => {
