@@ -3,8 +3,9 @@ const { MessageEmbed } = require('discord.js')
 let logChannel = null
 const getLogChannel = (guild) => {
   if (logChannel) return logChannel
-  logChannel = guild.channels.cache.filter((r) => r.name === guild.giuseppeSettings.channelModLog)
-  return logChannel.first()
+  const lc = guild.channels.cache.filter((r) => r.name === guild.giuseppeSettings.channelModLog)
+  logChannel = lc.first()
+  return logChannel
 }
 
 const genUserDetails = (channelID, authorID) => [{ name: 'Sender', value: `<@${channelID}>`, inline: true }, { name: 'Channel', value: `<#${authorID}>`, inline: true }]
