@@ -24,7 +24,7 @@
     "@pm2/io": "^4.3.5",
     "discord.js": "^12.4.1",
     "enmap": "^5.8.0",
-    "file-type": "^16.0.0",
+    "file-type": "^16.0.1",
     "moment": "^2.29.1",
     "mongoose": "^5.10.11",
     "node-fetch": "^2.6.1",
