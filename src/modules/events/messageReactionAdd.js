@@ -1,4 +1,5 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
+const { unsafeDelete } = require('../functions/general')
 const { raysA } = require('../functions/moderation/raysA')
 
 /**
@@ -9,7 +10,7 @@ const { raysA } = require('../functions/moderation/raysA')
 
 const banPrompt = async (reaction, sender, message, desc, client) => {
   if (!sender.hasPermission('KICK_MEMBERS')) return
-  if (reaction.emoji.name === '❌') { message.delete(); return }
+  if (reaction.emoji.name === '❌') { unsafeDelete(message, 0); return }
 
   const banDeets = /<@([0-9]+)>[\s\S]+```Reason: (.+)```/.exec(desc)
   let banLength
@@ -18,7 +19,7 @@ const banPrompt = async (reaction, sender, message, desc, client) => {
   else return
 
   await client.commands.get('ban').run(client, message, { argMap: { numbers: [banLength], users: [banDeets[1]] } }, banDeets[2])
-  message.delete().catch(() => {})
+  unsafeDelete(message, 0)
 }
 
 const warnPrompt = async (reaction, sender, message, client) => {

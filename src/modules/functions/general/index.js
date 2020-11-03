@@ -18,6 +18,14 @@ const unsafeDelete = (msg, t) => {
   })
 }
 
+const msgIntegrityCheck = (message) => !(
+  message.author.bot
+    || message.channel.type === 'dm'
+    || !message.member
+    || !message.channel
+    || !message.guild
+)
+
 const sendResult = (resultMsg, caller, resultTitle) => {
   const emb = {
     embed: {
@@ -118,6 +126,7 @@ const recreateEmoji = (name, guild) => {
 
 module.exports = {
   sendResult,
+  msgIntegrityCheck,
   kickUser,
   genSpinner,
   basicLookup,
@@ -125,4 +134,5 @@ module.exports = {
   quoteRegex,
   inCacheUpsert,
   recreateEmoji,
+  unsafeDelete,
 }
