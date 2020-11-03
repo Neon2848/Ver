@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 const lookup = require('../../functions/api/v3rm/lookup')
 const {
   sendResult, kickUser, genSpinner, unsafeDelete,

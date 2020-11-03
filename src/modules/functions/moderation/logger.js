@@ -8,7 +8,7 @@ const getLogChannel = (guild) => {
   return logChannel
 }
 
-const genUserDetails = (channelID, authorID) => [{ name: 'Sender', value: `<@${channelID}>`, inline: true }, { name: 'Channel', value: `<#${authorID}>`, inline: true }]
+const genUserDetails = (channelID, authorID) => [{ name: 'Sender', value: `<@${authorID}>`, inline: true }, { name: 'Channel', value: `<#${channelID}>`, inline: true }]
 const getAttachments = (message) => message.attachments.map((a) => a.proxyURL).join('\n')
 
 const genTextFields = (editDate, value, i) => {
@@ -23,7 +23,7 @@ const generateAdditionalFields = (message, existingFields) => {
 }
 
 const generateTextFields = (message, editDate = null) => {
-  const { content, channel, author } = message
+  const { content } = message
   const parts = content.match(/[\s\S]{1,1024}/g)
   if (parts.length) {
     const mapped = parts.map((value, i) => genTextFields(editDate, value, i))
