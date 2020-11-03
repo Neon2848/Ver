@@ -19,8 +19,10 @@ const generateTextFields = (message, editDate = null) => {
   const parts = content.match(/[\s\S]{1,1024}/g)
   if (parts.length) {
     const mapped = parts.map((value, i) => genTextFields(editDate, value, i))
-    if (!editDate) mapped.unshift(...genUserDetails(channel.id, author.id))
-    if (!editDate && message.attachments.size) mapped.push({ name: 'Attachments', value: getAttachments(message) })
+    if (!editDate) {
+      if (message.attachments.size) mapped.push({ name: 'Attachments', value: getAttachments(message) })
+      mapped.unshift(...genUserDetails(channel.id, author.id))
+    }
     return mapped
   }
   return []
