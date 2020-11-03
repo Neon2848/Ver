@@ -9,9 +9,16 @@ const getLogChannel = (guild) => {
 
 const genUserDetails = (channelID, authorID) => [{ name: 'Sender', value: `<@${channelID}>`, inline: true }, { name: 'Channel', value: `<#${authorID}>`, inline: true }]
 const getAttachments = (message) => message.attachments.map((a) => a.proxyURL).join('\n')
+
 const genTextFields = (editDate, value, i) => {
   const edited = editDate ? 'Edited to:' : 'Content:'
   return { name: i === 0 ? edited : '\u200E', value }
+}
+
+const generateAdditionalFields = (message, existingFields) => {
+  if (message.attachments.size) existingFields.push({ name: 'Attachments', value: getAttachments(message) })
+  existingFields.unshift(...genUserDetails(message.channel.id, message.author.id))
+  return existingFields
 }
 
 const generateTextFields = (message, editDate = null) => {
@@ -19,11 +26,7 @@ const generateTextFields = (message, editDate = null) => {
   const parts = content.match(/[\s\S]{1,1024}/g)
   if (parts.length) {
     const mapped = parts.map((value, i) => genTextFields(editDate, value, i))
-    if (!editDate) {
-      if (message.attachments.size) mapped.push({ name: 'Attachments', value: getAttachments(message) })
-      mapped.unshift(...genUserDetails(channel.id, author.id))
-    }
-    return mapped
+    return editDate ? mapped : generateAdditionalFields(message, mapped)
   }
   return []
 }
