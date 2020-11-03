@@ -8,6 +8,7 @@ const { checkWordFilters } = require('../functions/moderation')
 const { checkPings } = require('../functions/moderation/pingAbuse')
 const { unmuteMembers } = require('../functions/moderation/mute')
 const { preventFlood } = require('../functions/moderation/preventFlood')
+const { unsafeDelete, msgIntegrityCheck } = require('../functions/general')
 
 const assignRoles = async (message) => {
   const { giuseppeSettings: { channelWelcome } } = message.guild
@@ -15,7 +16,7 @@ const assignRoles = async (message) => {
     if (/^i agree$/gmi.test(message.cleanContent) && !message.member.roles.cache.find((r) => r.name === 'Member')) {
       message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id, 'assigning roles'))
     }
-    message.delete().catch(() => {})
+    unsafeDelete(message, 0)
   }
 }
 
@@ -28,7 +29,7 @@ const checkCmdPerms = (message, cmd) => {
   // The command is a bot-commands only command
   if (cmd.permissionLevel !== permissionLevel) {
     if (channelBotCommands !== message.channel.name) {
-      message.delete().catch({})
+      unsafeDelete(message, 0)
       return false
     }
   }
@@ -50,20 +51,15 @@ const runCommand = (client, message) => {
 }
 
 const runTasks = async (client, message) => {
-  await attemptRoleQueue()
-  await messageStatQueue(client, message)
-  await unmuteMembers(message.guild)
+  attemptRoleQueue()
+  messageStatQueue(client, message)
+  unmuteMembers(message.guild)
 }
 
 module.exports = async (client, message) => {
-  if (message.author.bot
-      || message.channel.type === 'dm'
-      || !message.member
-      || !message.channel
-      || !message.guild
-  ) return
-
+  if (!msgIntegrityCheck(message)) return
   if (client.secrets.v3rm.api.enabled) assignRoles(message)
+
   checkWordFilters(client, message)
   checkPings(client, message)
   preventFlood(client, message)

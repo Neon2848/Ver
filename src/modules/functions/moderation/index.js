@@ -1,4 +1,4 @@
-const { inCacheUpsert } = require('../general')
+const { inCacheUpsert, unsafeDelete } = require('../general')
 
 // This is heavy, and should only be called at bot start,
 // the resulting regex can be set as client.config
@@ -22,7 +22,7 @@ const genEmbed = (description, theword, iconUrl) => ({
   embed: {
     description,
     color: 13441048,
-    author: { name: 'Discord TOS Violation.', icon_url: iconUrl },
+    author: { name: 'Message Deleted', icon_url: iconUrl },
   },
 })
 
@@ -105,13 +105,13 @@ const checkFunctions = {
 }
 
 const checkWordFilters = (client, message) => {
-  // if (!message.member || message.member.hasPermission('KICK_MEMBERS')) return
+  if (!message.member || message.member.hasPermission('KICK_MEMBERS')) return
   const { secrets } = client
   const { config: { images: { v3rmLogo } } } = client
   const keys = Object.keys(secrets.wordFilters)
   const needsDeleting = secrets.regexFilters
     .some((filter, index) => checkFunctions[keys[index]](message, filter, keys[index], v3rmLogo))
-  if (needsDeleting) message.delete().catch(() => {})
+  if (needsDeleting) unsafeDelete(message, 0)
 }
 
 module.exports = { checkWordFilters, getWordlistAsRegex }
