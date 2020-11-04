@@ -6,7 +6,7 @@ const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 
 const muteMember = async (guild, member, details, message) => {
   const insertMute = await upsertMute(guild.id, member.user.id, details)
-  const muteRole = guild.roles.cache.get(guild.giuseppe.roles.roleMuted)
+  const muteRole = guild.roles.cache.get(guild.giuseppe.roles.muted)
   await member.roles.add(muteRole).catch(() => {
     addtoRoleQueue(member.id, member, null, [muteRole.name])
       .then(() => attemptRoleQueue())
@@ -26,12 +26,12 @@ const muteMember = async (guild, member, details, message) => {
 const unmuteMembers = async (guild) => {
   const { giuseppe: { settings: { nextUnmute } } } = guild
   if (nextUnmute === -1 || Date.now() < nextUnmute) return
-  const mutedMembers = guild.roles.cache.get(guild.giuseppe.roles.roleMuted).members
+  const mutedMembers = guild.roles.cache.get(guild.giuseppe.roles.muted).members
   const mutedIds = mutedMembers.map((m) => m.id)
   const unmutedMembers = await getAndUnmute(guild.id, mutedIds)
   mutedMembers.forEach((memb) => {
     if (unmutedMembers.includes(memb.id)) {
-      memb.roles.remove(guild.giuseppe.roles.roleMuted).catch(() => {})
+      memb.roles.remove(guild.giuseppe.roles.muted).catch(() => {})
     }
   })
   guild.giuseppe.settings.nextUnmute = await getNextUnmuteMuteTime(guild.id)

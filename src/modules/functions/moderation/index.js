@@ -75,7 +75,7 @@ const checkFunctions = {
   slur: (message, filter, type, v3rmLogo) => {
     const isASlur = message.cleanContent.match(filter) || []
     if (!isASlur.length) return false
-    message.guild.channels.cache.get(message.guild.giuseppe.channels.channelSlurLog)
+    message.guild.channels.cache.get(message.guild.giuseppe.channels.slurLog)
       .send(genNotice[type](isASlur, message, v3rmLogo)).then((sent) => {
         sent.react('🇲').then(() => sent.react('🇱').then(() => sent.react('❌')))
       })

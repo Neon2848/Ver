@@ -41,7 +41,7 @@ const logEditedMessage = (oldMessage, newMessage = null) => {
   if (newMessage) {
     editedMessage.addFields(generateTextFields(newMessage, newMessage.editedTimestamp))
   }
-  guild.channels.cache.get(guild.giuseppe.channels.channelModLog).send(editedMessage)
+  guild.channels.cache.get(guild.giuseppe.channels.modLog).send(editedMessage)
 }
 
 const logMessage = (client, message, newMessage = null) => {

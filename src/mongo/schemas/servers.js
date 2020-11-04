@@ -11,16 +11,16 @@ const serversSchema = new Schema({
     allowUsersToLookup: { type: Boolean, default: false },
   },
   channels: {
-    channelStaffVC: { type: String, default: 'Staff' },
-    channelWelcome: { type: String, default: 'welcome' },
-    channelDetoxChamber: { type: String, default: 'detox-chamber' },
-    channelBotCommands: { type: String, default: 'bot-commands' },
-    channelModLog: { type: String, default: 'channel-log' },
-    channelSlurLog: { type: String, default: 'swore-log' },
+    staffVC: { type: String, default: 'Staff' },
+    welcome: { type: String, default: 'welcome' },
+    detoxChamber: { type: String, default: 'detox-chamber' },
+    botCommands: { type: String, default: 'bot-commands' },
+    modLog: { type: String, default: 'channel-log' },
+    slurLog: { type: String, default: 'swore-log' },
   },
   roles: {
-    roleMuted: { type: String, default: 'votemuted' },
-    roleToxic: { type: String, default: 'toxic' },
+    muted: { type: String, default: 'votemuted' },
+    toxic: { type: String, default: 'toxic' },
   },
 })
 
