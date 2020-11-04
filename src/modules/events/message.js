@@ -11,8 +11,7 @@ const { preventFlood } = require('../functions/moderation/preventFlood')
 const { unsafeDelete, msgIntegrityCheck } = require('../functions/general')
 
 const assignRoles = async (message) => {
-  const { giuseppeSettings: { channelWelcome } } = message.guild
-  if (message.channel.name === channelWelcome) {
+  if (message.channel.id === message.guild.giuseppe.channels.channelWelcome) {
     if (/^i agree$/gmi.test(message.cleanContent) && !message.member.roles.cache.find((r) => r.name === 'Member')) {
       message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id, 'assigning roles'))
     }
@@ -23,12 +22,12 @@ const assignRoles = async (message) => {
 const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
 
-  const { giuseppeSettings: { channelBotCommands } } = message.guild
+  const { guild: { giuseppe: { channels: { channelBotCommands } } } } = message
   const permissionLevel = cmd.permissionLevel.replace(/_BC$/, '')
 
   // The command is a bot-commands only command
   if (cmd.permissionLevel !== permissionLevel) {
-    if (channelBotCommands !== message.channel.name) {
+    if (channelBotCommands !== message.channel.id) {
       unsafeDelete(message, 0)
       return false
     }

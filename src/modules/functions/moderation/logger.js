@@ -1,13 +1,5 @@
 const { MessageEmbed } = require('discord.js')
 
-let logChannel = null
-const getLogChannel = (guild) => {
-  if (logChannel) return logChannel
-  const lc = guild.channels.cache.filter((r) => r.name === guild.giuseppeSettings.channelModLog)
-  logChannel = lc.first()
-  return logChannel
-}
-
 const genUserDetails = (channelID, authorID) => [{ name: 'Sender', value: `<@${authorID}>`, inline: true }, { name: 'Channel', value: `<#${channelID}>`, inline: true }]
 const getAttachments = (message) => message.attachments.map((a) => a.proxyURL).join('\n')
 
@@ -49,12 +41,12 @@ const logEditedMessage = (oldMessage, newMessage = null) => {
   if (newMessage) {
     editedMessage.addFields(generateTextFields(newMessage, newMessage.editedTimestamp))
   }
-  getLogChannel(guild).send(editedMessage)
+  guild.channels.cache.get(guild.giuseppe.channels.channelModLog).send(editedMessage)
 }
 
 const logMessage = (client, message, newMessage = null) => {
-  const { guild, channel } = message
-  if (channel.parent.name === 'Esoterica' || channel === getLogChannel(guild)) return
+  const { channel } = message
+  if (channel.parent?.name === 'Esoterica') return
   logEditedMessage(message, newMessage)
 }
 

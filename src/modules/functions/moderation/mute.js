@@ -4,24 +4,16 @@ const { sendResult } = require('../general')
 const { upsertMute, getAndUnmute, getNextUnmuteMuteTime } = require('../../../mongo/mute')
 const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 
-let mutedRole = null
-const getMutedRole = (guild) => {
-  if (!mutedRole) {
-    mutedRole = guild.roles.cache.filter((r) => r.name === guild.giuseppeSettings.roleMuted).first()
-    return mutedRole
-  }
-  return mutedRole
-}
-
 const muteMember = async (guild, member, details, message) => {
   const insertMute = await upsertMute(guild.id, member.user.id, details)
-  await member.roles.add(getMutedRole(guild)).catch(() => {
-    addtoRoleQueue(member.id, member, null, [getMutedRole(guild).name])
+  const muteRole = guild.roles.cache.get(guild.giuseppe.roles.roleMuted)
+  await member.roles.add(muteRole).catch(() => {
+    addtoRoleQueue(member.id, member, null, [muteRole.name])
       .then(() => attemptRoleQueue())
   })
 
   // Force the settings to update with the next unmute time.
-  guild.giuseppeSettings.nextUnmute = await getNextUnmuteMuteTime(guild.id)
+  guild.giuseppe.settings.nextUnmute = await getNextUnmuteMuteTime(guild.id)
 
   const mutedUntil = moment().to(insertMute.unmuteTime)
   sendResult(
@@ -32,15 +24,17 @@ const muteMember = async (guild, member, details, message) => {
 }
 
 const unmuteMembers = async (guild) => {
-  const { giuseppeSettings: { nextUnmute } } = guild
+  const { giuseppe: { settings: { nextUnmute } } } = guild
   if (nextUnmute === -1 || Date.now() < nextUnmute) return
-  const mutedMembers = getMutedRole(guild).members
+  const mutedMembers = guild.roles.cache.get(guild.giuseppe.roles.roleMuted).members
   const mutedIds = mutedMembers.map((m) => m.id)
   const unmutedMembers = await getAndUnmute(guild.id, mutedIds)
   mutedMembers.forEach((memb) => {
-    if (unmutedMembers.includes(memb.id)) memb.roles.remove(getMutedRole(guild)).catch(() => {})
+    if (unmutedMembers.includes(memb.id)) {
+      memb.roles.remove(guild.giuseppe.roles.roleMuted).catch(() => {})
+    }
   })
-  guild.giuseppeSettings.nextUnmute = await getNextUnmuteMuteTime(guild.id)
+  guild.giuseppe.settings.nextUnmute = await getNextUnmuteMuteTime(guild.id)
 }
 
 module.exports = { muteMember, unmuteMembers }

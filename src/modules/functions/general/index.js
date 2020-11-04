@@ -108,7 +108,7 @@ const inCachePerform = (memb, theCache, fetchIndex, member, date, expireSecs) =>
 
 const inCacheUpsert = (type, message, expireSecs) => {
   const member = message.member.id
-  const theCache = message.guild.giuseppeQueues[type]
+  const theCache = message.guild.giuseppe.queues[type]
   let fetchIndex = -1
   const memb = theCache.filter((entry, i) => {
     if (entry.member === member) { fetchIndex = i; return true } return false
