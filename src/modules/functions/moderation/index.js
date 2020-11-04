@@ -10,7 +10,7 @@ const getWordlistAsRegex = (wordlist, wordFilter) => {
     else {
       const characterArray = Array.from(badWord).map((char) => {
         if (Object.keys(wordFilter).includes(char)) return `[${char}${wordFilter[char]}]+`
-        return `${char}+`
+        return `${char.replace(/\./, '\\.')}+`
       })
       regexBlacklist.push(characterArray.join(''))
     }
