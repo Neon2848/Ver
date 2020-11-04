@@ -24,7 +24,7 @@ const generateAdditionalFields = (message, existingFields) => {
 
 const generateTextFields = (message, editDate = null) => {
   const { content } = message
-  const parts = content.match(/[\s\S]{1,1024}/g)
+  const parts = content.match(/[\s\S]{1,1024}/g) || []
   if (parts.length) {
     const mapped = parts.map((value, i) => genTextFields(editDate, value, i))
     return editDate ? mapped : generateAdditionalFields(message, mapped)

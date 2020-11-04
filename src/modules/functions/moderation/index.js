@@ -27,7 +27,7 @@ const genEmbed = (description, theword, iconUrl) => ({
 })
 
 const genNotice = {
-  exploit: (theword, ...args) => genEmbed(`Hey there, I just deleted a message of yours because I detected the word: \`${theword}\`.\n
+  exploit: (theword, ...args) => genEmbed(`Hey there, I just deleted a message of yours because I detected the word: ||\`${theword}\`||.\n
 Unfortunately you're not allowed to talk about exploiting here. \
 Discord's rules are pretty strict, and we want to make sure we're following them properly or they'll delete our server. \
 Make sure to read the welcome channel. Your discussion might be better placed as a thread or post on the forum itself.`, ...args),
@@ -37,9 +37,9 @@ We filter some sensitive words to encourage you think about what you're saying, 
 For the next 20 minutes, I'll ignore sensitive words from you (not slurs though). Please make sure you use this privilege maturely and in a healthy way \
 or we might have to warn you.`, ...args),
 
-  slur: (message, iconUrl) => ({
+  slur: (wordArr, message, iconUrl) => ({
     embed: {
-      description: message.cleanContent,
+      description: wordArr.input.replace(wordArr[0], `${wordArr[0][0]}||${wordArr[0].substring(1)}||`),
       color: 13441048,
       fields: [
         {
@@ -73,12 +73,12 @@ const cacheCheckFunction = (message, filter, type) => {
 
 const checkFunctions = {
   slur: (message, filter, type, v3rmLogo) => {
-    const isASlur = filter.test(message.cleanContent)
-    if (!isASlur) return false
+    const isASlur = message.cleanContent.match(filter) || []
+    if (!isASlur.length) return false
     const swearLogsChannel = message.guild.channels.cache
       .find(((c) => c.name === message.guild.giuseppeSettings.channelSlurLog))
 
-    swearLogsChannel.send(genNotice[type](message, v3rmLogo)).then((sent) => {
+    swearLogsChannel.send(genNotice[type](isASlur, message, v3rmLogo)).then((sent) => {
       sent.react('🇲').then(() => sent.react('🇱').then(() => sent.react('❌')))
     })
 
@@ -105,7 +105,7 @@ const checkFunctions = {
 }
 
 const checkWordFilters = (client, message) => {
-  if (!message.member || message.member.hasPermission('KICK_MEMBERS')) return
+  // if (!message.member || message.member.hasPermission('KICK_MEMBERS')) return
   const { secrets } = client
   const { config: { images: { v3rmLogo } } } = client
   const keys = Object.keys(secrets.wordFilters)
