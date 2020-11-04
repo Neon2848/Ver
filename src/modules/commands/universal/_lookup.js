@@ -35,7 +35,7 @@ const updateOrKickMember = (guildMember, editable, details) => {
 
 exports.run = async (client, message, args, type = 'lookup') => { // eslint-disable-line no-unused-vars
   const discordid = args.argMap.users[0] || null
-  if (!discordid) return null
+  if (!discordid) return
   const editable = await message.reply(genSpinner('Looking up user...'))
 
   const details = await lookup(discordid, editable.guild.id, { bypass: message.member.hasPermission('KICK_MEMBERS'), type }).catch((err) => sendError(err, editable))

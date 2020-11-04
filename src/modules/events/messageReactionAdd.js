@@ -61,7 +61,7 @@ module.exports = async (client, messageReaction, sender) => {
 
   if (recipient.id === client.user.id) {
     botReactions(client, { messageReaction, sendMember, message })
-  } else if (!message.channel.name !== message.guild.giuseppeSettings.welcomeChannel) {
+  } else if (!message.channel.id !== message.guild.giuseppe.channels.welcomeChannel) {
     raysA(client, { messageReaction, sendMember, message })
   }
 }

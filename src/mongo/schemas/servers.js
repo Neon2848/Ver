@@ -9,14 +9,18 @@ const serversSchema = new Schema({
     lastLookup: { type: Date, default: Date.now },
     lookupTimeout: { type: Number, default: 30 },
     allowUsersToLookup: { type: Boolean, default: false },
-    channelWelcome: { type: String, default: 'welcome' },
-    channelDetoxChamber: { type: String, default: 'detox-chamber' },
-    channelBotCommands: { type: String, default: 'bot-commands' },
-    channelModLog: { type: String, default: 'channel-log' },
-    channelSlurLog: { type: String, default: 'swore-log' },
-    channelStaffVC: { type: String, default: 'Staff' },
-    roleMuted: { type: String, default: 'votemuted' },
-    roleToxic: { type: String, default: 'toxic' },
+  },
+  channels: {
+    staffVC: { type: String, default: 'Staff' },
+    welcome: { type: String, default: 'welcome' },
+    detoxChamber: { type: String, default: 'detox-chamber' },
+    botCommands: { type: String, default: 'bot-commands' },
+    modLog: { type: String, default: 'channel-log' },
+    slurLog: { type: String, default: 'swore-log' },
+  },
+  roles: {
+    muted: { type: String, default: 'votemuted' },
+    toxic: { type: String, default: 'toxic' },
   },
 })
 

@@ -75,13 +75,10 @@ const checkFunctions = {
   slur: (message, filter, type, v3rmLogo) => {
     const isASlur = message.cleanContent.match(filter) || []
     if (!isASlur.length) return false
-    const swearLogsChannel = message.guild.channels.cache
-      .find(((c) => c.name === message.guild.giuseppeSettings.channelSlurLog))
-
-    swearLogsChannel.send(genNotice[type](isASlur, message, v3rmLogo)).then((sent) => {
-      sent.react('🇲').then(() => sent.react('🇱').then(() => sent.react('❌')))
-    })
-
+    message.guild.channels.cache.get(message.guild.giuseppe.channels.slurLog)
+      .send(genNotice[type](isASlur, message, v3rmLogo)).then((sent) => {
+        sent.react('🇲').then(() => sent.react('🇱').then(() => sent.react('❌')))
+      })
     return true
   },
 

@@ -41,6 +41,14 @@ ___
             "warn": "warn",
             "ban": "ban"
         }
+    },
+    "wordFilters": {
+        // Filters can be "word" or "/regex/",
+        // but you do not need to account for filter evasion as config.characterEvasionMap is injected into the check.
+        "slur": [],
+        "exploit": [],
+        "sensitive": [],
+        "other": []
     }
 }
 
