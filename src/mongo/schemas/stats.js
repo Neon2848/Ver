@@ -4,7 +4,7 @@ const { Schema } = mongoose
 
 const statsSchema = new Schema({
   serverId: { type: String },
-  id: { type: String },
+  v3rmId: { type: Number },
   date: { type: Date },
   messages: { type: Number, default: 0 },
   pTo: { type: Number, default: 0 },

@@ -1,12 +1,17 @@
 const mongoose = require('mongoose')
 const log = require('./log')
 const mutedSchema = require('./schemas/muteList')
+const { getV3rmId } = require('./members')
+const membersSchema = require('./schemas/members')
 
 const Muted = mongoose.model('muteList', mutedSchema)
+const Members = mongoose.model('members', membersSchema)
 
 const upsertMute = async (serverId, id, muteDetails) => {
-  const query = { serverId, id }
+  const v3rmId = await getV3rmId(serverId, id)
+  const query = v3rmId ? { serverId, v3rmId } : { serverId, id }
   const theMember = {
+    id,
     lastMuted: Date.now(),
     muteReason: muteDetails.muteReason,
     unmuteTime: new Date(muteDetails.unmuteTime || Date.now() + 600000),
@@ -28,9 +33,21 @@ const getNextUnmuteMuteTime = async (serverId) => {
 
 const getAndUnmute = async (serverId, ids) => {
   const now = Date.now()
-  const unmutedMembers = await Muted.find({ serverId, unmuteTime: { $lte: now }, id: { $in: ids } })
+  // unmuteTime: { $lte: now },
+
+  const mutedMembers = await Members.aggregate([
+    { $match: { serverId, id: { $in: ids } } },
+    {
+      $lookup: {
+        from: 'mutelists', localField: 'v3rmId', foreignField: 'v3rmId', as: 'muted',
+      },
+    },
+  ]).catch((_) => { throw _ })
+
+  const unmutedMembers = mutedMembers.filter((un) => un.muted[0]?.unmuteTime <= now)
   const unmutedIds = unmutedMembers.map((m) => m.id)
-  await Muted.deleteMany({ id: { $in: unmutedIds } })
+  const unmutedV3rmIds = unmutedMembers.map((m) => m.v3rmId)
+  await Muted.deleteMany({ v3rmId: { $in: unmutedV3rmIds } })
   return unmutedIds || []
 }
 

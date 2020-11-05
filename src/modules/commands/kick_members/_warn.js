@@ -45,7 +45,7 @@ const prepareDoWarn = async (id, justQuote, editable) => {
   return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true }, 'User warned')
 }
 
-exports.run = async (message, args, externalReason = null) => {
+exports.run = async (client, message, args, externalReason = null) => {
   const spinner = genSpinner('Attempting to warn...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
