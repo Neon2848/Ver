@@ -31,7 +31,7 @@ const lookup = async (discordid, serverId, options) => {
   ])
 
   const v3rmRoles = translateRoles(allGroups)
-  const keepRoles = await getExtraRoles(serverId, discordid)
+  const keepRoles = await getExtraRoles(serverId, discordid, parseInt(json.uid, 10))
   const keepRolesNames = keepRoles.map((r) => r.name)
 
   return { username: json.username, uid: json.uid, roles: [...v3rmRoles, ...keepRolesNames] }

@@ -1,11 +1,14 @@
 const mongoose = require('mongoose')
-const { addMember } = require('./members')
+const { addMember, getV3rmId } = require('./members')
 const statsSchema = require('./schemas/stats')
 
 const Stats = mongoose.model('UserStats', statsSchema)
 
 const addMessage = async (serverId, userId, date, stats, ud = null) => {
-  const query = { serverId, id: userId, date }
+  await addMember(serverId, userId, ud)
+  const v3rmId = await getV3rmId(serverId, userId)
+  if (!v3rmId) return false // Can only record stats for users we have the v3rmId of.
+  const query = { serverId, v3rmId, date }
   const update = {
     $inc: {
       messages: stats.messages,
@@ -16,7 +19,6 @@ const addMessage = async (serverId, userId, date, stats, ud = null) => {
   const options = { upsert: true }
 
   await Stats.findOneAndUpdate(query, update, options)
-  await addMember(serverId, userId, ud)
   return true
 }
 
@@ -26,7 +28,7 @@ const getServerStats = async (serverId, timeframe, endFrame, limit = 5) => {
     { $match: query },
     {
       $group: {
-        _id: '$id',
+        _id: '$v3rmId',
         messages: { $sum: '$messages' },
         pFrom: { $sum: '$pFrom' },
         pTo: { $sum: '$pTo' },
@@ -34,7 +36,7 @@ const getServerStats = async (serverId, timeframe, endFrame, limit = 5) => {
     },
     {
       $lookup: {
-        from: 'members', localField: '_id', foreignField: 'id', as: 'member',
+        from: 'members', localField: '_id', foreignField: 'v3rmId', as: 'member',
       },
     },
     { $sort: { messages: -1, pTo: -1, pFrom: -1 } },

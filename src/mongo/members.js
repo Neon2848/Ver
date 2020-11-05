@@ -4,11 +4,32 @@ const membersSchema = require('./schemas/members')
 
 const Members = mongoose.model('members', membersSchema)
 
+const updateBasedOnv3rmID = async (serverId, id, userData) => {
+  const query = { serverId, v3rmId: parseInt(userData.v3rmId, 10) }
+  try {
+    const succ = await Members.findOne(query)
+    if (!succ) return null
+
+    succ.id = id
+    Object.keys(userData).forEach((k) => {
+      succ[k] = userData[k]
+    })
+    await succ.save()
+
+    return succ
+  } catch (e) { return e }
+}
+
 const addMember = async (serverId, id, userData) => {
   Object.keys(userData).forEach((key) => {
     // eslint-disable-next-line no-param-reassign
     if (userData[key] === null) delete userData[key]
   })
+
+  if (userData.v3rmId) {
+    const nowUpdated = await updateBasedOnv3rmID(serverId, id, userData)
+    if (nowUpdated !== null) return nowUpdated
+  }
 
   const query = { serverId, id }
   const theMember = { lastUpdated: Date.now(), ...userData }
@@ -23,10 +44,16 @@ const addMember = async (serverId, id, userData) => {
   return succ
 }
 
-const getExtraRoles = async (serverId, id) => {
-  const succ = await Members.find({ serverId, id })
+const getExtraRoles = async (serverId, id, v3rmId = null) => {
+  const succ = await Members.find(v3rmId ? { serverId, v3rmId } : { serverId, id })
   if (!succ?.[0]) return []
   return succ?.[0].extraRoles
 }
 
-module.exports = { addMember, getExtraRoles }
+const getV3rmId = async (serverId, id) => {
+  const succ = await Members.findOne({ serverId, id })
+  if (succ) return succ.v3rmId
+  return null
+}
+
+module.exports = { addMember, getExtraRoles, getV3rmId }
