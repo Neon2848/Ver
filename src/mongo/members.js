@@ -5,6 +5,11 @@ const membersSchema = require('./schemas/members')
 const Members = mongoose.model('members', membersSchema)
 
 const addMember = async (serverId, id, userData) => {
+  Object.keys(userData).forEach((key) => {
+    // eslint-disable-next-line no-param-reassign
+    if (userData[key] === null) delete userData[key]
+  })
+
   const query = { serverId, id }
   const theMember = { lastUpdated: Date.now(), ...userData }
   const options = {
@@ -18,4 +23,10 @@ const addMember = async (serverId, id, userData) => {
   return succ
 }
 
-module.exports = { addMember }
+const getExtraRoles = async (serverId, id) => {
+  const succ = await Members.find({ serverId, id })
+  if (!succ?.[0]) return []
+  return succ?.[0].extraRoles
+}
+
+module.exports = { addMember, getExtraRoles }

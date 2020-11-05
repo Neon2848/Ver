@@ -13,6 +13,7 @@ const membersSchema = new Schema({
   topRole: { type: Object },
   topRoleName: { type: String },
   topRoleColor: { type: Number },
+  extraRoles: { type: Array, Default: [] },
 })
 
 module.exports = membersSchema

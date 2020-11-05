@@ -40,7 +40,7 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
 
   const details = await lookup(discordid, editable.guild.id, { bypass: message.member.hasPermission('KICK_MEMBERS'), type }).catch((err) => sendError(err, editable))
   if (!details) return
-  logMember(message.guild.id, message.member, details.uid)
+  logMember(message.guild.id, message.guild.members.cache.get(discordid), details.uid)
 
   const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
   const kickedMember = updateOrKickMember(guildMember, editable, details)

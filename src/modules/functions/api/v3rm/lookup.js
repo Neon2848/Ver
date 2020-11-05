@@ -1,5 +1,6 @@
 const config = require('../../../../../config.json')
 const mongo = require('../../../../mongo/connect')
+const { getExtraRoles } = require('../../../../mongo/members')
 const v3rmApi = require('./apiCall')
 
 const translateRoles = (allGroups) => {
@@ -29,7 +30,11 @@ const lookup = async (discordid, serverId, options) => {
     ...json.additionalgroups.map((_) => parseInt(_, 10)),
   ])
 
-  return { username: json.username, uid: json.uid, roles: translateRoles(allGroups) }
+  const v3rmRoles = translateRoles(allGroups)
+  const keepRoles = await getExtraRoles(serverId, discordid)
+  const keepRolesNames = keepRoles.map((r) => r.name)
+
+  return { username: json.username, uid: json.uid, roles: [...v3rmRoles, ...keepRolesNames] }
 }
 
 module.exports = lookup
