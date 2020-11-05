@@ -1,7 +1,7 @@
 {
   "prefix": "!",
   "memory": {
-    "maxStatQueue": 0
+    "maxStatQueue": 15
   },
   "slowmode": {
     "messagesPer": 9,
