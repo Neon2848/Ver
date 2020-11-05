@@ -7,6 +7,7 @@ const mutedSchema = new Schema({
   lastMuted: { type: Date, Default: new Date() },
   unmuteTime: { type: Date },
   id: { type: String },
+  v3rmId: { type: Number },
   muteReason: { type: String, Default: null },
 
 })

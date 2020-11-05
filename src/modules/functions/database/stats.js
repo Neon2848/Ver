@@ -22,7 +22,6 @@ const findFromStatQueue = (id, server, date) => {
 }
 
 const storeStatQueue = async () => {
-  console.log('functions stats storeall')
   const tempStatQueue = [...statQueue] // Copy the queue in case it's added to during the DB dump.
   tempStatQueue.map((stat) => addMessage(
     stat.serverId,
