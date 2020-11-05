@@ -46,7 +46,8 @@ const getServerStats = async (serverId, timeframe, endFrame, limit = 5) => {
 }
 
 const getUserStats = async (serverId, timeframe, endFrame, uid) => {
-  const query = { serverId, date: { $gte: timeframe, $lte: endFrame }, id: uid }
+  const v3rmId = await getV3rmId(serverId, uid)
+  const query = { serverId, date: { $gte: timeframe, $lte: endFrame }, v3rmId }
 
   const succ = await Stats.find(query)
     .sort({ date: 1 })
