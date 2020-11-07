@@ -8,7 +8,8 @@ const { checkWordFilters } = require('../functions/moderation')
 const { checkPings } = require('../functions/moderation/pingAbuse')
 const { unmuteMembers } = require('../functions/moderation/mute')
 const { preventFlood } = require('../functions/moderation/preventFlood')
-const { unsafeDelete, msgIntegrityCheck } = require('../functions/general')
+const { unsafeDelete, msgIntegrityCheck, basicLookup } = require('../functions/general')
+const { getV3rmId } = require('../../mongo/members')
 
 const assignRoles = async (message) => {
   if (message.channel.id === message.guild.giuseppe.channels.welcome) {
@@ -56,8 +57,13 @@ const runTasks = async (client, message) => {
 }
 
 module.exports = async (client, message) => {
+  if(message.channel.type === 'dm') console.log(`${message.author.tag} | ${message.channel.recipient} - ${message.cleanContent}`)
   if (!msgIntegrityCheck(message)) return
-  if (client.secrets.v3rm.api.enabled) assignRoles(message)
+  if (client.secrets.v3rm.api.enabled){
+    const v3rmId = await getV3rmId(message.guild.id, message.author.id)
+    if(!v3rmId) await basicLookup(message.member)
+    assignRoles(message)
+  }
 
   checkWordFilters(client, message)
   checkPings(client, message)
