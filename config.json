@@ -1,7 +1,7 @@
 {
   "prefix": "!",
   "memory": {
-    "maxStatQueue": 15
+    "maxStatQueue": 10
   },
   "slowmode": {
     "messagesPer": 9,
@@ -17,8 +17,7 @@
       "Elite": 15,
       "VIP": 11,
       "Member": 2,
-      "Banned": 7,
-      "Pending": 1337
+      "Banned": 7
   },
   "urls": {
     "v3rm": {
