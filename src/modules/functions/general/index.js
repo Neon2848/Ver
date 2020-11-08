@@ -5,6 +5,7 @@ const lookup = require('../api/v3rm/lookup')
 const secrets = require('../../../../secrets.json')
 const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 const { logMember } = require('../database/members')
+const log = require('../../../mongo/log')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'
@@ -12,10 +13,9 @@ const errorReasonTransform = (err) => {
   return `${err.replace(`${secrets.v3rm.api.base}`, 'apibase')}.`
 }
 
-const unsafeDelete = (msg, t) => {
-  msg.delete({ timeout: t }).catch(() => {
-    // swallow error, message may have already been deleted. doesn't matter.
-  })
+const safeDelete = (msg, t) => {
+  if (msg || !msg.deleted) return
+  msg.delete({ timeout: t }).catch(((e) => log(msg.guild.id, 'error', 'deleting message', e.message, msg)))
 }
 
 const msgIntegrityCheck = (message) => !(
@@ -37,17 +37,17 @@ const sendResult = (resultMsg, caller, resultTitle) => {
   const send = caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb)
   send.then((_) => {
     if (caller.timeout) {
-      if (caller.edit) return unsafeDelete(caller.message, caller.timeout)
-      return unsafeDelete(_, caller.timeout)
+      if (caller.edit) return safeDelete(caller.message, caller.timeout)
+      return safeDelete(_, caller.timeout)
     }
     return true
   })
 }
 
 const kickUser = (member, editable, reasons) => {
-  if(member.user.bot) return
+  if (member.user.bot) return
   member.send(reasons.dm).finally(() => {
-    sendResult(reasons.channel, { message: editable, edit: true }, 'Kicking User')
+    if (reasons.channel) sendResult(reasons.channel, { message: editable, edit: editable.author.bot }, 'Kicking User')
     member.kick(reasons.log).catch((e) => sendResult(`Unable to kick user: \`${e}\``, { message: editable, timeout: 10000 }, 'Kick Error'))
   })
 }
@@ -135,5 +135,5 @@ module.exports = {
   quoteRegex,
   inCacheUpsert,
   recreateEmoji,
-  unsafeDelete,
+  safeDelete,
 }

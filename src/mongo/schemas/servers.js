@@ -21,6 +21,7 @@ const serversSchema = new Schema({
   roles: {
     muted: { type: String, default: 'votemuted' },
     toxic: { type: String, default: 'toxic' },
+    member: { type: String, default: 'Member' },
   },
 })
 

@@ -1,7 +1,7 @@
 const { MessageAttachment } = require('discord.js')
 const FileType = require('file-type')
 const { getServerStats, getUserStats } = require('../../../mongo/stats')
-const { sendResult, genSpinner, unsafeDelete } = require('../../functions/general')
+const { sendResult, genSpinner, safeDelete } = require('../../functions/general')
 const { getBar, getLine } = require('../../functions/api/quickchart')
 
 let lastCall = Date.now()
@@ -94,7 +94,7 @@ const sendFile = async (buffer, editable, sDF, eDF) => {
   await editable.channel.send(
     `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC. \`\`\`diff\n- Note: This is development data, and is not accurate at all. The bot hasn't been running most of the time, and when it has it's only been collecting partial data. It will also be reset several times.\`\`\``,
     { files: [file] },
-  ).then(() => unsafeDelete(editable, 0))
+  ).then(() => safeDelete(editable, 0))
   return true
 }
 
@@ -161,7 +161,7 @@ const doLineGraph = async (message, sDF, eDF, args, editable) => {
 }
 
 const graphDecisionEngine = async (message, dNow, argMap) => {
-  if (!checkCall(message.member, dNow)) { unsafeDelete(message, 0); return null }
+  if (!checkCall(message.member, dNow)) { safeDelete(message, 0); return null }
 
   const editable = await message.reply(genSpinner('Generating graph...'))
 

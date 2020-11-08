@@ -1,6 +1,6 @@
 const lookup = require('../../functions/api/v3rm/lookup')
 const {
-  sendResult, kickUser, genSpinner, unsafeDelete,
+  sendResult, kickUser, genSpinner, safeDelete,
 } = require('../../functions/general')
 const { basicUserSetup } = require('../../functions/api/v3rm/userSetup')
 const { logMember } = require('../../functions/database/members')
@@ -45,5 +45,5 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
   const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
   const kickedMember = updateOrKickMember(guildMember, editable, details)
   editable.channel.send(`<@${discordid}> is: ${client.config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } })
-    .then(() => { if (kickedMember) unsafeDelete(editable, 0) })
+    .then(() => { if (kickedMember) safeDelete(editable, 0) })
 }

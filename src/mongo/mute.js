@@ -17,12 +17,14 @@ const upsertMute = async (serverId, id, muteDetails) => {
     unmuteTime: new Date(muteDetails.unmuteTime || Date.now() + 600000),
   }
   const options = {
-    upsert: true, new: true, setDefaultsOnInsert: true,
+    upsert: true, new: false, setDefaultsOnInsert: true,
   }
 
   const succ = await Muted.findOneAndUpdate(query, {
     $set: theMember,
   }, options).catch((err) => log(serverId, 'error', 'Muting Member', err, { id, ...theMember }))
+
+  if (succ && succ.unmuteTime <= Date.now()) return null
   return succ
 }
 

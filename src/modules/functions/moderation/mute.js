@@ -15,12 +15,14 @@ const muteMember = async (guild, member, details, message) => {
   // Force the settings to update with the next unmute time.
   guild.giuseppe.settings.nextUnmute = await getNextUnmuteMuteTime(guild.id)
 
-  const mutedUntil = moment().to(insertMute.unmuteTime)
+  if (!message) return insertMute
+  const mutedUntil = moment().to(details.unmuteTime || Date.now() + 600000)
   sendResult(
-    `Muted <@${member.user.id}>${insertMute.muteReason ? ` for \`${insertMute.muteReason}\`` : ''}.\
+    `Muted <@${member.user.id}>${details.muteReason ? ` for \`${details.muteReason}\`` : ''}.\
  Unmuting ${mutedUntil}`,
     { message, timeout: 10000 }, 'User Muted',
   )
+  return insertMute
 }
 
 const unmuteMembers = async (guild) => {

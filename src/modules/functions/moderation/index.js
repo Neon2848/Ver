@@ -1,21 +1,21 @@
-const { inCacheUpsert, unsafeDelete } = require('../general')
+const { inCacheUpsert, safeDelete } = require('../general')
 
 // This is heavy, and should only be called at bot start,
 // the resulting regex can be set as client.config
 const getWordlistAsRegex = (wordlist, wordFilter) => {
-  const regexBlacklist = []
+  const regexDenylist = []
   wordlist.forEach((badWord) => {
     const alreadyRegex = badWord.match(/\/(.*)\//)
-    if (alreadyRegex && alreadyRegex.length) regexBlacklist.push(alreadyRegex[1])
+    if (alreadyRegex && alreadyRegex.length) regexDenylist.push(alreadyRegex[1])
     else {
       const characterArray = Array.from(badWord).map((char) => {
         if (Object.keys(wordFilter).includes(char)) return `[${char}${wordFilter[char]}]+`
         return `${char.replace(/\./, '\\.')}+`
       })
-      regexBlacklist.push(characterArray.join(''))
+      regexDenylist.push(characterArray.join(''))
     }
   })
-  return new RegExp(`(${regexBlacklist.join(')|(')})`, 'mi')
+  return new RegExp(`(${regexDenylist.join(')|(')})`, 'mi')
 }
 
 const genEmbed = (description, theword, iconUrl) => ({
@@ -108,7 +108,7 @@ const checkWordFilters = (client, message) => {
   const keys = Object.keys(secrets.wordFilters)
   const needsDeleting = secrets.regexFilters
     .some((filter, index) => checkFunctions[keys[index]](message, filter, keys[index], v3rmLogo))
-  if (needsDeleting) unsafeDelete(message, 0)
+  if (needsDeleting) safeDelete(message, 0)
 }
 
 module.exports = { checkWordFilters, getWordlistAsRegex }
