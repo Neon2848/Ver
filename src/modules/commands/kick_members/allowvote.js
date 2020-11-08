@@ -44,11 +44,24 @@ const quickSend = async (message, sendFunction, delTime = 15000) => {
   await message.channel.send(sendFunction).then((m) => { if (delTime >= 0) safeDelete(m, 15000) })
 }
 
+const succesfulAllowvote = async (message, fields) => {
+  const {
+    user, reason, lastDenyReason, config,
+  } = fields
+
+  if (reason) {
+    quickSend(message, embs.reasonListed(user, lastDenyReason, config), -1)
+    return
+  }
+  await giveSecondChance(message.guild.id, user)
+  quickSend(message, embs.chanceListed(user, lastDenyReason, config))
+}
+
 exports.run = async (client, message, args) => {
   const fields = await getFields(client, message, args)
   if (!fields) return
   const {
-    user, perm, exists, onSecondChance, force, reason, lastDenyReason, config,
+    user, perm, exists, onSecondChance, force, lastDenyReason, config,
   } = fields
 
   if (perm && !force) {
@@ -60,11 +73,5 @@ exports.run = async (client, message, args) => {
     quickSend(message, embs.notDenylisted(user, lastDenyReason, config))
     return
   }
-
-  if (reason) {
-    quickSend(message, embs.reasonListed(user, lastDenyReason, config), -1)
-    return
-  }
-  await giveSecondChance(message.guild.id, user)
-  quickSend(message, embs.chanceListed(user, lastDenyReason, config))
+  await succesfulAllowvote(message, fields)
 }
