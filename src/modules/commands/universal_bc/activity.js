@@ -5,7 +5,7 @@ const { sendResult, genSpinner, safeDelete } = require('../../functions/general'
 const { getBar, getLine } = require('../../functions/api/quickchart')
 
 let lastCall = Date.now()
-const maxCall = 60 * 1000
+const maxCall = 30 * 1000
 
 const checkCall = (member, dNow) => {
   if (member.hasPermission('KICK_MEMBERS')) return true

@@ -6,5 +6,5 @@ module.exports = async (client, oldMessage, newMessage) => {
   if (!msgIntegrityCheck(oldMessage) || !msgIntegrityCheck(newMessage)) return
   if (oldMessage.cleanContent === newMessage.cleanContent) return
   checkWordFilters(client, newMessage)
-  logMessage(client, oldMessage, newMessage)
+  logMessage(newMessage.guild.giuseppe.channels.modLog, oldMessage, newMessage)
 }

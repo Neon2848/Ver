@@ -17,6 +17,7 @@ const serversSchema = new Schema({
     botCommands: { type: String, default: 'bot-commands' },
     modLog: { type: String, default: 'channel-log' },
     slurLog: { type: String, default: 'swore-log' },
+    voteApprovals: { type: String, default: 'vote-abuse-approvals' },
   },
   roles: {
     muted: { type: String, default: 'votemuted' },

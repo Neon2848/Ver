@@ -3,5 +3,5 @@ const { logMessage } = require('../functions/moderation/logger')
 
 module.exports = async (client, message) => {
   if (!msgIntegrityCheck(message)) return
-  logMessage(client, message)
+  logMessage(message.guild.giuseppe.channels.modLog, message)
 }
