@@ -14,7 +14,7 @@ const errorReasonTransform = (err) => {
 }
 
 const safeDelete = (msg, t) => {
-  if (msg || !msg.deleted) return
+  if (!msg || msg.deleted) return
   msg.delete({ timeout: t }).catch(((e) => log(msg.guild.id, 'error', 'deleting message', e.message, msg)))
 }
 

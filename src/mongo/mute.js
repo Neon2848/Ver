@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 const log = require('./log')
-const mutedSchema = require('./schemas/muteList')
+const mutedSchema = require('./schemas/mutelist')
 const { getV3rmId } = require('./members')
 const membersSchema = require('./schemas/members')
 
-const Muted = mongoose.model('muteList', mutedSchema)
+const Muted = mongoose.model('mutelist', mutedSchema)
 const Members = mongoose.model('members', membersSchema)
 
 const upsertMute = async (serverId, id, muteDetails) => {

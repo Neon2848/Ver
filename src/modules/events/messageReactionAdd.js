@@ -1,6 +1,7 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const { safeDelete } = require('../functions/general')
 const { raysAStart, raysAVote } = require('../functions/moderation/raysA')
+const { ignoreRays, denyRays, approveRays } = require('../functions/moderation/raysApprovals')
 
 /**
  * @param {Discord.Client} client bot client
@@ -53,7 +54,21 @@ const botModerationReactions = async (client, parts) => {
 }
 
 const botReactions = async (client, parts) => {
-  if (parts.messageReaction.emoji.name === 'raysA') raysAVote(client, parts)
+  const { sendMember, message, messageReaction: { emoji: { name } } } = parts
+  if (name === 'raysA') raysAVote(client, parts)
+  if (!message.raysA?.isApproval) return
+  switch (name) {
+    case '👍':
+      approveRays(message, sendMember)
+      break
+    case '👎':
+      denyRays(message, sendMember)
+      break
+    case '❌':
+      ignoreRays(message, sendMember)
+      break
+    default: break
+  }
 }
 
 const userReactions = async (client, parts) => {

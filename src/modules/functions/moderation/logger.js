@@ -24,7 +24,7 @@ const generateTextFields = (message, editDate = null) => {
   return []
 }
 
-const logEditedMessage = (oldMessage, newMessage = null) => {
+const logEditedMessage = async (logToChannel, oldMessage, newMessage = null) => {
   const { guild, client, channel } = oldMessage
 
   const editedMessage = new MessageEmbed({
@@ -41,13 +41,15 @@ const logEditedMessage = (oldMessage, newMessage = null) => {
   if (newMessage) {
     editedMessage.addFields(generateTextFields(newMessage, newMessage.editedTimestamp))
   }
-  guild.channels.cache.get(guild.giuseppe.channels.modLog).send(editedMessage)
+  const logged = await guild.channels.cache.get(logToChannel).send(editedMessage)
+  return logged
 }
 
-const logMessage = (client, message, newMessage = null) => {
+const logMessage = async (logToChannel, message, newMessage = null) => {
   const { channel } = message
-  if (channel.parent?.name === 'Esoterica') return
-  logEditedMessage(message, newMessage)
+  if (channel.parent?.name === 'Esoterica') return null
+  const logged = await logEditedMessage(logToChannel, message, newMessage)
+  return logged
 }
 
 module.exports = { logMessage }

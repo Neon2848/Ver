@@ -1,17 +1,16 @@
+const { alreadyOnDenylist } = require('../../../mongo/denyvote')
 const { safeDelete, kickUser, inCacheUpsert } = require('../general')
 const { muteMember } = require('./mute')
+const { logRaysAToApprovals } = require('./raysApprovals')
 
-const logRaysAToApprovals = async () => {
-  // TODO: Log the message to an approvals channel. Modularise and adapt the logger for this+
-  // Write the leaderboard for approved votes.
-  // Write the denylist for denied votes.
-}
-
-/* TODO: checkDenylList
-  // Read from denylist in database
+/* TODO:
   if (message.member.hasPermission('KICK_MEMBERS')) return { deny: true, punish: false }
 */
-const checkDenyList = (sender, message) => ({ deny: false, punish: false })
+const checkDenyList = async (sender, guildId) => {
+  const checkDl = await alreadyOnDenylist({ serverId: guildId, id: sender.id })
+  if (checkDl.exists && !checkDl.onSecondChance) return { deny: true, punish: true }
+  return { deny: false, punish: false }
+}
 
 const punishUser = async (content, muteReason = 'Attempting to vote while denylisted', length = 600000) => {
   const { sendMember, message } = content
@@ -29,7 +28,7 @@ const punishUser = async (content, muteReason = 'Attempting to vote while denyli
 
 const runDenyList = async (content) => {
   const { messageReaction, sendMember, message } = content
-  const { deny, punish } = checkDenyList(sendMember, message)
+  const { deny, punish } = await checkDenyList(sendMember, message.guild.id)
   if (punish) punishUser(content)
   if (deny) {
     if (messageReaction) messageReaction.users.remove(sendMember.id)
@@ -55,7 +54,8 @@ const voteInitiatedEmbed = (senderId, recipientId, emoji, messageLink, config) =
 
 const voteCompleteEmbed = (recipientId, users, config) => ({
   embed: {
-    description: `You have successfully vote deleted a message sent by <@${recipientId}>.\nThe sender has been muted for 10 minutes.\n\n Voters: ${users}`,
+    description: `You have successfully vote deleted a message sent by <@${recipientId}>.\nThe sender has been muted for 10 minutes.\n\n\
+If a moderator approves this votemute, the initial voter will receive 1 leaderboard point. Otherwise, the initial voter will be denylisted.\n\nVoters: ${users}`,
     color: 0,
     author: {
       name: 'Votemute Complete',
@@ -101,6 +101,7 @@ const raysAStart = async (client, content) => {
   const theEmoji = messageReaction?.emoji || await message.guild.emojis.cache.find((e) => e.name === 'raysA')
 
   message.raysA = { hasBeenVoted: true }
+  logRaysAToApprovals(message, sendMember)
 
   const messageLink = `${message.guild.id}/${message.channel.id}/${message.id}`
   const editable = await message.channel.send(
@@ -110,20 +111,19 @@ const raysAStart = async (client, content) => {
   editable.raysA = { targetMessage: message.id }
 }
 
-const getRealVoterCount = (reactionUsers) => {
+const getRealVoterCount = (reactionUsers, guildId) => {
   // TODO: Certain roles get more than +1.
-  const users = reactionUsers.filter((u) => (!u.bot && !checkDenyList(u).deny)).map((u) => ` <@${u.id}> +1`)
+  const users = reactionUsers.filter((u) => (!u.bot && !checkDenyList(u, guildId).deny)).map((u) => ` <@${u.id}> +1`)
   return { count: users.length, users }
 }
 
 const completeRaysAVote = async (message, targetMessage, users) => {
   message.reactions.removeAll()
   // eslint-disable-next-line no-param-reassign
-  message.guild.giuseppe.queues.voteMutes = [] // TODO: Make sure this works
+  message.guild.giuseppe.queues.voteMuteStart = []
   // eslint-disable-next-line no-param-reassign
-  message.guild.giuseppe.queues.voteMuteSpam = []
+  message.guild.giuseppe.queues.voteMuteParticipate = []
   if (!targetMessage || targetMessage.deleted) return
-  logRaysAToApprovals()
   await targetMessage.delete()
   await muteMember(message.guild, targetMessage.member, { muteReason: 'Vote Muted' })
   await message.edit(voteCompleteEmbed(targetMessage.author.id, users, message.client.config))
@@ -156,12 +156,12 @@ const raysAVote = async (client, content) => {
   if (!targetMessage) return
 
   const reactionUsers = await messageReaction.users.fetch()
-  const numVotes = getRealVoterCount(reactionUsers)
+  const numVotes = getRealVoterCount(reactionUsers, message.guild.id)
   const newEmbed = message.embeds[0]
 
-  if (numVotes.count >= 2) {
+  if (numVotes.count >= 1) {
     message.raysA = { ...message.raysA, success: true }
-    completeRaysAVote(message, targetMessage, numVotes.users)
+    await completeRaysAVote(message, targetMessage, numVotes.users)
   } else {
     newEmbed.fields = [
       { name: 'Vote Points', value: `${numVotes.count}/2`, inline: true },
