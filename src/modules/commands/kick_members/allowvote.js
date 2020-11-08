@@ -27,27 +27,44 @@ const getExtraArgs = (message, args) => ({
   reason: args.raw.includes('reason'),
 })
 
-exports.run = async (client, message, args) => {
+const getFields = async (client, message, args) => {
   const user = args.argMap.users[0] || null
   if (!user) return null
-  const { config } = client
-  const { force, reason } = getExtraArgs(message, args)
+  const dlInfo = await alreadyOnDenylist({ serverId: message.guild.id, id: user })
+  const extraArgs = getExtraArgs(message, args)
+  return {
+    user,
+    config: client.config,
+    ...dlInfo,
+    ...extraArgs,
+  }
+}
+
+const quickSend = async (message, sendFunction, delTime = 15000) => {
+  await message.channel.send(sendFunction).then((m) => { if (delTime >= 0) safeDelete(m, 15000) })
+}
+
+exports.run = async (client, message, args) => {
+  const fields = await getFields(client, message, args)
+  if (!fields) return
   const {
-    lastDenyReason, perm, exists, onSecondChance,
-  } = await alreadyOnDenylist({ serverId: message.guild.id, id: user })
+    user, perm, exists, onSecondChance, force, reason, lastDenyReason, config,
+  } = fields
 
   if (perm && !force) {
-    return message.channel
-      .send(embs.permListed(user, lastDenyReason, config)).then((m) => safeDelete(m, 15000))
+    quickSend(message, embs.permListed(user, lastDenyReason, config))
+    return
   }
 
   if (!exists || onSecondChance) {
-    return message.channel.send(
-      embs.notDenylisted(user, lastDenyReason, config),
-    ).then((m) => safeDelete(m, 15000))
+    quickSend(message, embs.notDenylisted(user, lastDenyReason, config))
+    return
   }
 
-  if (reason) return message.channel.send(embs.reasonListed(user, lastDenyReason, config))
+  if (reason) {
+    quickSend(message, embs.reasonListed(user, lastDenyReason, config), -1)
+    return
+  }
   await giveSecondChance(message.guild.id, user)
-  return message.channel.send(embs.chanceListed(user, lastDenyReason, config))
+  quickSend(message, embs.chanceListed(user, lastDenyReason, config))
 }
