@@ -34,11 +34,11 @@ const upsertDenylist = async (serverId, id, denyMessageLink) => {
   const preCheck = await alreadyOnDenylist(query)
   if (preCheck.perm) return
 
-  const theMember = {
+  const denylistEntry = {
     id,
     lastDenyDate: Date.now(),
     denyMessageLink,
-    perm: preCheck.exists, // If they're already on the blacklist, they're now on it for good.
+    perm: preCheck.exists, // If they're already on the allowlist, they're now on it for good.
     onSecondChance: false,
   }
 
@@ -46,9 +46,8 @@ const upsertDenylist = async (serverId, id, denyMessageLink) => {
     upsert: true, new: false, setDefaultsOnInsert: true,
   }
 
-  await Denylist.findOneAndUpdate(query, {
-    $set: theMember,
-  }, options).catch((err) => log(serverId, 'error', 'Denylisting member', err, { id, ...theMember }))
+  await Denylist.findOneAndUpdate(query, { $set: denylistEntry }, options)
+    .catch((err) => log(serverId, 'error', 'Denylisting', err, { ...denylistEntry, id }))
 }
 
 module.exports = { alreadyOnDenylist, upsertDenylist, giveSecondChance }
