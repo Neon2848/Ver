@@ -42,7 +42,7 @@ const warnPrompt = async (reaction, sender, message, client) => {
   await message.edit(emb).catch(() => {})
 }
 
-const botReactions = async (client, parts) => {
+const botModerationReactions = async (client, parts) => {
   const embedDesc = parts.message.embeds?.[0]?.description || null
   const embedFooter = parts.message.embeds?.[0]?.footer || null
   if (embedDesc && embedDesc.indexOf('React below to ban them for') > -1) {
@@ -50,6 +50,14 @@ const botReactions = async (client, parts) => {
   } if (embedFooter && embedFooter.text.indexOf('React below to warn for 2M, 2O, or ignore respestively') > -1) {
     warnPrompt(parts.messageReaction, parts.sendMember, parts.message, client)
   }
+}
+
+const botReactions = async (client, parts) => {
+  if (parts.messageReaction.emoji.name === 'raysA') raysAVote(client, parts)
+}
+
+const userReactions = async (client, parts) => {
+  if (parts.messageReaction.emoji.name === 'raysA') raysAStart(client, parts)
 }
 
 const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
@@ -63,13 +71,15 @@ module.exports = async (client, messageReaction, sender) => {
   const { emoji: { id } } = messageReaction
   if (!sendMember) return
 
+  const parts = { messageReaction, sendMember, message }
+
   if (recipient.id === client.user.id) {
-    botReactions(client, { messageReaction, sendMember, message })
-    if (messageReaction.emoji.name === 'raysA') raysAVote(client, { messageReaction, sendMember, message })
+    botModerationReactions(client, parts)
+    botReactions(client, parts)
     return
   }
 
   if (!message.channel.id !== welcomeChannel && isServerReaction(guild, id)) {
-    if (messageReaction.emoji.name === 'raysA') raysAStart(client, { messageReaction, sendMember, message })
+    userReactions(client, parts)
   }
 }

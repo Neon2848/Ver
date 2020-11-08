@@ -132,9 +132,12 @@ const completeRaysAVote = async (message, targetMessage, users) => {
 const checkRaysAVote = async (content) => {
   const { sendMember, message } = content
 
-  if (sendMember.user.bot || await runDenyList(content)) return false
-  if (preventReactSpam(content, 'voteMuteParticipate')) return false
-  if (!message.raysA?.targetMessage) return false
+  if (sendMember.user.bot
+    || await runDenyList(content)
+    || preventReactSpam(content, 'voteMuteParticipate')
+    || !message.raysA?.targetMessage
+  ) return false
+
   const targetMessage = await message.channel.messages.cache.get(message.raysA.targetMessage)
   if (message.raysA?.success) {
     await message.reactions.removeAll()
