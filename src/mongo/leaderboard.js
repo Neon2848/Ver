@@ -31,7 +31,6 @@ const addPoint = async (serverId, id) => {
   return res
 }
 
-// eslint-disable-next-line max-lines-per-function
 const getLBUser = async (serverId, id) => {
   const v3rmId = await getV3rmId(id)
   const res = await Leaderboard.aggregate([
@@ -41,24 +40,14 @@ const getLBUser = async (serverId, id) => {
         _id: false,
         users: {
           $push: {
-            _id: '$_id',
-            serverId: '$serverId',
-            id: '$id',
-            v3rmId: '$v3rmId',
-            points: '$points',
+            _id: '$_id', serverId: '$serverId', id: '$id', v3rmId: '$v3rmId', points: '$points',
           },
         },
       },
     },
     { $unwind: { path: '$users', includeArrayIndex: 'ranking' } },
     {
-      $match: {
-        'users.serverId': serverId,
-        $or: [
-          { 'users.v3rmId': v3rmId },
-          { 'users.id': id },
-        ],
-      },
+      $match: { 'users.serverId': serverId, $or: [{ 'users.v3rmId': v3rmId }, { 'users.id': id }] },
     },
   ])
   return res?.[0]
