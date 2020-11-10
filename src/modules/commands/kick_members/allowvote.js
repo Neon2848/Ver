@@ -17,7 +17,7 @@ const genVoteEmbed = (name, description, senderId, lastReason, config) => ({
 
 const embs = {
   notDenylisted: (senderId, ...args) => genVoteEmbed('Allowvote issue', ' is already allowed to votemute.', senderId, ...args),
-  permListed: (senderId, ...args) => genVoteEmbed('Allowvote issue', ' is denylisted, has already been denied at least twice. Admin approval is needed to remove this denylist.', senderId, ...args),
+  permListed: (senderId, ...args) => genVoteEmbed('Allowvote issue', ' is denylisted, and has already been denied at least twice. Admin approval is needed to remove this denylist.', senderId, ...args),
   chanceListed: (senderId, ...args) => genVoteEmbed('Allowvote success', ', you have now been removed from the votemute denylist. Please do not abuse the system again. If you\'re not sure whether or not something should be voted for, double check with a staff member.', senderId, ...args),
   reasonListed: (senderId, ...args) => genVoteEmbed('Allowvote Info', ' is not currently allowed to votemute.', senderId, ...args),
 }

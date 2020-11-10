@@ -81,7 +81,7 @@ const preventReactSpam = (content, type) => {
   const cacheSet = { member: sendMember, guild: message.guild }
 
   if (type === 'voteMuteStart') {
-    if (!inCacheUpsert(type, cacheSet, 600) && sendMember.hasPermission('KICK_MEMBERS')) return false
+    if (!inCacheUpsert(type, cacheSet, 600) || sendMember.hasPermission('KICK_MEMBERS')) return false
     messageReaction.users.remove(sendMember)
     message.channel.send(voteTimeoutEmbed(sendMember.id, message.client.config))
       .then((nm) => nm.delete({ timeout: 3000 }))

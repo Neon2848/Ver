@@ -1,4 +1,6 @@
 const path = require('path')
+const FileType = require('file-type')
+const { MessageAttachment } = require('discord.js')
 const config = require('../../../../config.json')
 const knownErrors = require('../../knownErrors')
 const lookup = require('../api/v3rm/lookup')
@@ -125,6 +127,49 @@ const recreateEmoji = (name, guild) => {
   guild.emojis.create(pth, name)
 }
 
+/* eslint-disable no-bitwise */
+const decToRGB = (dec) => ({
+  r: (dec & 0xff0000) >> 16,
+  g: (dec & 0x00ff00) >> 8,
+  b: (dec & 0x0000ff),
+})
+/* eslint-enable no-bitwise */
+
+const toNameArray = (sStats) => sStats.map((stat) => {
+  const name = stat.member[0]?.displayName.replace(/[^a-zA-Z\d]/gm, '') || 'Unknown'
+  return name.length > 8 ? `${name.substring(0, 7)}...` : name
+})
+
+const toColorArray = (sStats) => sStats.map((stat) => {
+  const rgb = decToRGB(stat.member[0]?.topRoleColor || 0)
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`
+})
+
+const toFieldArray = (sStats, key) => sStats.map((stat) => stat[key])
+
+const dtOptions = {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  year: '2-digit',
+  minute: '2-digit',
+}
+
+const sendFile = async (buffer, editable, sDF = null, eDF = null) => {
+  if (await FileType.fromBuffer(buffer) === undefined) {
+    sendResult(buffer.toString().trim(), { message: editable, edit: true }, 'Unable to generate graph.')
+    return false
+  }
+
+  const theMessage = sDF
+    ? `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC. \`\`\`diff\n- Note: This is development data, and is not accurate at all. The bot hasn't been running most of the time, and when it has it's only been collecting partial data. It will also be reset several times.\`\`\``
+    : '`Number of approved votemutes per user:`'
+
+  const file = new MessageAttachment(buffer, 'chart.png')
+  await editable.channel.send(theMessage, { files: [file] }).then(() => safeDelete(editable, 0))
+  return true
+}
+
 module.exports = {
   sendResult,
   msgIntegrityCheck,
@@ -136,4 +181,8 @@ module.exports = {
   inCacheUpsert,
   recreateEmoji,
   safeDelete,
+  toNameArray,
+  toColorArray,
+  toFieldArray,
+  sendFile,
 }

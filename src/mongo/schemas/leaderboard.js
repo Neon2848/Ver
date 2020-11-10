@@ -8,7 +8,6 @@ const leaderboardSchema = new Schema({
   id: { type: String },
   v3rmId: { type: Number },
   points: { type: Number, Default: 0 },
-
 })
 
 module.exports = leaderboardSchema

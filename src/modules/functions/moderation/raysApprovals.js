@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { upsertDenylist } = require('../../../mongo/denyvote')
-const addPoint = require('../../../mongo/leaderboard')
+const { addPoint } = require('../../../mongo/leaderboard')
 const { logMessage } = require('./logger')
 
 const logRaysAToApprovals = async (message, sendMember) => {
@@ -30,7 +30,11 @@ const approveRays = async (message, sendMember) => {
   if (message.raysA.isBeingApproved) return
   // eslint-disable-next-line no-param-reassign
   message.raysA.isBeingApproved = true
-  await addPoint(message.guild.id, sendMember.id)
+  const { raysA: { initialVoter: { id } } } = message
+  const theMember = await message.guild.members.cache.get(id)
+  if (!theMember) return
+
+  await addPoint(message.guild.id, theMember.id)
   updateApprovalLog('diff\n+ Approved', sendMember.user.tag, message)
 }
 
