@@ -77,24 +77,41 @@ const userReactions = async (client, parts) => {
 
 const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 
-module.exports = async (client, messageReaction, sender) => {
-  if (sender.bot || !messageReaction.message || !messageReaction.message.member) return
+const getVars = async (client, messageReaction, sender) => {
   const { message } = messageReaction
-  const recipient = message.member
-  const sendMember = message.guild.members.cache.get(sender.id)
-  const { guild, guild: { giuseppe: { channels: { welcomeChannel } } } } = message
-  const { emoji: { id } } = messageReaction
-  if (!sendMember) return
+  if (sender.bot
+    || !messageReaction.message
+    || !messageReaction.message.member
+  ) return false
+  const sendMember = await message.guild.members.cache.get(sender.id)
+  if (!sendMember) return false
 
-  const parts = { messageReaction, sendMember, message }
+  return {
+    client,
+    message,
+    parts: { messageReaction, sendMember, message },
+  }
+}
 
-  if (recipient.id === client.user.id) {
+module.exports = async (...args) => {
+  const data = await getVars(...args)
+  if (!data) return
+
+  const {
+    client,
+    parts,
+    parts: {
+      message: {
+        channel, member, guild, guild: { giuseppe: { channels: { welcomeChannel } } },
+      }, messageReaction: { emoji: { id } },
+    },
+  } = data
+
+  if (member.id === client.user.id) {
     botModerationReactions(client, parts)
     botReactions(client, parts)
     return
   }
 
-  if (!message.channel.id !== welcomeChannel && isServerReaction(guild, id)) {
-    userReactions(client, parts)
-  }
+  if (!channel.id !== welcomeChannel && isServerReaction(guild, id)) userReactions(client, parts)
 }
