@@ -111,18 +111,29 @@ const raysAStart = async (client, content) => {
   editable.raysA = { targetMessage: message.id }
 }
 
-const getRealVoterCount = (reactionUsers, guildId) => {
-  // TODO: Certain roles get more than +1.
-  const users = reactionUsers.filter((u) => (!u.bot && !checkDenyList(u, guildId).deny)).map((u) => ` <@${u.id}> +1`)
-  return { count: users.length, users }
+const userVoteBonus = (u, guild) => {
+  const { giuseppe: { roles: { leaderboardLord, nitro, esoterica } } } = guild
+  const m = guild.members.cache.get(u.id)
+  if (m) {
+    if (m.roles.cache.filter((r) => r.id === leaderboardLord).size) return 4
+    if (m.roles.cache.filter((r) => r.id === esoterica || r.id === nitro || r.permissions.has('KICK_MEMBERS')).size) return 2
+  }
+  return 1
+}
+
+const getRealVoterCount = (reactionUsers, guild) => {
+  const validUsers = reactionUsers.filter((u) => (!u.bot && !checkDenyList(u, guild.id).deny))
+  const users = validUsers.map((u) => ` <@${u.id}> +${userVoteBonus(u, guild)}`)
+  const count = validUsers.map((u) => userVoteBonus(u, guild)).reduce((a, b) => a + b)
+  return { count, users }
 }
 
 const completeRaysAVote = async (message, targetMessage, users) => {
   message.reactions.removeAll()
-  // eslint-disable-next-line no-param-reassign
+  /* eslint-disable no-param-reassign */
   message.guild.giuseppe.queues.voteMuteStart = []
-  // eslint-disable-next-line no-param-reassign
   message.guild.giuseppe.queues.voteMuteParticipate = []
+  /* eslint-enable no-param-reassign */
   if (!targetMessage || targetMessage.deleted) return
   await targetMessage.delete()
   await muteMember(message.guild, targetMessage.member, { muteReason: 'Vote Muted' })
@@ -156,15 +167,15 @@ const raysAVote = async (client, content) => {
   if (!targetMessage) return
 
   const reactionUsers = await messageReaction.users.fetch()
-  const numVotes = getRealVoterCount(reactionUsers, message.guild.id)
+  const numVotes = getRealVoterCount(reactionUsers, message.guild)
   const newEmbed = message.embeds[0]
 
-  if (numVotes.count >= 1) {
+  if (numVotes.count >= 5) {
     message.raysA = { ...message.raysA, success: true }
     await completeRaysAVote(message, targetMessage, numVotes.users)
   } else {
     newEmbed.fields = [
-      { name: 'Vote Points', value: `${numVotes.count}/2`, inline: true },
+      { name: 'Vote Points', value: `${numVotes.count}/5`, inline: true },
       { name: 'Voters', value: numVotes.users, inline: true },
     ]
     await message.edit({ embed: newEmbed })

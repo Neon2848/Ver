@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { upsertDenylist } = require('../../../mongo/denyvote')
+const addPoint = require('../../../mongo/leaderboard')
 const { logMessage } = require('./logger')
 
 const logRaysAToApprovals = async (message, sendMember) => {
@@ -26,6 +27,10 @@ const updateApprovalLog = async (action, user, message) => {
 const ignoreRays = async (message, sendMember) => updateApprovalLog('fix\nIgnored', sendMember.user.tag, message)
 
 const approveRays = async (message, sendMember) => {
+  if (message.raysA.isBeingApproved) return
+  // eslint-disable-next-line no-param-reassign
+  message.raysA.isBeingApproved = true
+  await addPoint(message.guild.id, sendMember.id)
   updateApprovalLog('diff\n+ Approved', sendMember.user.tag, message)
 }
 
@@ -37,8 +42,8 @@ const denyRays = async (message, sendMember) => {
   embed.fields = embed.fields.filter((f) => f.name !== '----')
   embed.description = null
   embed.addField('\u200E', `\`\`\`diff\n- ${sendMember.displayName} has decided that the initial voter (${raysA.initialVoter.displayName}) has abused the vote system. They have now been denylisted from the vote delete system.\`\`\``)
-  message.guild.channels.cache.get(raysA.initialChannel).send(`<@${sendMember.id}> <@${raysA.initialVoter.id}>`, { embed })
-  await upsertDenylist(message.guild.id, raysA.initialVoter.id, `https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`)
+  const logMsg = await message.guild.channels.cache.get(raysA.initialChannel).send(`<@${sendMember.id}> <@${raysA.initialVoter.id}>`, { embed })
+  await upsertDenylist(message.guild.id, raysA.initialVoter.id, `https://discordapp.com/channels/${logMsg.guild.id}/${logMsg.channel.id}/${logMsg.id}`)
 }
 
 module.exports = {

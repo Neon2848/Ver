@@ -23,6 +23,9 @@ const serversSchema = new Schema({
     muted: { type: String, default: 'votemuted' },
     toxic: { type: String, default: 'toxic' },
     member: { type: String, default: 'Member' },
+    nitro: { type: String, default: 'cute people' },
+    leaderboardLord: { type: String, default: 'Leaderboard Lord' },
+    esoterica: { type: String, default: 'Esoterica' },
   },
 })
 

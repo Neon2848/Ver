@@ -38,7 +38,7 @@ const warnPrompt = async (reaction, sender, message, client) => {
     emb.setFooter(`This user has been warned by ${sender.user.tag}.`)
     const user = emb.fields[0].value.replace(/[^0-9]/g, '')
     await client.commands.get('warn')
-      .run(message, { argMap: { users: [user] } }, warnReason)
+      .run(null, message, { argMap: { users: [user] } }, warnReason)
   }
   await message.edit(emb).catch(() => {})
 }
