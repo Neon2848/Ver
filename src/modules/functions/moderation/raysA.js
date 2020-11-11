@@ -3,10 +3,8 @@ const { safeDelete, kickUser, inCacheUpsert } = require('../general')
 const { muteMember } = require('./mute')
 const { logRaysAToApprovals } = require('./raysApprovals')
 
-/* TODO:
-  if (message.member.hasPermission('KICK_MEMBERS')) return { deny: true, punish: false }
-*/
 const checkDenyList = async (sender, guildId) => {
+  if (sender.hasPermission('KICK_MEMBERS')) return { deny: true, punish: false }
   const checkDl = await alreadyOnDenylist({ serverId: guildId, id: sender.id })
   if (checkDl.exists && !checkDl.onSecondChance) return { deny: true, punish: true }
   return { deny: false, punish: false }
@@ -94,9 +92,23 @@ const preventReactSpam = (content, type) => {
   return true
 }
 
+let nextChuu = 0
+const isBotAndMuteChuu = (message) => {
+  if (!message.author.bot) return false
+  if (message.member.roles.cache.find((role) => role.id === message.guild.giuseppe.roles.chuu)) {
+    if (Date.now() >= nextChuu) {
+      nextChuu = Date.now() + 600000
+      message.delete()
+    }
+  }
+  return true
+}
+
 const raysAStart = async (client, content) => {
   const { messageReaction, sendMember, message } = content
-  if (sendMember.user.bot || message.raysA?.hasBeenVoted) return
+  console.log('h')
+  if (isBotAndMuteChuu(message) || message.raysA?.hasBeenVoted) return
+  console.log('hh')
   if (await runDenyList(content) || preventReactSpam(content, 'voteMuteStart')) return
   const theEmoji = messageReaction?.emoji || await message.guild.emojis.cache.find((e) => e.name === 'raysA')
 
