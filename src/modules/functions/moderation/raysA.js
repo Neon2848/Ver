@@ -3,8 +3,8 @@ const { safeDelete, kickUser, inCacheUpsert } = require('../general')
 const { muteMember } = require('./mute')
 const { logRaysAToApprovals } = require('./raysApprovals')
 
-const checkDenyList = async (sender, guildId) => {
-  if (sender.hasPermission('KICK_MEMBERS')) return { deny: true, punish: false }
+const checkDenyList = async (sender, recipient, guildId) => {
+  if (recipient.hasPermission('KICK_MEMBERS')) return { deny: true, punish: false }
   const checkDl = await alreadyOnDenylist({ serverId: guildId, id: sender.id })
   if (checkDl.exists && !checkDl.onSecondChance) return { deny: true, punish: true }
   return { deny: false, punish: false }
@@ -26,7 +26,7 @@ const punishUser = async (content, muteReason = 'Attempting to vote while denyli
 
 const runDenyList = async (content) => {
   const { messageReaction, sendMember, message } = content
-  const { deny, punish } = await checkDenyList(sendMember, message.guild.id)
+  const { deny, punish } = await checkDenyList(sendMember, message.member, message.guild.id)
   if (punish) punishUser(content)
   if (deny) {
     if (messageReaction) messageReaction.users.remove(sendMember.id)
