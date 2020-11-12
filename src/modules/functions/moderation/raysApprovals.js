@@ -46,7 +46,7 @@ const denyRays = async (message, sendMember) => {
   embed.fields = embed.fields.filter((f) => f.name !== '----')
   embed.description = null
   embed.addField('\u200E', `\`\`\`diff\n- ${sendMember.displayName} has decided that the initial voter (${raysA.initialVoter.displayName}) has abused the vote system. They have now been denylisted from the vote delete system.\`\`\``)
-  const logMsg = await message.guild.channels.cache.get(raysA.initialChannel).send(`<@${sendMember.id}> <@${raysA.initialVoter.id}>`, { embed })
+  const logMsg = await message.guild.channels.cache.get(raysA.initialChannel).send(`<@${raysA.initialVoter.id}>`, { embed })
   await upsertDenylist(message.guild.id, raysA.initialVoter.id, `https://discordapp.com/channels/${logMsg.guild.id}/${logMsg.channel.id}/${logMsg.id}`)
 }
 

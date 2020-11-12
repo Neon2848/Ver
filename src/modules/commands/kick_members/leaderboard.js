@@ -20,17 +20,24 @@ const specificUser = async (message, uid) => {
   )
 }
 
+const getPresentLeaderboard = async (leaderboard, guild) => {
+  const serverMembers = await guild.members.fetch({ user: leaderboard.map((lb) => lb.id)})
+  const nonStaff = serverMembers.filter((m) => !m.hasPermission('KICK_MEMBERS')).map((ns) => ns.id)
+  return leaderboard.filter((lb) => nonStaff.includes(lb.id))
+}
+
 exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
   const editable = await message.reply(genSpinner('Generating leaderboard...'))
-  const limit = args.argMap.numbers[0] || 10
+  const limit = parseInt(args.argMap.numbers[0], 10) || 10
   const specify = args.argMap.users[0]
 
   if (specify) return specificUser(editable, specify)
 
   const lb = await getLeaderboard(message.guild.id, limit)
-  const labels = toNameArray(lb)
-  const colours = toColorArray(lb)
-  const data = toFieldArray(lb, 'points')
+  const neededEntries = await getPresentLeaderboard(lb, message.guild)
+  const labels = toNameArray(neededEntries)
+  const colours = toColorArray(neededEntries)
+  const data = toFieldArray(neededEntries, 'points')
   const buffer = await getBar(labels, data, colours, [])
   return sendFile(buffer, editable)
 }
