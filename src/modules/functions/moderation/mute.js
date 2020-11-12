@@ -5,7 +5,7 @@ const { upsertMute, getAndUnmute, getNextUnmuteMuteTime } = require('../../../mo
 const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 
 const muteMember = async (guild, member, details, message) => {
-  const insertMute = await upsertMute(guild.id, member.user.id, details)
+  const insertMute = await upsertMute(guild.id, member.id, details)
   const muteRole = guild.roles.cache.get(guild.giuseppe.roles.muted)
   await member.roles.add(muteRole).catch(() => {
     addtoRoleQueue(member.id, member, null, [muteRole.name])

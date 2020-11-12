@@ -4,8 +4,8 @@
     "maxStatQueue": 10
   },
   "slowmode": {
-    "messagesPer": 6,
-    "pollingRate": 3,
+    "messagesPer": 7,
+    "pollingRate": 4,
     "seconds": 5
   },
   "maxPings": 2,

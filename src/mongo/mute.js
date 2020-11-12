@@ -35,7 +35,6 @@ const getNextUnmuteMuteTime = async (serverId) => {
 
 const getAndUnmute = async (serverId, ids) => {
   const now = Date.now()
-  // unmuteTime: { $lte: now },
 
   const mutedMembers = await Members.aggregate([
     { $match: { serverId, id: { $in: ids } } },
@@ -46,9 +45,10 @@ const getAndUnmute = async (serverId, ids) => {
     },
   ]).catch((_) => { throw _ })
 
-  const unmutedMembers = mutedMembers.filter((un) => un.muted[0]?.unmuteTime <= now)
-  const unmutedIds = unmutedMembers.map((m) => m.id)
-  const unmutedV3rmIds = unmutedMembers.map((m) => m.v3rmId)
+  // Find muted users whose time has expred, or who aren't in the muted list at all.
+  const unMM = mutedMembers.filter((un) => !un.muted?.[0] || un.muted[0].unmuteTime <= now)
+  const unmutedIds = unMM.map((m) => m.id)
+  const unmutedV3rmIds = unMM.map((m) => m.v3rmId)
   await Muted.deleteMany({ v3rmId: { $in: unmutedV3rmIds } })
   return unmutedIds || []
 }

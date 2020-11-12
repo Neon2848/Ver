@@ -106,13 +106,10 @@ const isBotAndMuteChuu = (message) => {
 
 const raysAStart = async (client, content) => {
   const { messageReaction, sendMember, message } = content
-  console.log('h')
-  if (isBotAndMuteChuu(message) || message.raysA?.hasBeenVoted) return
-  console.log('hh')
+  if (isBotAndMuteChuu(message) || !!message.raysA?.sourceMessage) return
   if (await runDenyList(content) || preventReactSpam(content, 'voteMuteStart')) return
   const theEmoji = messageReaction?.emoji || await message.guild.emojis.cache.find((e) => e.name === 'raysA')
 
-  message.raysA = { hasBeenVoted: true }
   logRaysAToApprovals(message, sendMember)
 
   const messageLink = `${message.guild.id}/${message.channel.id}/${message.id}`
@@ -121,6 +118,7 @@ const raysAStart = async (client, content) => {
   )
   editable.react(theEmoji)
   editable.raysA = { targetMessage: message.id }
+  message.raysA = { sourceMessage: editable.id }
 }
 
 const userVoteBonus = (u, guild) => {
@@ -140,16 +138,15 @@ const getRealVoterCount = (reactionUsers, guild) => {
   return { count, users }
 }
 
-const completeRaysAVote = async (message, targetMessage, users) => {
+const completeRaysAVote = async (targetMessage, message, users) => {
   message.reactions.removeAll()
   /* eslint-disable no-param-reassign */
   message.guild.giuseppe.queues.voteMuteStart = []
   message.guild.giuseppe.queues.voteMuteParticipate = []
   /* eslint-enable no-param-reassign */
-  if (!targetMessage || targetMessage.deleted) return
-  await targetMessage.delete()
+  safeDelete(targetMessage, 0)
   await muteMember(message.guild, targetMessage.member, { muteReason: 'Vote Muted' })
-  await message.edit(voteCompleteEmbed(targetMessage.author.id, users, message.client.config))
+  await message.edit(voteCompleteEmbed(targetMessage.member.id, users, message.client.config))
 }
 
 const checkRaysAVote = async (content) => {
@@ -184,7 +181,7 @@ const raysAVote = async (client, content) => {
 
   if (numVotes.count >= 5) {
     message.raysA = { ...message.raysA, success: true }
-    await completeRaysAVote(message, targetMessage, numVotes.users)
+    await completeRaysAVote(targetMessage, message, numVotes.users)
   } else {
     newEmbed.fields = [
       { name: 'Vote Points', value: `${numVotes.count}/5`, inline: true },
@@ -194,4 +191,14 @@ const raysAVote = async (client, content) => {
   }
 }
 
-module.exports = { raysAStart, raysAVote }
+const checkMessageForRaysA = async (message) => {
+  // If the message is being voted on
+  if (message.raysA?.sourceMessage) {
+    const sourceMsg = message.channel.messages.cache.get(message.raysA.sourceMessage)
+    // If the votemute message linked to this one hasn't completed yet.
+    if (sourceMsg.raysA.success === true) return
+    await completeRaysAVote(message, sourceMsg, '`Unknown, the user edited/deleted their message and has been votemuted anyway.`')
+  }
+}
+
+module.exports = { raysAStart, raysAVote, checkMessageForRaysA }
