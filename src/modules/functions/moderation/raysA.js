@@ -4,7 +4,7 @@ const { muteMember } = require('./mute')
 const { logRaysAToApprovals } = require('./raysApprovals')
 
 const checkDenyList = async (sender, recipient, guildId) => {
-  if (recipient.hasPermission('KICK_MEMBERS')) return { deny: true, punish: false }
+  //if (recipient.hasPermission('KICK_MEMBERS')) return { deny: true, punish: false }
   const checkDl = await alreadyOnDenylist({ serverId: guildId, id: sender.id })
   if (checkDl.exists && !checkDl.onSecondChance) return { deny: true, punish: true }
   return { deny: false, punish: false }
@@ -176,6 +176,7 @@ const raysAVote = async (client, content) => {
   if (!targetMessage) return
 
   const reactionUsers = await messageReaction.users.fetch()
+  if(!reactionUsers.size) return
   const numVotes = getRealVoterCount(reactionUsers, message.guild)
   const newEmbed = message.embeds[0]
 
