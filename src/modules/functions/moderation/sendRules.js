@@ -11,6 +11,7 @@ const sendRules = async (channel, full = true) => {
 
 \`\`\`diff\n
 ! Among the things you are agreeing to by following the 3 rule-sets above are:
+
 - You are over the age of 13.
 - You will not post **any** NSFW content.
 - You will not post homophobic or racist content, nor use derogatory words **even in a non-derogatory context** relating to such content.

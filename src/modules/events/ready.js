@@ -46,9 +46,5 @@ module.exports = async (client) => {
     objData.giuseppe = await createGiuseppeObject(s, objData)
   })
 
-  const tempChannel = await client.guilds.cache.get('571114137107562541')
-  await sendRules(tempChannel.channels.cache.get('776851134765072445'))
-  await sendRules(tempChannel.channels.cache.get('571117537115373570'))
-
   log('global', 'info', 'connected', undefined, { user: client.user.tag })
 }
