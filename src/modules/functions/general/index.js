@@ -47,7 +47,7 @@ const sendResult = (resultMsg, caller, resultTitle) => {
 }
 
 const kickUser = (member, editable, reasons) => {
-  if (member.user.bot) return
+  if (!member || member.user.bot) return
   member.send(reasons.dm).finally(() => {
     if (reasons.channel) sendResult(reasons.channel, { message: editable, edit: editable.author.bot }, 'Kicking User')
     member.kick(reasons.log).catch((e) => sendResult(`Unable to kick user: \`${e}\``, { message: editable, timeout: 10000 }, 'Kick Error'))
