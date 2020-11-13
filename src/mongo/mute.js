@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 const log = require('./log')
-const mutedSchema = require('./schemas/muteList')
+const mutedSchema = require('./schemas/mutelist')
 const { getV3rmId } = require('./members')
 const membersSchema = require('./schemas/members')
 
-const Muted = mongoose.model('muteList', mutedSchema)
+const Muted = mongoose.model('mutelist', mutedSchema)
 const Members = mongoose.model('members', membersSchema)
 
 const upsertMute = async (serverId, id, muteDetails) => {
@@ -17,12 +17,14 @@ const upsertMute = async (serverId, id, muteDetails) => {
     unmuteTime: new Date(muteDetails.unmuteTime || Date.now() + 600000),
   }
   const options = {
-    upsert: true, new: true, setDefaultsOnInsert: true,
+    upsert: true, new: false, setDefaultsOnInsert: true,
   }
 
   const succ = await Muted.findOneAndUpdate(query, {
     $set: theMember,
   }, options).catch((err) => log(serverId, 'error', 'Muting Member', err, { id, ...theMember }))
+
+  if (succ && succ.unmuteTime <= Date.now()) return null
   return succ
 }
 
@@ -33,7 +35,6 @@ const getNextUnmuteMuteTime = async (serverId) => {
 
 const getAndUnmute = async (serverId, ids) => {
   const now = Date.now()
-  // unmuteTime: { $lte: now },
 
   const mutedMembers = await Members.aggregate([
     { $match: { serverId, id: { $in: ids } } },
@@ -44,9 +45,10 @@ const getAndUnmute = async (serverId, ids) => {
     },
   ]).catch((_) => { throw _ })
 
-  const unmutedMembers = mutedMembers.filter((un) => un.muted[0]?.unmuteTime <= now)
-  const unmutedIds = unmutedMembers.map((m) => m.id)
-  const unmutedV3rmIds = unmutedMembers.map((m) => m.v3rmId)
+  // Find muted users whose time has expred, or who aren't in the muted list at all.
+  const unMM = mutedMembers.filter((un) => !un.muted?.[0] || un.muted[0].unmuteTime <= now)
+  const unmutedIds = unMM.map((m) => m.id)
+  const unmutedV3rmIds = unMM.map((m) => m.v3rmId)
   await Muted.deleteMany({ v3rmId: { $in: unmutedV3rmIds } })
   return unmutedIds || []
 }

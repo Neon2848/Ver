@@ -8,7 +8,7 @@ const { checkWordFilters } = require('../functions/moderation')
 const { checkPings } = require('../functions/moderation/pingAbuse')
 const { unmuteMembers } = require('../functions/moderation/mute')
 const { preventFlood } = require('../functions/moderation/preventFlood')
-const { unsafeDelete, msgIntegrityCheck, basicLookup } = require('../functions/general')
+const { safeDelete, msgIntegrityCheck, basicLookup } = require('../functions/general')
 const { getV3rmId } = require('../../mongo/members')
 
 const assignRoles = async (message) => {
@@ -16,7 +16,7 @@ const assignRoles = async (message) => {
     if (/^i agree$/gmi.test(message.cleanContent) && !message.member.roles.cache.find((r) => r.name === 'Member')) {
       message.member.roles.add(message.guild.roles.cache.find((r) => r.name === 'Member')).catch((_) => knownErrors.userOperation(_, message.member.guild.id, 'assigning roles'))
     }
-    unsafeDelete(message, 0)
+    safeDelete(message, 0)
   }
 }
 
@@ -29,7 +29,7 @@ const checkCmdPerms = (message, cmd) => {
   // The command is a bot-commands only command
   if (cmd.permissionLevel !== permissionLevel) {
     if (botCommands !== message.channel.id) {
-      unsafeDelete(message, 0)
+      safeDelete(message, 0)
       return false
     }
   }
@@ -57,14 +57,17 @@ const runTasks = async (client, message) => {
 }
 
 module.exports = async (client, message) => {
-  if(message.channel.type === 'dm') console.log(`${message.author.tag} | ${message.channel.recipient} - ${message.cleanContent}`)
+  if (message.channel.type === 'dm') console.log(`${message.author.tag} | ${message.channel.recipient} - ${message.cleanContent}`)
   if (!msgIntegrityCheck(message)) return
-  if (client.secrets.v3rm.api.enabled){
+
+  // Any user who speaks and does not have a stored v3rmId will be looked up.
+  // This stores them in the database, and does their role/name assignment.
+  if (client.secrets.v3rm.api.enabled) {
     const v3rmId = await getV3rmId(message.guild.id, message.author.id)
-    if(!v3rmId) await basicLookup(message.member)
-    assignRoles(message)
+    if (!v3rmId) await basicLookup(message.member)
   }
 
+  assignRoles(message)
   checkWordFilters(client, message)
   checkPings(client, message)
   preventFlood(client, message)

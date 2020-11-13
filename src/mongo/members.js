@@ -1,8 +1,6 @@
 const mongoose = require('mongoose')
 const knownErrors = require('../modules/knownErrors')
 const membersSchema = require('./schemas/members')
-const { v3rm: { api: { enabled } } } = require('../../secrets.json')
-const v3rmApi = require('../modules/functions/api/v3rm/apiCall')
 
 const Members = mongoose.model('members', membersSchema)
 

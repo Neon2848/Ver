@@ -4,9 +4,7 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const mongo = require('../../mongo/connect')
 const log = require('../../mongo/log')
-const { getV3rmId } = require('../../mongo/members')
 const { getNextUnmuteMuteTime } = require('../../mongo/mute')
-const { basicLookup } = require('../functions/general')
 
 const convertNamesCircular = (inputArray, guild, setting, type) => {
   Object.keys(inputArray).forEach((key) => {
@@ -30,6 +28,8 @@ const createGiuseppeObject = async (s, objData) => {
       exploit: [],
       sensitive: [],
       pingAbuse: [],
+      voteMuteStart: [],
+      voteMuteParticipate: [],
     },
   }
 }

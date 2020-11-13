@@ -17,10 +17,17 @@ const serversSchema = new Schema({
     botCommands: { type: String, default: 'bot-commands' },
     modLog: { type: String, default: 'channel-log' },
     slurLog: { type: String, default: 'swore-log' },
+    voteApprovals: { type: String, default: 'vote-abuse-approvals' },
   },
   roles: {
     muted: { type: String, default: 'votemuted' },
     toxic: { type: String, default: 'toxic' },
+    member: { type: String, default: 'Member' },
+    nitro: { type: String, default: 'cute people' },
+    leaderboardLord: { type: String, default: 'Leaderboard Lord' },
+    esoterica: { type: String, default: 'Esoterica' },
+    // chuu: { type: String, default: 'Chuu.fm' },
+    chuu: { type: String, default: 'Chuu.fm' },
   },
 })
 

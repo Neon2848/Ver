@@ -1,6 +1,7 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
-const { unsafeDelete } = require('../functions/general')
-const { raysA } = require('../functions/moderation/raysA')
+const { safeDelete } = require('../functions/general')
+const { raysAStart, raysAVote } = require('../functions/moderation/raysA')
+const { ignoreRays, denyRays, approveRays } = require('../functions/moderation/raysApprovals')
 
 /**
  * @param {Discord.Client} client bot client
@@ -10,7 +11,7 @@ const { raysA } = require('../functions/moderation/raysA')
 
 const banPrompt = async (reaction, sender, message, desc, client) => {
   if (!sender.hasPermission('KICK_MEMBERS')) return
-  if (reaction.emoji.name === '❌') { unsafeDelete(message, 0); return }
+  if (reaction.emoji.name === '❌') { safeDelete(message, 0); return }
 
   const banDeets = /<@([0-9]+)>[\s\S]+```Reason: (.+)```/.exec(desc)
   let banLength
@@ -19,7 +20,7 @@ const banPrompt = async (reaction, sender, message, desc, client) => {
   else return
 
   await client.commands.get('ban').run(client, message, { argMap: { numbers: [banLength], users: [banDeets[1]] } }, banDeets[2])
-  unsafeDelete(message, 0)
+  safeDelete(message, 0)
 }
 
 const warnPrompt = async (reaction, sender, message, client) => {
@@ -37,12 +38,12 @@ const warnPrompt = async (reaction, sender, message, client) => {
     emb.setFooter(`This user has been warned by ${sender.user.tag}.`)
     const user = emb.fields[0].value.replace(/[^0-9]/g, '')
     await client.commands.get('warn')
-      .run(message, { argMap: { users: [user] } }, warnReason)
+      .run(null, message, { argMap: { users: [user] } }, warnReason)
   }
   await message.edit(emb).catch(() => {})
 }
 
-const botReactions = async (client, parts) => {
+const botModerationReactions = async (client, parts) => {
   const embedDesc = parts.message.embeds?.[0]?.description || null
   const embedFooter = parts.message.embeds?.[0]?.footer || null
   if (embedDesc && embedDesc.indexOf('React below to ban them for') > -1) {
@@ -52,16 +53,65 @@ const botReactions = async (client, parts) => {
   }
 }
 
-module.exports = async (client, messageReaction, sender) => {
-  if (sender.bot || !messageReaction.message || !messageReaction.message.member) return
-  const { message } = messageReaction
-  const recipient = message.member
-  const sendMember = message.guild.members.cache.get(sender.id)
-  if (!sendMember) return
-
-  if (recipient.id === client.user.id) {
-    botReactions(client, { messageReaction, sendMember, message })
-  } else if (!message.channel.id !== message.guild.giuseppe.channels.welcomeChannel) {
-    raysA(client, { messageReaction, sendMember, message })
+const botReactions = async (client, parts) => {
+  const { sendMember, message, messageReaction: { emoji: { name } } } = parts
+  if (name === 'raysA') raysAVote(client, parts)
+  if (!message.raysA?.isApproval) return
+  switch (name) {
+    case '👍':
+      approveRays(message, sendMember)
+      break
+    case '👎':
+      denyRays(message, sendMember)
+      break
+    case '❌':
+      ignoreRays(message, sendMember)
+      break
+    default: break
   }
+}
+
+const userReactions = async (client, parts) => {
+  if (parts.messageReaction.emoji.name === 'raysA') raysAStart(client, parts)
+}
+
+const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
+
+const getVars = async (client, messageReaction, sender) => {
+  const { message } = messageReaction
+  if (sender.bot
+    || !messageReaction.message
+    || !messageReaction.message.member
+  ) return false
+  const sendMember = await message.guild.members.cache.get(sender.id)
+  if (!sendMember) return false
+
+  return {
+    client,
+    message,
+    parts: { messageReaction, sendMember, message },
+  }
+}
+
+module.exports = async (...args) => {
+  const data = await getVars(...args)
+  if (!data) return
+
+  const {
+    client,
+    parts,
+    parts: {
+      message: {
+        channel, member, guild, guild: { giuseppe: { channels: { welcomeChannel } } },
+      }, messageReaction: { emoji: { id } },
+    },
+  } = data
+
+  if (member.id === client.user.id) {
+    botModerationReactions(client, parts)
+    botReactions(client, parts)
+    return
+  }
+
+  if (!channel.id !== welcomeChannel && isServerReaction(guild, id)) userReactions(client, parts)
 }

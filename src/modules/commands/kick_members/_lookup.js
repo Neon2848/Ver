@@ -1,6 +1,6 @@
 const lookup = require('../../functions/api/v3rm/lookup')
 const {
-  sendResult, kickUser, genSpinner, unsafeDelete,
+  sendResult, kickUser, genSpinner, safeDelete,
 } = require('../../functions/general')
 const { basicUserSetup } = require('../../functions/api/v3rm/userSetup')
 const { logMember } = require('../../functions/database/members')
@@ -40,10 +40,10 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
 
   const details = await lookup(discordid, editable.guild.id, { bypass: message.member.hasPermission('KICK_MEMBERS'), type }).catch((err) => sendError(err, editable))
   if (!details) return
-  logMember(message.guild.id, message.guild.members.cache.get(discordid), details.uid)
+  const guildMember = message.guild.members.cache.get(discordid)
+  if(guildMember) logMember(message.guild.id, guildMember, details.uid)
 
-  const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
   const kickedMember = updateOrKickMember(guildMember, editable, details)
   editable.channel.send(`<@${discordid}> is: ${client.config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } })
-    .then(() => { if (kickedMember) unsafeDelete(editable, 0) })
+    .then(() => { if (!guildMember || kickedMember) safeDelete(editable, 0) })
 }

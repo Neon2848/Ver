@@ -1,33 +1,17 @@
-const { MessageAttachment } = require('discord.js')
-const FileType = require('file-type')
 const { getServerStats, getUserStats } = require('../../../mongo/stats')
-const { sendResult, genSpinner, unsafeDelete } = require('../../functions/general')
 const { getBar, getLine } = require('../../functions/api/quickchart')
+const {
+  sendResult, genSpinner, safeDelete, toNameArray, toColorArray, toFieldArray, sendFile,
+} = require('../../functions/general')
 
 let lastCall = Date.now()
-const maxCall = 60 * 1000
+const maxCall = 30 * 1000
 
 const checkCall = (member, dNow) => {
   if (member.hasPermission('KICK_MEMBERS')) return true
   if (maxCall - Math.abs(dNow - lastCall) > 0) return false
   lastCall = dNow
   return true
-}
-
-/* eslint-disable no-bitwise */
-const decToRGB = (dec) => ({
-  r: (dec & 0xff0000) >> 16,
-  g: (dec & 0x00ff00) >> 8,
-  b: (dec & 0x0000ff),
-})
-/* eslint-enable no-bitwise */
-
-const dtOptions = {
-  month: 'short',
-  day: 'numeric',
-  hour: 'numeric',
-  year: '2-digit',
-  minute: '2-digit',
 }
 
 const getAllHoursSinceDate = (date) => {
@@ -42,18 +26,6 @@ const getAllHoursSinceDate = (date) => {
   }
   return hours
 }
-
-const toFieldArray = (sStats, key) => sStats.map((stat) => stat[key])
-
-const toNameArray = (sStats) => sStats.map((stat) => {
-  const name = stat.member[0]?.displayName.replace(/[^a-zA-Z\d]/gm, '') || 'Unknown'
-  return name.length > 8 ? `${name.substring(0, 7)}...` : name
-})
-
-const toColorArray = (sStats) => sStats.map((stat) => {
-  const rgb = decToRGB(stat.member[0]?.topRoleColor || 0)
-  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`
-})
 
 const extraBarData = (pToData, pFromData) => [
   {
@@ -82,20 +54,6 @@ const convertDataToBar = (sStats, showPings) => {
   return {
     labels, data, colours, extraData: [],
   }
-}
-
-const sendFile = async (buffer, editable, sDF, eDF) => {
-  if (await FileType.fromBuffer(buffer) === undefined) {
-    sendResult(buffer.toString().trim(), { message: editable, edit: true }, 'Unable to generate graph.')
-    return false
-  }
-
-  const file = new MessageAttachment(buffer, 'chart.png')
-  await editable.channel.send(
-    `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC. \`\`\`diff\n- Note: This is development data, and is not accurate at all. The bot hasn't been running most of the time, and when it has it's only been collecting partial data. It will also be reset several times.\`\`\``,
-    { files: [file] },
-  ).then(() => unsafeDelete(editable, 0))
-  return true
 }
 
 const doBarGraph = async (message, sDF, eDF, graphLength, args, editable) => {
@@ -161,7 +119,7 @@ const doLineGraph = async (message, sDF, eDF, args, editable) => {
 }
 
 const graphDecisionEngine = async (message, dNow, argMap) => {
-  if (!checkCall(message.member, dNow)) { unsafeDelete(message, 0); return null }
+  if (!checkCall(message.member, dNow)) { safeDelete(message, 0); return null }
 
   const editable = await message.reply(genSpinner('Generating graph...'))
 

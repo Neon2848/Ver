@@ -58,12 +58,10 @@ const attemptRoleQueue = async () => {
     roles: [...rQ.rolesToAdd],
   }, rQ.member).catch(async () => {
     if (rQ.attempts >= 2) {
-      if(rQ.member.bot) return
+      if (rQ.member.bot) return
       await rQ.member.send('There was an unexpected error assigning your roles/nickname, we can\'t let you in the server if we can\'t manage your account.').finally(() => { rQ.member.kick('Unable to assign roles').catch((_) => knownErrors.userOperation(_, rQ.member.guild.id)) })
       failedRoleQueue.shift()
-    } else {
-      await addtoRoleQueue(rQ.id, rQ.member, rQ.nickChange)
-    }
+    } else await addtoRoleQueue(rQ.id, rQ.member, rQ.nickChange)
   })
   roleQueueMetric.set(failedRoleQueue.length)
   if (!success) return []
