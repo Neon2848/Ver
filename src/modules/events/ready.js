@@ -5,6 +5,7 @@ const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const mongo = require('../../mongo/connect')
 const log = require('../../mongo/log')
 const { getNextUnmuteMuteTime } = require('../../mongo/mute')
+const sendRules = require('../functions/moderation/sendRules')
 
 const convertNamesCircular = (inputArray, guild, setting, type) => {
   Object.keys(inputArray).forEach((key) => {
@@ -44,5 +45,10 @@ module.exports = async (client) => {
     const objData = client.guilds.cache.get(s.serverId)
     objData.giuseppe = await createGiuseppeObject(s, objData)
   })
+
+  const tempChannel = await client.guilds.cache.get('571114137107562541')
+  await sendRules(tempChannel.channels.cache.get('776851134765072445'))
+  await sendRules(tempChannel.channels.cache.get('571117537115373570'))
+
   log('global', 'info', 'connected', undefined, { user: client.user.tag })
 }
