@@ -10,7 +10,7 @@ const secrets = require('../secrets.json')
 const config = require('../config.json')
 const { getWordlistAsRegex } = require('./modules/functions/moderation')
 
-const client = new Discord.Client()
+const client = new Discord.Client({ partials: ['REACTION', 'MESSAGE'] })
 
 client.secrets = secrets
 client.config = config

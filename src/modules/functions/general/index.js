@@ -21,7 +21,8 @@ const safeDelete = (msg, t) => {
 }
 
 const msgIntegrityCheck = (message) => !(
-  message.author.bot
+  message.partial
+    || message.author.bot
     || message.channel.type === 'dm'
     || !message.member
     || !message.channel
@@ -65,7 +66,7 @@ const genSpinner = (spinnerInfo) => (
   { embed: { color: 16674701, author: { name: spinnerInfo, icon_url: config.images.loader } } }
 )
 
-const basicLookup = async (member) => {
+const performBasicLookup = async (member) => {
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => {})
   if (!details) return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
   if (details.roles.includes('Banned') || !details.roles.length) {
@@ -75,6 +76,17 @@ const basicLookup = async (member) => {
   await addtoRoleQueue(member.id, member, details.username, details.roles)
   const finishedMember = await attemptRoleQueue()
   return finishedMember
+}
+
+// Debounce basic lookup (per user), as it only takes a react to be called.
+const basicLookupTable = []
+
+const basicLookup = async (member) => {
+  if (basicLookupTable.includes(member.id)) return null
+  basicLookupTable.push(member.id)
+  const theMember = await performBasicLookup(member)
+  basicLookupTable.splice(basicLookupTable.indexOf(member.id), 1)
+  return theMember
 }
 
 const quoteRegex = (msg) => {

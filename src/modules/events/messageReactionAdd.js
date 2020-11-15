@@ -1,7 +1,9 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
+const { getV3rmId } = require('../../mongo/members')
 const { safeDelete } = require('../functions/general')
 const { raysAStart, raysAVote } = require('../functions/moderation/raysA')
 const { ignoreRays, denyRays, approveRays } = require('../functions/moderation/raysApprovals')
+const knownErrors = require('../knownErrors')
 
 /**
  * @param {Discord.Client} client bot client
@@ -77,7 +79,27 @@ const userReactions = async (client, parts) => {
 
 const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 
+const welcomeReaction = async (partialReaction, sender) => {
+  const r = await partialReaction.fetch()
+  const { message: { guild, id, channel }, message: { guild: { giuseppe: { channels } } } } = r
+  if (channel.id !== channels.welcome) return
+
+  const lastValidMsg = await channel.messages.fetch()
+  if (lastValidMsg.first().id !== id) return
+
+  const s = await guild.members.cache.get(sender.id)
+
+  // Activate the user
+  const existingDetails = await getV3rmId(guild.id, s.id)
+  if (!existingDetails) return
+  const roleToAdd = await guild.roles.cache.find((rol) => rol.name === 'Member')
+  await s.roles.add(roleToAdd).catch((_) => knownErrors.userOperation(_, guild.id, 'assigning roles'))
+}
+
 const getVars = async (client, messageReaction, sender) => {
+  await welcomeReaction(messageReaction, sender)
+  if (messageReaction.partial) return false
+
   const { message } = messageReaction
   if (sender.bot
     || !messageReaction.message

@@ -42,4 +42,5 @@ module.exports = async (client) => {
   })
 
   log('global', 'info', 'connected', undefined, { user: client.user.tag })
+  client.reallyReady = true
 }
