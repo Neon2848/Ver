@@ -69,7 +69,7 @@ const basicLookup = async (member) => {
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => {})
   if (!details) return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
   if (details.roles.includes('Banned') || !details.roles.length) {
-    return basicKickUser(member, 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.', member.guild.id)
+    return basicKickUser(member, `To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn't meet these standards yet, or you're currently banned onsite. You're welcome to join when you do. (Your profile: https://v3rm.net/m/${details.uid} )`, member.guild.id)
   }
   await logMember(member.guild.id, member, details.uid)
   await addtoRoleQueue(member.id, member, details.username, details.roles)

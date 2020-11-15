@@ -8,7 +8,7 @@ const checkPings = async (client, message) => {
   if (quotePos === 0 || quotePos === 1) maxPings += 1
   const nonSelf = message.mentions.users.filter((m) => m.id !== message.author.id)
   if (nonSelf.size <= maxPings) return
-  if (inCacheUpsert('pingAbuse', message, 60 * 60 * 24)) {
+  if (inCacheUpsert('pingAbuse', message, 172800)) {
     await muteMember(message.guild, message.member, { muteReason: 'Ping Abuse' }, message)
     return
   }

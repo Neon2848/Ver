@@ -24,12 +24,12 @@ const generateTextFields = (message, editDate = null) => {
   return []
 }
 
-const logEditedMessage = async (logToChannel, oldMessage, newMessage = null) => {
+const logEditedMessage = async (logToChannel, oldMessage, extraInfo, newMessage = null) => {
   const { guild, client, channel } = oldMessage
 
   const editedMessage = new MessageEmbed({
     color: newMessage ? 16695040 : 13441048,
-    description: `https://discordapp.com/channels/${guild.id}/${channel.id}/${newMessage?.id || oldMessage.id}`,
+    description: `${extraInfo ? `${extraInfo}\n\n` : ''}https://discordapp.com/channels/${guild.id}/${channel.id}/${newMessage?.id || oldMessage.id}`,
     author: {
       name: `Message ${newMessage ? 'Edited' : 'Deleted'}`,
       icon_url: client.config.images.v3rmLogo,
@@ -45,10 +45,10 @@ const logEditedMessage = async (logToChannel, oldMessage, newMessage = null) => 
   return logged
 }
 
-const logMessage = async (logToChannel, message, newMessage = null) => {
+const logMessage = async (logToChannel, message, extraInfo = null, newMessage = null) => {
   const { channel } = message
   if (channel.parent?.name === 'Esoterica') return null
-  const logged = await logEditedMessage(logToChannel, message, newMessage)
+  const logged = await logEditedMessage(logToChannel, message, extraInfo, newMessage)
   return logged
 }
 

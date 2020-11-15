@@ -4,8 +4,6 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const mongo = require('../../mongo/connect')
 const log = require('../../mongo/log')
-const { getNextUnmuteMuteTime } = require('../../mongo/mute')
-const sendRules = require('../functions/moderation/sendRules')
 
 const convertNamesCircular = (inputArray, guild, setting, type) => {
   Object.keys(inputArray).forEach((key) => {
@@ -19,10 +17,7 @@ const convertNamesCircular = (inputArray, guild, setting, type) => {
 const createGiuseppeObject = async (s, objData) => {
   const { roles, channels } = s
   return {
-    settings: {
-      ...s.settings,
-      nextUnmute: await getNextUnmuteMuteTime(s.serverId),
-    },
+    settings: s.settings,
     roles: convertNamesCircular(roles, objData, s, 'roles'),
     channels: convertNamesCircular(channels, objData, s, 'channels'),
     queues: {

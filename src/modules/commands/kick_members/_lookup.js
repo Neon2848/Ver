@@ -23,7 +23,7 @@ const catchUpdateError = (e, message) => {
 const updateOrKickMember = (guildMember, editable, details) => {
   if (details.roles.includes('Banned') || !details.roles.length) {
     kickUser(guildMember, editable, {
-      dm: 'To prevent botting, you need to have been a member for at least 1 month and have at least 40 posts on our website to use our Discord. You don\'t seem to meet these standards yet, but you\'re welcome to join when you do.',
+      dm: 'To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn\'t meet these standards yet, or you\'re currently banned onsite. You\'re welcome to join when you do.',
       channel: 'The user does not have access to the site. They have now been removed from the server',
       log: 'User does not have permissions on site.',
     })

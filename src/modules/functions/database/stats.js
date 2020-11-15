@@ -1,5 +1,6 @@
 const io = require('@pm2/io')
 const { addMessage } = require('../../../mongo/stats')
+const { msgIntegrityCheck } = require('../general')
 const { getUserData } = require('./members')
 
 let statQueue = []
@@ -56,6 +57,7 @@ const addOneToStatQueue = async (id, createdAt, serverId, opt, userData = null) 
 }
 
 const messageStatQueue = async (client, message) => {
+  if (!msgIntegrityCheck(message)) return
   const serverId = message.guild.id
   const { member: { id }, createdAt, member } = message
   createdAt.setHours(createdAt.getHours(), 0, 0, 0)

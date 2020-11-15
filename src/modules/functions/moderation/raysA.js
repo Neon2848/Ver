@@ -26,7 +26,10 @@ const punishUser = async (content, muteReason = 'Attempting to vote while denyli
 
 const runDenyList = async (content, checkAdmin = true) => {
   const { messageReaction, sendMember, message } = content
-  const { deny, punish } = await checkDenyList(sendMember, message.guild.id, checkAdmin ? message.member : null)
+  const {
+    deny,
+    punish,
+  } = await checkDenyList(sendMember, message.guild.id, checkAdmin ? message.member : null)
   if (punish) punishUser(content)
   if (deny) {
     if (messageReaction) messageReaction.users.remove(sendMember.id)
@@ -176,7 +179,7 @@ const raysAVote = async (client, content) => {
   if (!targetMessage) return
 
   const reactionUsers = await messageReaction.users.fetch()
-  if(!reactionUsers.size) return
+  if (!reactionUsers.size) return
   const numVotes = getRealVoterCount(reactionUsers, message.guild)
   const newEmbed = message.embeds[0]
 

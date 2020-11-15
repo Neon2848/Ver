@@ -1,7 +1,6 @@
-/* eslint-disable no-param-reassign */
 const moment = require('moment')
 const { sendResult } = require('../general')
-const { upsertMute, getAndUnmute, getNextUnmuteMuteTime } = require('../../../mongo/mute')
+const { upsertMute, getAndUnmute } = require('../../../mongo/mute')
 const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 
 const muteMember = async (guild, member, details, message) => {
@@ -11,9 +10,6 @@ const muteMember = async (guild, member, details, message) => {
     addtoRoleQueue(member.id, member, null, [muteRole.name])
       .then(() => attemptRoleQueue())
   })
-
-  // Force the settings to update with the next unmute time.
-  guild.giuseppe.settings.nextUnmute = await getNextUnmuteMuteTime(guild.id)
 
   if (!message) return insertMute
   const mutedUntil = moment().to(details.unmuteTime || Date.now() + 600000)
@@ -25,18 +21,23 @@ const muteMember = async (guild, member, details, message) => {
   return insertMute
 }
 
+let muteDebounce = false
 const unmuteMembers = async (guild) => {
-  const { giuseppe: { settings: { nextUnmute } } } = guild
-  if (nextUnmute === -1 || Date.now() < nextUnmute) return
-  const mutedMembers = guild.roles.cache.get(guild.giuseppe.roles.muted).members
+  if (muteDebounce) return
+  muteDebounce = true
+
+  const allRoles = await guild.roles.fetch()
+  const mutedMembers = allRoles.cache.get(guild.giuseppe.roles.muted).members
   const mutedIds = mutedMembers.map((m) => m.id)
+  // Send a list of currently muted members to the database, which will return the list of those
+  // specific members who need to be unmuted.
   const unmutedMembers = await getAndUnmute(guild.id, mutedIds)
-  mutedMembers.forEach((memb) => {
+  mutedMembers.forEach(async (memb) => {
     if (unmutedMembers.includes(memb.id)) {
-      memb.roles.remove(guild.giuseppe.roles.muted).catch(() => {})
+      await memb.roles.remove(guild.giuseppe.roles.muted).catch(() => {})
     }
   })
-  guild.giuseppe.settings.nextUnmute = await getNextUnmuteMuteTime(guild.id)
+  muteDebounce = false
 }
 
 module.exports = { muteMember, unmuteMembers }
