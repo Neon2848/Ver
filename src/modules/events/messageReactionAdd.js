@@ -1,6 +1,6 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const { getV3rmId } = require('../../mongo/members')
-const { safeDelete } = require('../functions/general')
+const { safeDelete, basicLookup } = require('../functions/general')
 const { raysAStart, raysAVote } = require('../functions/moderation/raysA')
 const { ignoreRays, denyRays, approveRays } = require('../functions/moderation/raysApprovals')
 const knownErrors = require('../knownErrors')
@@ -79,6 +79,16 @@ const userReactions = async (client, parts) => {
 
 const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 
+// For when the user has reacted in welcome but
+// for some reason hasn't been looked up yet.
+const reactLookup = async (guildid, memberid) => {
+  const existingDetails = await getV3rmId(guildid, memberid)
+  if (existingDetails) return true
+  await basicLookup(memberid)
+  const newDetails = await getV3rmId(guildid, memberid)
+  return !!newDetails
+}
+
 const welcomeReaction = async (partialReaction, sender) => {
   const r = await partialReaction.fetch()
   const { message: { guild, id, channel }, message: { guild: { giuseppe: { channels } } } } = r
@@ -90,8 +100,11 @@ const welcomeReaction = async (partialReaction, sender) => {
   const s = await guild.members.cache.get(sender.id)
 
   // Activate the user
-  const existingDetails = await getV3rmId(guild.id, s.id)
-  if (!existingDetails) return
+  const attemptReactLookup = await reactLookup(guild.id, s.id)
+  if (!attemptReactLookup) {
+    await partialReaction.users.remove(sender)
+    return
+  }
   const roleToAdd = await guild.roles.cache.find((rol) => rol.name === 'Member')
   await s.roles.add(roleToAdd).catch((_) => knownErrors.userOperation(_, guild.id, 'assigning roles'))
 }
