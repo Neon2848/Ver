@@ -29,7 +29,7 @@ const msgIntegrityCheck = (message) => !(
     || !message.guild
 )
 
-const sendResult = (resultMsg, caller, resultTitle) => {
+const sendResult = async (resultMsg, caller, resultTitle) => {
   const emb = {
     embed: {
       description: errorReasonTransform(resultMsg),
@@ -37,14 +37,12 @@ const sendResult = (resultMsg, caller, resultTitle) => {
       author: { name: resultTitle, icon_url: config.images.v3rmLogo },
     },
   }
-  const send = caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb)
-  send.then((_) => {
-    if (caller.timeout) {
-      if (caller.edit) return safeDelete(caller.message, caller.timeout)
-      return safeDelete(_, caller.timeout)
-    }
-    return true
-  })
+  const send = await (caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb))
+  if (caller.timeout) {
+    if (caller.edit) return safeDelete(caller.message, caller.timeout)
+    return safeDelete(send, caller.timeout)
+  }
+  return send
 }
 
 const kickUser = (member, editable, reasons) => {
@@ -66,12 +64,32 @@ const genSpinner = (spinnerInfo) => (
   { embed: { color: 16674701, author: { name: spinnerInfo, icon_url: config.images.loader } } }
 )
 
+const genericLinkInfo = (confg, title, description, footer) => ({
+  embed: {
+    description,
+    color: 13441048,
+    author: { name: title, icon_url: config.images.v3rmLogo },
+    footer: { text: footer },
+    timestamp: new Date(),
+  },
+})
+
+let activationChannel = null
+
 const performBasicLookup = async (member) => {
+  const logLookup = await activationChannel.send(genSpinner(`Looking up new member: <@${member.id}>`))
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => {})
-  if (!details) return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
+  if (!details) {
+    logLookup.edit(genericLinkInfo(member.client.config, 'Not Linked', `User is not linked: <@${member.id}>`, `${member.user.tag} - ${member.id}`))
+    return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
+  }
   if (details.roles.includes('Banned') || !details.roles.length) {
+    await logLookup.edit(genericLinkInfo(member.client.config, 'Unauthenticated', `User found, but they are banned/unactivated or don't qualify: <@${member.id}>`, `${member.user.tag} - ${member.id}`))
+    await logLookup.channel.send(`<@${member.id}> - https://v3rm.net/m/${details.uid}`)
     return basicKickUser(member, `To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn't meet these standards yet, or you're currently banned onsite. You're welcome to join when you do. (Your profile: https://v3rm.net/m/${details.uid} )`, member.guild.id)
   }
+  await logLookup.edit(genericLinkInfo(member.client.config, 'User Linked', `User successfully linked: <@${member.id}>`, `${member.user.tag} - ${member.id}`))
+  await logLookup.channel.send(`<@${member.id}> - https://v3rm.net/m/${details.uid}`)
   await logMember(member.guild.id, member, details.uid)
   await addtoRoleQueue(member.id, member, details.username, details.roles)
   const finishedMember = await attemptRoleQueue()
@@ -82,6 +100,10 @@ const performBasicLookup = async (member) => {
 const basicLookupTable = []
 
 const basicLookup = async (member) => {
+  if (!activationChannel) {
+    activationChannel = await member.guild.channels.cache
+      .get(member.guild.giuseppe.channels.activationLog)
+  }
   if (basicLookupTable.includes(member.id)) return null
   basicLookupTable.push(member.id)
   const theMember = await performBasicLookup(member)
@@ -197,4 +219,5 @@ module.exports = {
   toColorArray,
   toFieldArray,
   sendFile,
+  genericLinkInfo,
 }
