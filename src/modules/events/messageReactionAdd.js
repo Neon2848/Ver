@@ -80,23 +80,21 @@ const userReactions = async (client, parts) => {
 
 const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 
-let activationChannel = null
 // For when the user has reacted in welcome but
 // for some reason hasn't been looked up yet.
 const reactLookup = async (guildid, member) => {
-  if (!activationChannel) {
-    activationChannel = await member.guild.channels.cache
-      .get(member.guild.giuseppe.channels.activationLog)
-  }
+  const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
+  const activationChannel = cache.get(activationLog)
+
   const existingDetails = await getV3rmId(guildid, member.id)
   if (existingDetails) {
-    activationChannel.send(genericLinkInfo(member.client.config, 'Welcome Agree', `User successfully agreed to terms: <@${member.id}> (https://v3rm.net/m/${existingDetails}).`, `${member.user.tag} - ${member.id}`))
+    activationChannel.send(genericLinkInfo(member.client.config, 'Welcome Agree', `User successfully agreed to terms: <@${member.id}> ([v3rm.net/m/${existingDetails}](https://v3rm.net/m/${existingDetails})).`, `${member.user.tag} - ${member.id}`))
     return true
   }
   await basicLookup(member)
   const newDetails = await getV3rmId(guildid, member.id)
   if (newDetails) {
-    activationChannel.send(genericLinkInfo(member.client.config, 'Welcome Agree', `User successfully agreed to terms (second attempt): <@${member.id}> (https://v3rm.net/m/${newDetails}).`, `${member.user.tag} - ${member.id}`))
+    activationChannel.send(genericLinkInfo(member.client.config, 'Welcome Agree', `User successfully agreed to terms (second attempt): <@${member.id}> ([v3rm.net/m/${newDetails}](https://v3rm.net/m/${newDetails})).`, `${member.user.tag} - ${member.id}`))
   }
   return !!newDetails
 }
@@ -105,9 +103,10 @@ const welcomeReaction = async (partialReaction, sender) => {
   const r = await partialReaction.fetch()
   const m = await r.message.fetch()
   const {
-    guild, guild: { giuseppe: { channels } }, id, channel,
+    guild, guild: { channels: { cache }, giuseppe: { channels } }, id, channel,
   } = m
   if (channel.id !== channels.welcome) return
+  const aChannel = cache.get(channels.activationLog)
 
   const lastValidMsg = await channel.messages.fetch()
   if (lastValidMsg.first().id !== id) return
@@ -116,7 +115,7 @@ const welcomeReaction = async (partialReaction, sender) => {
 
   const attemptReactLookup = await reactLookup(guild.id, s)
   if (!attemptReactLookup) {
-    activationChannel.send(`User lookup failed: <@${sender.id} - ${sender.id}`)
+    aChannel.send(`User lookup failed: <@${sender.id} - ${sender.id}`)
     await partialReaction.users.remove(sender)
     return
   }

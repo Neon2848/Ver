@@ -74,10 +74,11 @@ const genericLinkInfo = (confg, title, description, footer) => ({
   },
 })
 
-let activationChannel = null
-
 const performBasicLookup = async (member) => {
-  const logLookup = await activationChannel.send(genSpinner(`Looking up new member: <@${member.id}>`))
+  const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
+  const aChannel = cache.get(activationLog)
+
+  const logLookup = await aChannel.send(genSpinner(`Looking up new member: <@${member.id}>`))
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => {})
   if (!details) {
     logLookup.edit(genericLinkInfo(member.client.config, 'Not Linked', `User is not linked: <@${member.id}>`, `${member.user.tag} - ${member.id}`))
@@ -100,10 +101,6 @@ const performBasicLookup = async (member) => {
 const basicLookupTable = []
 
 const basicLookup = async (member) => {
-  if (!activationChannel) {
-    activationChannel = await member.guild.channels.cache
-      .get(member.guild.giuseppe.channels.activationLog)
-  }
   if (basicLookupTable.includes(member.id)) return null
   basicLookupTable.push(member.id)
   const theMember = await performBasicLookup(member)
