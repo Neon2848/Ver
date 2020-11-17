@@ -88,13 +88,13 @@ const reactLookup = async (guildid, member) => {
 
   const existingDetails = await getV3rmId(guildid, member.id)
   if (existingDetails) {
-    activationChannel.send(genericLinkInfo(member.client.config, 'Welcome Agree', `User successfully agreed to terms: <@${member.id}> ([v3rm.net/m/${existingDetails}](https://v3rm.net/m/${existingDetails})).`, `${member.user.tag} - ${member.id}`))
+    activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms.', existingDetails))
     return true
   }
   await basicLookup(member)
   const newDetails = await getV3rmId(guildid, member.id)
   if (newDetails) {
-    activationChannel.send(genericLinkInfo(member.client.config, 'Welcome Agree', `User successfully agreed to terms (second attempt): <@${member.id}> ([v3rm.net/m/${newDetails}](https://v3rm.net/m/${newDetails})).`, `${member.user.tag} - ${member.id}`))
+    activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', newDetails))
   }
   return !!newDetails
 }

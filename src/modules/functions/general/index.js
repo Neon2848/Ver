@@ -64,12 +64,16 @@ const genSpinner = (spinnerInfo) => (
   { embed: { color: 16674701, author: { name: spinnerInfo, icon_url: config.images.loader } } }
 )
 
-const genericLinkInfo = (confg, title, description, footer) => ({
+const genericLinkInfo = (member, title, v3rmId = null) => ({
   embed: {
-    description,
+    title,
     color: 13441048,
-    author: { name: title, icon_url: config.images.v3rmLogo },
-    footer: { text: footer },
+    author: {
+      name: member.displayName,
+      icon_url: member.user.displayAvatarURL(),
+      url: v3rmId ? `https://v3rm.net/m/${v3rmId}` : null,
+    },
+    footer: { text: `${member.user.tag} - ${member.id}` },
     timestamp: new Date(),
   },
 })
@@ -78,19 +82,17 @@ const performBasicLookup = async (member) => {
   const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
   const aChannel = cache.get(activationLog)
 
-  const logLookup = await aChannel.send(genSpinner(`Looking up new member: <@${member.id}>`))
+  const logLookup = await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`))
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => {})
   if (!details) {
-    logLookup.edit(genericLinkInfo(member.client.config, 'Not Linked', `User is not linked: <@${member.id}>`, `${member.user.tag} - ${member.id}`))
+    logLookup.edit(genericLinkInfo(member, 'User is not linked.'))
     return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
   }
   if (details.roles.includes('Banned') || !details.roles.length) {
-    await logLookup.edit(genericLinkInfo(member.client.config, 'Unauthenticated', `User found, but they are banned/unactivated or don't qualify: <@${member.id}>`, `${member.user.tag} - ${member.id}`))
-    await logLookup.channel.send(`<@${member.id}> - https://v3rm.net/m/${details.uid}`)
+    logLookup.edit(genericLinkInfo(member, 'User found, but they are banned/unactivated or don\'t qualify.', details.uid))
     return basicKickUser(member, `To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn't meet these standards yet, or you're currently banned onsite. You're welcome to join when you do. (Your profile: https://v3rm.net/m/${details.uid} )`, member.guild.id)
   }
-  await logLookup.edit(genericLinkInfo(member.client.config, 'User Linked', `User successfully linked: <@${member.id}>`, `${member.user.tag} - ${member.id}`))
-  await logLookup.channel.send(`<@${member.id}> - https://v3rm.net/m/${details.uid}`)
+  logLookup.edit(genericLinkInfo(member, 'User successfully linked.', details.uid))
   await logMember(member.guild.id, member, details.uid)
   await addtoRoleQueue(member.id, member, details.username, details.roles)
   const finishedMember = await attemptRoleQueue()
