@@ -32,9 +32,8 @@ ___
         "server": "mongodb://127.0.0.1:27017/giuseppe"
     },
     "v3rm": {
-      // If you want to develop with v3rmAPI enabled, you will need to stub it.
+      // You will need to stub the v3rmAPI, as it is not public at this time.
         "api": { 
-            "enabled": false,
             "base": "https://apipath",
             "lookup": "user",
             "unlink": "unlink",

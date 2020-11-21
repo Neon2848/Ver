@@ -51,10 +51,9 @@ module.exports = async (client, message) => {
 
   // Any user who speaks and does not have a stored v3rmId will be looked up.
   // This stores them in the database, and does their role/name assignment.
-  if (client.secrets.v3rm.api.enabled) {
-    const v3rmId = await getV3rmId(message.guild.id, message.author.id)
-    if (!v3rmId) await basicLookup(message.member)
-  }
+  const v3rmId = await getV3rmId(message.guild.id, message.author.id)
+  if (!v3rmId) await basicLookup(message.member)
+  // TODO: Hopefully this can be removed if we're confident enough in the database.
 
   checkWordFilters(client, message)
   checkPings(client, message)

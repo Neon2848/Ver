@@ -42,12 +42,11 @@ recursive('./src/modules/commands', (err, files) => {
     const dirParts = path.dirname(file).replace(/\\/g, '/').split('/')
     dirParts.shift() // Remove src/ from directory parts
     const fileName = path.basename(file)
-    if (fileName.startsWith('_') && !client.secrets.v3rm.api.enabled) return
 
     const props = require(path.join(__dirname, [...dirParts].join('/'), fileName)) // rebuild path
     // set permission based on permisisons folder (./kick_members, etc)
     props.permissionLevel = dirParts[dirParts.length - 1].toUpperCase()
-    const commandName = fileName.replace('_', '').split('.')[0] // Remove _ for v3rmapi commands.
+    const commandName = fileName.split('.')[0]
     client.commands.set(commandName, props)
   })
   return files
