@@ -17,7 +17,10 @@ const errorReasonTransform = (err) => {
 
 const safeDelete = (msg, t) => {
   if (!msg || msg.deleted) return
-  msg.delete({ timeout: t }).catch(((e) => log(msg.guild.id, 'error', 'deleting message', e.message, msg)))
+  setTimeout(() => { // Custom timeout so we can re-check to avoid 'unknown message' issue.
+    if (!msg || msg.deleted) return
+    msg.delete().catch(((e) => log(msg.guild.id, 'error', 'deleting message', e.message, msg)))
+  }, t)
 }
 
 const msgIntegrityCheck = (message) => !(
