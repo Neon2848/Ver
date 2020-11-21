@@ -1,9 +1,9 @@
 const config = require('../../../../config.json')
 
 // Match arg where only digits exist in the arg.
-const numbers = (args) => args.filter((arg) => /^[0-9]{1,17}$/.test(arg))
-// It's physically impossible for a number to be >17 digits.
-// JK this is just a hacky solution to the fact that user snowflakes are 18+ digits.
+const numbers = (args) => args.filter((arg) => /^[0-9]{1,16}$/.test(arg))
+// It's physically impossible for a number to be >16 digits.
+// JK this is just a hacky solution to the fact that user snowflakes are 17+ digits.
 
 // Match 123456789123456789 or <@123456789123456789>
 const users = (args) => {
@@ -11,7 +11,7 @@ const users = (args) => {
   // and 20 characters in 68 years. So in theory this will break then. A resillient
   // solution would be to compare the arg to the IDs of all users the bot has cached.
   // but I'm not too fussed.
-  const reg = new RegExp('^(?:<@!?)?([0-9]{18,20})(?:>)?$', 'gm')
+  const reg = new RegExp('^(?:<@!?)?([0-9]{17,20})(?:>)?$', 'gm')
   return args.filter((arg) => {
     reg.lastIndex = 0
     const isValid = reg.test(arg)

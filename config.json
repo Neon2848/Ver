@@ -4,11 +4,11 @@
     "maxStatQueue": 10
   },
   "slowmode": {
-    "messagesPer": 7,
+    "messagesPer": 8,
     "pollingRate": 4,
-    "seconds": 5
+    "seconds": 6
   },
-  "maxPings": 2,
+  "maxPings": 3,
   "roleTranslations": {
       "Administrator": 4,
       "Advisor": 14,
@@ -16,8 +16,9 @@
       "Esoterica": 28,
       "Elite": 15,
       "VIP": 11,
-      "Member": 2,
-      "Banned": 7
+      "Member": 12,
+      "Banned": 7,
+      "cute people": -1
   },
   "urls": {
     "v3rm": {

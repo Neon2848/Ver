@@ -18,6 +18,7 @@ const serversSchema = new Schema({
     modLog: { type: String, default: 'channel-log' },
     slurLog: { type: String, default: 'swore-log' },
     voteApprovals: { type: String, default: 'vote-abuse-approvals' },
+    activationLog: { type: String, default: 'watch-people-join' },
   },
   roles: {
     muted: { type: String, default: 'votemuted' },
@@ -26,7 +27,6 @@ const serversSchema = new Schema({
     nitro: { type: String, default: 'cute people' },
     leaderboardLord: { type: String, default: 'Leaderboard Lord' },
     esoterica: { type: String, default: 'Esoterica' },
-    // chuu: { type: String, default: 'Chuu.fm' },
     chuu: { type: String, default: 'Chuu.fm' },
   },
 })

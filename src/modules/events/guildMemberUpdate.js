@@ -4,10 +4,35 @@ const { logMember } = require('../functions/database/members')
 const sortRoles = (a, b) => a.id - b.id
 const minifyRoles = (r) => r.id
 
-module.exports = (client, oldMember, newMember) => {
-  const oldRoles = oldMember.roles.cache.sort(sortRoles)
-  const newRoles = newMember.roles.cache.sort(sortRoles)
-  if (oldRoles.map(minifyRoles) === newRoles.map(minifyRoles)) return
+const filterSpecialRoles = async (r) => {
+  const {
+    guild: {
+      client: { config: { roleTranslations } },
+      roles: { everyone: { id } },
+    },
+  } = r
+  const transitions = Object.keys(roleTranslations)
+  return !transitions.includes(r.name) && id !== r.id
+}
 
-  logMember(newMember.guild.id, newMember, null, true)
+const arrayRapidCompare = (a, b) => {
+  if (a === b) return true
+  if (a.length !== b.length) return false
+  return a && b
+}
+
+const arraysEqual = (a, b) => {
+  if (!arrayRapidCompare(a, b)) return false
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false
+  }
+  return true
+}
+
+module.exports = (client, oldMember, newMember) => {
+  const oldRoles = oldMember.roles.cache.sort(sortRoles).filter(filterSpecialRoles)
+  const newRoles = newMember.roles.cache.sort(sortRoles).filter(filterSpecialRoles)
+  if (arraysEqual(oldRoles.map(minifyRoles), newRoles.map(minifyRoles))) return
+
+  logMember(newMember.guild.id, newMember, null, newRoles.map((r) => ({ id: r.id, name: r.name })))
 }

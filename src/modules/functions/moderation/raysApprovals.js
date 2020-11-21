@@ -4,7 +4,7 @@ const { addPoint } = require('../../../mongo/leaderboard')
 const { logMessage } = require('./logger')
 
 const logRaysAToApprovals = async (message, sendMember) => {
-  const approval = await logMessage(message.guild.giuseppe.channels.voteApprovals, message)
+  const approval = await logMessage(message.guild.giuseppe.channels.voteApprovals, message, `**Voted by <@${sendMember.id}>**`)
   approval.raysA = {
     isApproval: true,
     initialChannel: message.channel.id,

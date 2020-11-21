@@ -9,5 +9,5 @@ module.exports = async (client, oldMessage, newMessage) => {
 
   await checkMessageForRaysA(newMessage)
   checkWordFilters(client, newMessage)
-  logMessage(newMessage.guild.giuseppe.channels.modLog, oldMessage, newMessage)
+  logMessage(newMessage.guild.giuseppe.channels.modLog, oldMessage, null, newMessage)
 }

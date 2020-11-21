@@ -21,14 +21,15 @@ const safeDelete = (msg, t) => {
 }
 
 const msgIntegrityCheck = (message) => !(
-  message.author.bot
-    || message.channel.type === 'dm'
-    || !message.member
-    || !message.channel
-    || !message.guild
+  message.partial
+  || message.author.bot
+  || message.channel.type === 'dm'
+  || !message.member
+  || !message.channel
+  || !message.guild
 )
 
-const sendResult = (resultMsg, caller, resultTitle) => {
+const sendResult = async (resultMsg, caller, resultTitle) => {
   const emb = {
     embed: {
       description: errorReasonTransform(resultMsg),
@@ -36,14 +37,12 @@ const sendResult = (resultMsg, caller, resultTitle) => {
       author: { name: resultTitle, icon_url: config.images.v3rmLogo },
     },
   }
-  const send = caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb)
-  send.then((_) => {
-    if (caller.timeout) {
-      if (caller.edit) return safeDelete(caller.message, caller.timeout)
-      return safeDelete(_, caller.timeout)
-    }
-    return true
-  })
+  const send = await (caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb))
+  if (caller.timeout) {
+    if (caller.edit) return safeDelete(caller.message, caller.timeout)
+    return safeDelete(send, caller.timeout)
+  }
+  return send
 }
 
 const kickUser = (member, editable, reasons) => {
@@ -55,26 +54,68 @@ const kickUser = (member, editable, reasons) => {
 }
 
 const basicKickUser = (member, reason, gid) => {
-  if (member.user.bot) return
-  member.send(reason).finally(() => {
-    member.kick('User does not have permissions on site').catch((_) => knownErrors.userOperation(_, gid))
-  }).catch(() => {})
+  if (member.user.bot) return null
+  return member.send(reason).finally(() => {
+    member.kick('User does not have permissions.').catch((_) => knownErrors.userOperation(_, gid))
+  }).catch(() => { })
 }
 
 const genSpinner = (spinnerInfo) => (
   { embed: { color: 16674701, author: { name: spinnerInfo, icon_url: config.images.loader } } }
 )
 
-const basicLookup = async (member) => {
-  const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => {})
-  if (!details) return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
+const genericLinkInfo = (member, title, v3rmId = null) => ({
+  embed: {
+    title,
+    color: 13441048,
+    author: {
+      name: member.displayName,
+      icon_url: member.user.displayAvatarURL(),
+      url: v3rmId ? `https://v3rm.net/m/${v3rmId}` : null,
+    },
+    footer: { text: `${member.user.tag} - ${member.id}` },
+    timestamp: new Date(),
+  },
+})
+
+const performBasicLookup = async (member) => {
+  const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
+  const aChannel = cache.get(activationLog)
+
+  const logLookup = await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`))
+  const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => { })
+  if (!details) {
+    logLookup.edit(genericLinkInfo(member, 'User is not linked.'))
+    return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
+  }
   if (details.roles.includes('Banned') || !details.roles.length) {
-    return basicKickUser(member, 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.', member.guild.id)
+    logLookup.edit(genericLinkInfo(member, 'User found, but they are banned/unactivated or don\'t qualify.', details.uid))
+    return basicKickUser(member, `To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn't meet these standards yet, or you're currently banned onsite. You're welcome to join when you do. (Your profile: https://v3rm.net/m/${details.uid} )`, member.guild.id)
   }
   await logMember(member.guild.id, member, details.uid)
   await addtoRoleQueue(member.id, member, details.username, details.roles)
   const finishedMember = await attemptRoleQueue()
+  logLookup.edit(genericLinkInfo(member, 'User successfully linked.', details.uid))
   return finishedMember
+}
+
+// Debounce basic lookup (per user), as it only takes a react to be called.
+// Also limit the queue size to 5, so that if 5 or more users are being looked up at once
+// We wait 5.1s and re-call the function. This should avoid API abuse if join raid.
+// Why? at most, this will cause 2 send calls, 1 v3rmApi call, and 1 DM call... which is a lot.
+const basicLookupTable = []
+
+const basicLookup = async (member) => {
+  if (basicLookupTable.includes(member.id)) return null
+  if (basicLookupTable.length >= 4) {
+    await new Promise((r) => setTimeout(r, 5100))
+    const tM = await basicLookup(member)
+    return tM
+  }
+  basicLookupTable.push(member.id)
+  const theMember = await performBasicLookup(member)
+  basicLookupTable.splice(basicLookupTable.indexOf(member.id), 1)
+  return theMember
 }
 
 const quoteRegex = (msg) => {
@@ -185,4 +226,6 @@ module.exports = {
   toColorArray,
   toFieldArray,
   sendFile,
+  genericLinkInfo,
+  basicKickUser,
 }

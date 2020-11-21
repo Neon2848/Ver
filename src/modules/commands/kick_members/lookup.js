@@ -23,7 +23,7 @@ const catchUpdateError = (e, message) => {
 const updateOrKickMember = (guildMember, editable, details) => {
   if (details.roles.includes('Banned') || !details.roles.length) {
     kickUser(guildMember, editable, {
-      dm: 'Your site account is either banned or unactivated. Once this is resolved, you will be allowed to join our server.',
+      dm: 'To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn\'t meet these standards yet, or you\'re currently banned onsite. You\'re welcome to join when you do.',
       channel: 'The user does not have access to the site. They have now been removed from the server',
       log: 'User does not have permissions on site.',
     })
@@ -41,7 +41,7 @@ exports.run = async (client, message, args, type = 'lookup') => { // eslint-disa
   const details = await lookup(discordid, editable.guild.id, { bypass: message.member.hasPermission('KICK_MEMBERS'), type }).catch((err) => sendError(err, editable))
   if (!details) return
   const guildMember = message.guild.members.cache.get(discordid)
-  if(guildMember) logMember(message.guild.id, guildMember, details.uid)
+  if (guildMember) logMember(message.guild.id, guildMember, details.uid)
 
   const kickedMember = updateOrKickMember(guildMember, editable, details)
   editable.channel.send(`<@${discordid}> is: ${client.config.urls.v3rm.profileURL}${details.uid}`, { allowedMentions: { users: [] } })

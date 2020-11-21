@@ -4,7 +4,8 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const mongo = require('../../mongo/connect')
 const log = require('../../mongo/log')
-const { getNextUnmuteMuteTime } = require('../../mongo/mute')
+const { findPartialUsers } = require('../../mongo/members')
+const unlink = require('../functions/api/v3rm/unlink')
 
 const convertNamesCircular = (inputArray, guild, setting, type) => {
   Object.keys(inputArray).forEach((key) => {
@@ -18,10 +19,7 @@ const convertNamesCircular = (inputArray, guild, setting, type) => {
 const createGiuseppeObject = async (s, objData) => {
   const { roles, channels } = s
   return {
-    settings: {
-      ...s.settings,
-      nextUnmute: await getNextUnmuteMuteTime(s.serverId),
-    },
+    settings: s.settings,
     roles: convertNamesCircular(roles, objData, s, 'roles'),
     channels: convertNamesCircular(channels, objData, s, 'channels'),
     queues: {
@@ -34,6 +32,16 @@ const createGiuseppeObject = async (s, objData) => {
   }
 }
 
+const oldMemberCleanup = async (guild) => {
+  const user = await findPartialUsers(guild.id)
+  const matching = await guild.members.fetch({ user })
+
+  matching.forEach((match) => match.kick('There was an issue with this users connection.'))
+  user.forEach((_) => unlink(_).catch(() => {}))
+
+  return { unlinked: user, kicked: matching.map((m) => m.id) }
+}
+
 module.exports = async (client) => {
   mongo.connect()
 
@@ -43,6 +51,11 @@ module.exports = async (client) => {
   resolvedServers.forEach(async (s) => {
     const objData = client.guilds.cache.get(s.serverId)
     objData.giuseppe = await createGiuseppeObject(s, objData)
+
+    const clean = await oldMemberCleanup(objData)
+    if (clean.unlinked.length) log(objData.id, 'info', 'user cleanup', 'removed invalid links', clean)
   })
+
   log('global', 'info', 'connected', undefined, { user: client.user.tag })
+  client.reallyReady = true
 }

@@ -28,11 +28,6 @@ const upsertMute = async (serverId, id, muteDetails) => {
   return succ
 }
 
-const getNextUnmuteMuteTime = async (serverId) => {
-  const nextUnmute = await Muted.find({ serverId }).sort({ unmuteTime: -1 }).limit(1)
-  return nextUnmute?.[0]?.unmuteTime || -1
-}
-
 const getAndUnmute = async (serverId, ids) => {
   const now = Date.now()
 
@@ -53,4 +48,4 @@ const getAndUnmute = async (serverId, ids) => {
   return unmutedIds || []
 }
 
-module.exports = { upsertMute, getAndUnmute, getNextUnmuteMuteTime }
+module.exports = { upsertMute, getAndUnmute }

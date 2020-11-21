@@ -21,7 +21,7 @@ const specificUser = async (message, uid) => {
 }
 
 const getPresentLeaderboard = async (leaderboard, guild) => {
-  const serverMembers = await guild.members.fetch({ user: leaderboard.map((lb) => lb.id)})
+  const serverMembers = await guild.members.fetch({ user: leaderboard.map((lb) => lb.id) })
   const nonStaff = serverMembers.filter((m) => !m.hasPermission('KICK_MEMBERS')).map((ns) => ns.id)
   return leaderboard.filter((lb) => nonStaff.includes(lb.id))
 }
