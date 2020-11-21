@@ -6,15 +6,18 @@ const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 const muteMember = async (guild, member, details, message) => {
   const insertMute = await upsertMute(guild.id, member.id, details)
   const muteRole = await guild.roles.fetch(guild.giuseppe.roles.muted)
-  await member.roles.add(muteRole).catch(() => {
-    addtoRoleQueue(member.id, member, null, [muteRole.name])
-      .then(() => attemptRoleQueue())
-  })
+
+  if (member.roles) { // Could be member or author, if the member left.
+    await member.roles.add(muteRole).catch(() => {
+      addtoRoleQueue(member.id, member, null, [muteRole.name])
+        .then(() => attemptRoleQueue())
+    })
+  }
 
   if (!message) return insertMute
   const mutedUntil = moment().to(details.unmuteTime || Date.now() + 600000)
   sendResult(
-    `Muted <@${member.user.id}>${details.muteReason ? ` for \`${details.muteReason}\`` : ''}.\
+    `Muted <@${member.user?.id || member.id}>${details.muteReason ? ` for \`${details.muteReason}\`` : ''}.\
  Unmuting ${mutedUntil}`,
     { message, timeout: 10000 }, 'User Muted',
   )

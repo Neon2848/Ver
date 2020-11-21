@@ -85,7 +85,7 @@ const preventReactSpam = (content, type) => {
     if (!inCacheUpsert(type, cacheSet, 600) || sendMember.hasPermission('KICK_MEMBERS')) return false
     messageReaction.users.remove(sendMember)
     message.channel.send(voteTimeoutEmbed(sendMember.id, message.client.config))
-      .then((nm) => nm.delete({ timeout: 3000 }))
+      .then((nm) => safeDelete(nm, 3000))
     return true
   }
   if (!inCacheUpsert(type, cacheSet, 4)) return false
@@ -101,7 +101,7 @@ const isBotAndMuteChuu = (message) => {
   if (message.member.roles.cache.find((role) => role.id === message.guild.giuseppe.roles.chuu)) {
     if (Date.now() >= nextChuu) {
       nextChuu = Date.now() + 600000
-      message.delete()
+      safeDelete(message, 0)
     }
   }
   return true
@@ -148,7 +148,7 @@ const completeRaysAVote = async (targetMessage, message, users) => {
   message.guild.giuseppe.queues.voteMuteParticipate = []
   /* eslint-enable no-param-reassign */
   safeDelete(targetMessage, 0)
-  await muteMember(message.guild, targetMessage.member, { muteReason: 'Vote Muted' })
+  await muteMember(message.guild, targetMessage.member || targetMessage.author, { muteReason: 'Vote Muted' })
   await message.edit(voteCompleteEmbed(targetMessage.member.id, users, message.client.config))
 }
 
@@ -196,6 +196,7 @@ const raysAVote = async (client, content) => {
 }
 
 const checkMessageForRaysA = async (message) => {
+  if (!message) return
   // If the message is being voted on
   if (message.raysA?.sourceMessage) {
     const sourceMsg = message.channel.messages.cache.get(message.raysA.sourceMessage)

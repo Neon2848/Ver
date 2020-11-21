@@ -37,7 +37,7 @@ const applySlowmode = async (messageRate, message) => {
 
   sendResult(
     `(sorry ☹️) This channel is under heavy use (\`${mps.toFixed(2)} messages/second\`). Slowmode will be disabled in \`${Math.round(15 * mps)}\` seconds.\n\n\
- Don't be mad at me, I'm just a bot. Be mad at <@${maxSender}>, who sent the most messages in the last few seconds`,
+ Don't be mad at me, I'm just a bot. Be mad at ${maxSender}, who sent the most messages in the last few seconds`,
     { message }, 'Slowmode Enabled',
   )
 

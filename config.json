@@ -4,7 +4,7 @@
     "maxStatQueue": 10
   },
   "slowmode": {
-    "messagesPer": 8,
+    "messagesPer": 7,
     "pollingRate": 4,
     "seconds": 6
   },
@@ -17,7 +17,8 @@
       "Elite": 15,
       "VIP": 11,
       "Member": 12,
-      "Banned": 7
+      "Banned": 7,
+      "cute people": -1
   },
   "urls": {
     "v3rm": {
