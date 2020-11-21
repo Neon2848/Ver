@@ -1,38 +1,33 @@
 const mongoose = require('mongoose')
 const knownErrors = require('../modules/knownErrors')
 const membersSchema = require('./schemas/members')
+const log = require('./log')
 
 const Members = mongoose.model('members', membersSchema)
 
-const updateBasedOnv3rmID = async (serverId, id, userData) => {
-  const query = { serverId, v3rmId: parseInt(userData.v3rmId, 10) }
-  try {
-    const succ = await Members.findOne(query)
-    if (!succ) return null
-
-    succ.id = id
-    Object.keys(userData).forEach((k) => {
-      succ[k] = userData[k]
-    })
-    await succ.save()
-
-    return succ
-  } catch (e) { return e }
+const getV3rmId = async (serverId, id) => {
+  const succ = await Members.findOne({ serverId, id })
+  if (succ) return succ.v3rmId
+  return null
 }
 
+// eslint-disable-next-line max-lines-per-function
 const addMember = async (serverId, id, userData) => {
-  Object.keys(userData).forEach((key) => {
-    // eslint-disable-next-line no-param-reassign
-    if (userData[key] === null) delete userData[key]
-  })
-
-  if (userData.v3rmId) {
-    const nowUpdated = await updateBasedOnv3rmID(serverId, id, userData)
-    if (nowUpdated !== null) return nowUpdated
+  const v3rmId = parseInt(userData.v3rmId, 10) || await getV3rmId(serverId, id)
+  if (!v3rmId) {
+    log(serverId, 'error', 'logging member', 'no v3rmid present', { id, ...userData })
+    return null
   }
 
-  const query = { serverId, id }
-  const theMember = { lastUpdated: Date.now(), ...userData }
+  Object.keys(userData).forEach((key) => {
+    // eslint-disable-next-line no-param-reassign
+    if (!userData[key]) delete userData[key]
+  })
+
+  const query = { serverId, v3rmId }
+  const theMember = {
+    lastUpdated: Date.now(), id, v3rmId, ...userData,
+  }
   const options = {
     upsert: true, new: true, setDefaultsOnInsert: true,
   }
@@ -50,10 +45,18 @@ const getExtraRoles = async (serverId, id, v3rmId = null) => {
   return succ?.[0].extraRoles
 }
 
-const getV3rmId = async (serverId, id) => {
-  const succ = await Members.findOne({ serverId, id })
-  if (succ) return succ.v3rmId
-  return null
+const findPartialUsers = async (serverId) => {
+  const membs = await Members.find({
+    serverId,
+    $or: [{ v3rmId: { $exists: false } }, { v3rmId: null }],
+  })
+  const membIds = membs.map((m) => m.id)
+
+  await Members.deleteMany({ id: { $in: membIds } })
+
+  return membIds
 }
 
-module.exports = { addMember, getExtraRoles, getV3rmId }
+module.exports = {
+  addMember, getExtraRoles, getV3rmId, findPartialUsers,
+}

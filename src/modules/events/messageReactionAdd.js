@@ -1,6 +1,7 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
+const moment = require('moment')
 const { getV3rmId } = require('../../mongo/members')
-const { safeDelete, basicLookup, genericLinkInfo } = require('../functions/general')
+const { safeDelete, basicLookup, genericLinkInfo, basicKickUser } = require('../functions/general')
 const { raysAStart, raysAVote } = require('../functions/moderation/raysA')
 const { ignoreRays, denyRays, approveRays } = require('../functions/moderation/raysApprovals')
 const knownErrors = require('../knownErrors')
@@ -74,7 +75,7 @@ const botReactions = async (client, parts) => {
 }
 
 const userReactions = async (client, parts) => {
-  if (parts.message?.createdAt < (Date.now() - 604800000)) return
+  if (parts.message.partial || parts.message?.createdAt < (Date.now() - 604800000)) return
   if (parts.messageReaction.emoji.name === 'raysA') raysAStart(client, parts)
 }
 
@@ -85,6 +86,12 @@ const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 const reactLookup = async (guildid, member) => {
   const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
   const activationChannel = cache.get(activationLog)
+
+  if (Date.now() - member.user.createdAt < 259200000) {
+    await activationChannel.send(genericLinkInfo(member, `User tried to activate, but their account is only ${moment().diff(member.user.createdAt, 'hours')} hours old.`))
+    await basicKickUser(member, "Sorry! Your Discord account is less than 3 days old, so we can't activate you quite yet. You're welcome to rejoin later at https://v3rm.net/discord.", guildid)
+    return false
+  }
 
   const existingDetails = await getV3rmId(guildid, member.id)
   if (existingDetails) {
@@ -115,7 +122,6 @@ const welcomeReaction = async (partialReaction, sender) => {
 
   const attemptReactLookup = await reactLookup(guild.id, s)
   if (!attemptReactLookup) {
-    aChannel.send(`User lookup failed: <@${sender.id} - ${sender.id}`)
     await partialReaction.users.remove(sender)
     return
   }
