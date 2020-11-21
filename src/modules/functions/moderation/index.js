@@ -54,7 +54,7 @@ or we might have to warn you.`, ...args),
         },
       ],
       footer: {
-        text: 'React below to warn for 2M, 2O, or ignore respestively.',
+        text: 'React below to warn for 2M, 2L, or ignore respestively.',
       },
       author: {
         name: 'Slur Detected',

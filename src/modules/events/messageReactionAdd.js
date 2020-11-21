@@ -1,7 +1,9 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const moment = require('moment')
 const { getV3rmId } = require('../../mongo/members')
-const { safeDelete, basicLookup, genericLinkInfo, basicKickUser } = require('../functions/general')
+const {
+  safeDelete, basicLookup, genericLinkInfo, basicKickUser,
+} = require('../functions/general')
 const { raysAStart, raysAVote } = require('../functions/moderation/raysA')
 const { ignoreRays, denyRays, approveRays } = require('../functions/moderation/raysApprovals')
 const knownErrors = require('../knownErrors')
@@ -110,10 +112,9 @@ const welcomeReaction = async (partialReaction, sender) => {
   const r = await partialReaction.fetch()
   const m = await r.message.fetch()
   const {
-    guild, guild: { channels: { cache }, giuseppe: { channels } }, id, channel,
+    guild, guild: { giuseppe: { channels } }, id, channel,
   } = m
   if (channel.id !== channels.welcome) return
-  const aChannel = cache.get(channels.activationLog)
 
   const lastValidMsg = await channel.messages.fetch()
   if (lastValidMsg.first().id !== id) return

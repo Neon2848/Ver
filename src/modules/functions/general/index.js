@@ -113,7 +113,6 @@ const basicLookup = async (member) => {
     return tM
   }
   basicLookupTable.push(member.id)
-  console.log(basicLookupTable)
   const theMember = await performBasicLookup(member)
   basicLookupTable.splice(basicLookupTable.indexOf(member.id), 1)
   return theMember

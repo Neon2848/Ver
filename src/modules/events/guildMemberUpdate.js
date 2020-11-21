@@ -15,15 +15,17 @@ const filterSpecialRoles = async (r) => {
   return !transitions.includes(r.name) && id !== r.id
 }
 
-const arraysEqual = (a, b) => {
+const arrayRapidCompare = (a, b) => {
   if (a === b) return true
-  if (a == null || b == null) return false
   if (a.length !== b.length) return false
+  return a && b
+}
 
-  a.forEach((v, i) => {
-    if (v !== b[i]) return false
-    return true
-  })
+const arraysEqual = (a, b) => {
+  if (!arrayRapidCompare(a, b)) return false
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false
+  }
   return true
 }
 
