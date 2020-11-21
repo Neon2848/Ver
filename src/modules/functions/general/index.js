@@ -82,7 +82,7 @@ const genericLinkInfo = (member, title, v3rmId = null) => ({
 })
 
 const performBasicLookup = async (member) => {
-  const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
+  const { guild: { channels: { cache }, ver: { channels: { activationLog } } } } = member
   const aChannel = cache.get(activationLog)
 
   const logLookup = await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`))
@@ -155,7 +155,7 @@ const inCachePerform = (memb, theCache, fetchIndex, member, date, expireSecs) =>
 
 const inCacheUpsert = (type, message, expireSecs) => {
   const member = message.member.id
-  const theCache = message.guild.giuseppe.queues[type]
+  const theCache = message.guild.ver.queues[type]
   let fetchIndex = -1
   const memb = theCache.filter((entry, i) => {
     if (entry.member === member) { fetchIndex = i; return true } return false

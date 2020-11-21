@@ -16,7 +16,7 @@ const convertNamesCircular = (inputArray, guild, setting, type) => {
   return inputArray
 }
 
-const createGiuseppeObject = async (s, objData) => {
+const createVerObject = async (s, objData) => {
   const { roles, channels } = s
   return {
     settings: s.settings,
@@ -50,7 +50,7 @@ module.exports = async (client) => {
   const resolvedServers = await Promise.all(servers)
   resolvedServers.forEach(async (s) => {
     const objData = client.guilds.cache.get(s.serverId)
-    objData.giuseppe = await createGiuseppeObject(s, objData)
+    objData.ver = await createVerObject(s, objData)
 
     const clean = await oldMemberCleanup(objData)
     if (clean.unlinked.length) log(objData.id, 'info', 'user cleanup', 'removed invalid links', clean)

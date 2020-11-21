@@ -90,7 +90,7 @@ const preventReactSpam = (content, type) => {
   }
   if (!inCacheUpsert(type, cacheSet, 4)) return false
   messageReaction.users.remove(sendMember)
-  sendMember.roles.remove(message.guild.giuseppe.roles.member)
+  sendMember.roles.remove(message.guild.ver.roles.member)
   sendMember.send('Hey, you have been sent to our welcome channel for react spamming 😞. You will need to type "I agree" again, once you agree to our rules.')
   return true
 }
@@ -98,7 +98,7 @@ const preventReactSpam = (content, type) => {
 let nextChuu = 0
 const isBotAndMuteChuu = (message) => {
   if (!message.author.bot) return false
-  if (message.member.roles.cache.find((role) => role.id === message.guild.giuseppe.roles.chuu)) {
+  if (message.member.roles.cache.find((role) => role.id === message.guild.ver.roles.chuu)) {
     if (Date.now() >= nextChuu) {
       nextChuu = Date.now() + 600000
       safeDelete(message, 0)
@@ -125,7 +125,7 @@ const raysAStart = async (client, content) => {
 }
 
 const userVoteBonus = (u, guild) => {
-  const { giuseppe: { roles: { leaderboardLord, nitro, esoterica } } } = guild
+  const { ver: { roles: { leaderboardLord, nitro, esoterica } } } = guild
   const m = guild.members.cache.get(u.id)
   if (m) {
     if (m.roles.cache.filter((r) => r.id === leaderboardLord).size) return 4
@@ -144,8 +144,8 @@ const getRealVoterCount = (reactionUsers, guild) => {
 const completeRaysAVote = async (targetMessage, message, users) => {
   message.reactions.removeAll()
   /* eslint-disable no-param-reassign */
-  message.guild.giuseppe.queues.voteMuteStart = []
-  message.guild.giuseppe.queues.voteMuteParticipate = []
+  message.guild.ver.queues.voteMuteStart = []
+  message.guild.ver.queues.voteMuteParticipate = []
   /* eslint-enable no-param-reassign */
   safeDelete(targetMessage, 0)
   await muteMember(message.guild, targetMessage.member || targetMessage.author, { muteReason: 'Vote Muted' })

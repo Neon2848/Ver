@@ -1,12 +1,15 @@
-# Giuseppe Jr. II
+<img style='float:right;' src='https://cdn.discordapp.com/attachments/548683437524123660/779798235421081640/versmall.png' style="text-align: right">
+<div style='margin-bottom:158px;'></div>
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/409e726dc858ae9e6df5/maintainability)](https://codeclimate.com/github/SegFault-Verm/GiuseppeJrTheSecond/maintainability)
-[![Code Climate issues](https://img.shields.io/codeclimate/issues/SegFault-Verm/GiuseppeJrTheSecond?color=45d298)](https://codeclimate.com/github/SegFault-Verm/GiuseppeJrTheSecond/maintainability)
-[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/SegFault-Verm/GiuseppeJrTheSecond?color=45d298)](https://codeclimate.com/github/SegFault-Verm/GiuseppeJrTheSecond/maintainability)
+# Ver
 
-[![GitHub package.json version](https://img.shields.io/github/package-json/v/SegFault-Verm/GiuseppeJrTheSecond)](https://github.com/SegFault-Verm/GiuseppeJrTheSecond/projects/1)
+[![Maintainability](https://api.codeclimate.com/v1/badges/409e726dc858ae9e6df5/maintainability)](https://codeclimate.com/github/SegFault-Verm/Ver/maintainability)
+[![Code Climate issues](https://img.shields.io/codeclimate/issues/SegFault-Verm/Ver?color=45d298)](https://codeclimate.com/github/SegFault-Verm/Ver/maintainability)
+[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/SegFault-Verm/Ver?color=45d298)](https://codeclimate.com/github/SegFault-Verm/Ver/maintainability)
 
-In development.
+[![GitHub package.json version](https://img.shields.io/github/package-json/v/SegFault-Verm/Ver)](https://github.com/SegFault-Verm/Ver/projects/1)
+
+In development. Artwork by Loyola.
 
 ___
 
@@ -29,7 +32,7 @@ ___
     },
     "mongo": {
         // Authless is fine as DB is only locally accessible.
-        "server": "mongodb://127.0.0.1:27017/giuseppe"
+        "server": "mongodb://127.0.0.1:27017/ver"
     },
     "v3rm": {
       // You will need to stub the v3rmAPI, as it is not public at this time.
@@ -56,8 +59,8 @@ ___
 ---
 ## Contributing
 
-I will likely not accept merge requests until the the project is complete. You can track progress [here](https://github.com/SegFault-Verm/GiuseppeJrTheSecond).
+I will likely not accept merge requests until the the project is complete. You can track progress [here](https://github.com/SegFault-Verm/Ver).
 
 Install ESLint globally and follow the ESLint rules or your MR will not be accepted.
 
-You can add bug reports and feature requests [here](https://github.com/SegFault-Verm/GiuseppeJrTheSecond/issues), but I will only be focusing on features that directly relate to existing tickets on the project tracker above until I am finished with the project.
+You can add bug reports and feature requests [here](https://github.com/SegFault-Verm/Ver/issues), but I will only be focusing on features that directly relate to existing tickets on the project tracker above until I am finished with the project.

@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'giuseppe',
+    name: 'ver',
     script: 'src/index.js',
   }],
 }

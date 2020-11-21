@@ -51,19 +51,19 @@ const preventFlood = async (client, message) => {
   /* eslint-disable no-param-reassign */
   const { channel } = message
 
-  if (!channel.giuseppeFloodCache) {
-    channel.giuseppeFloodCache = { messages: 0, lastTick: Date.now() }
+  if (!channel.verFloodCache) {
+    channel.verFloodCache = { messages: 0, lastTick: Date.now() }
   }
-  const { giuseppeFloodCache: { messages, lastTick } } = channel
+  const { verFloodCache: { messages, lastTick } } = channel
 
-  channel.giuseppeFloodCache.messages += 1
+  channel.verFloodCache.messages += 1
   const now = Date.now()
   if (now - lastTick <= message.client.config.slowmode.pollingRate * 1000) return
 
   applySlowmode(messages + 1, message)
 
-  channel.giuseppeFloodCache.lastTick = now
-  channel.giuseppeFloodCache.messages = 0
+  channel.verFloodCache.lastTick = now
+  channel.verFloodCache.messages = 0
   /* eslint-enable no-param-reassign */
 }
 

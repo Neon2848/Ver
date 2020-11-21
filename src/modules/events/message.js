@@ -12,7 +12,7 @@ const { safeDelete, msgIntegrityCheck } = require('../functions/general')
 const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
 
-  const { guild: { giuseppe: { channels: { botCommands } } } } = message
+  const { guild: { ver: { channels: { botCommands } } } } = message
   const permissionLevel = cmd.permissionLevel.replace(/_BC$/, '')
 
   // The command is a bot-commands only command
