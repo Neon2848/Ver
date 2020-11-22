@@ -74,6 +74,7 @@ const genericLinkInfo = (member, title, v3rmId = null) => ({
     description: `**Tag:** ${member}\n\`\`\`ARM\n
 ${v3rmId ? `v3rmId: '${v3rmId}'\n` : ''}\
 discordId: '${member.id}'
+discordTag: '${member.user.tag}'
 discordCreated: '${moment(member.user.createdAt).fromNow()} (${moment(member.user.createdAt).format('lll')})'\`\`\``,
     color: 13441048,
     author: {
