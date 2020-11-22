@@ -90,7 +90,7 @@ const reactLookup = async (guildid, member) => {
   const activationChannel = cache.get(activationLog)
 
   if (Date.now() - member.user.createdAt < 259200000) {
-    await activationChannel.send(genericLinkInfo(member, `User tried to activate, but their account is only ${moment().diff(member.user.createdAt, 'hours')} hours old.`))
+    await activationChannel.send(genericLinkInfo(member, `User tried to activate, but their was created ${moment(member.user.createdAt).fromNow()}.`))
     await basicKickUser(member, "Sorry! Your Discord account is less than 3 days old, so we can't activate you quite yet. You're welcome to rejoin later at https://v3rm.net/discord.", guildid)
     return false
   }

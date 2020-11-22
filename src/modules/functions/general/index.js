@@ -70,6 +70,7 @@ const genSpinner = (spinnerInfo) => (
 const genericLinkInfo = (member, title, v3rmId = null) => ({
   embed: {
     title,
+    description: `**Tag:** ${member}\n**Account Created:** ${moment(member.user.createdAt).fromNow()} (${moment(member.user.createdAt).format('lll')}) }`
     color: 13441048,
     author: {
       name: member.displayName,
