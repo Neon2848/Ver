@@ -78,7 +78,7 @@ const genericLinkInfo = (member, title, v3rmId = null) => ({
     },
     fields: [
       { name: 'Action', value: `\`${title}\``, inline: true },
-      { name: 'Tag', value: member.user, inline: true },
+      { name: 'Tag', value: `${member.user}\n${member.user.tag}`, inline: true },
       {
         name: 'User Info',
         value: `\`\`\`ARM\n
