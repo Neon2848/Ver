@@ -7,7 +7,8 @@ const { checkWordFilters } = require('../functions/moderation')
 const { checkPings } = require('../functions/moderation/pingAbuse')
 const { unmuteMembers } = require('../functions/moderation/mute')
 const { preventFlood } = require('../functions/moderation/preventFlood')
-const { safeDelete, msgIntegrityCheck } = require('../functions/general')
+const { safeDelete, msgIntegrityCheck, basicLookup } = require('../functions/general')
+const { getV3rmId } = require('../../mongo/members')
 
 const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
@@ -47,6 +48,11 @@ const runTasks = async (client, message) => {
 
 module.exports = async (client, message) => {
   if (!client.reallyReady || !msgIntegrityCheck(message)) return
+
+  // Any user who speaks and does not have a stored v3rmId will be looked up.
+  // This stores them in the database, and does their role/name assignment.
+  const v3rmId = await getV3rmId(message.guild.id, message.author.id)
+  if (!v3rmId) await basicLookup(message.member)
 
   checkWordFilters(client, message)
   checkPings(client, message)
