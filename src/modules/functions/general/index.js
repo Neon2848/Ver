@@ -1,6 +1,7 @@
 const path = require('path')
 const FileType = require('file-type')
 const { MessageAttachment } = require('discord.js')
+const moment = require('moment')
 const config = require('../../../../config.json')
 const knownErrors = require('../../knownErrors')
 const lookup = require('../api/v3rm/lookup')
@@ -70,14 +71,16 @@ const genSpinner = (spinnerInfo) => (
 const genericLinkInfo = (member, title, v3rmId = null) => ({
   embed: {
     title,
-    description: `**Tag:** ${member}\n**Account Created:** ${moment(member.user.createdAt).fromNow()} (${moment(member.user.createdAt).format('lll')}) }`
+    description: `**Tag:** ${member}\n\`\`\`ARM\n
+${v3rmId ? `v3rmId: '${v3rmId}'\n` : ''}\
+discordId: '${member.id}'
+discordCreated: '${moment(member.user.createdAt).fromNow()} (${moment(member.user.createdAt).format('lll')})'\`\`\``,
     color: 13441048,
     author: {
       name: member.displayName,
       icon_url: member.user.displayAvatarURL(),
       url: v3rmId ? `https://v3rm.net/m/${v3rmId}` : null,
     },
-    footer: { text: `${member.user.tag} - ${member.id}` },
     timestamp: new Date(),
   },
 })
