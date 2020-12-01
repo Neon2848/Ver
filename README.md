@@ -5,7 +5,7 @@
 
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/SegFault-Verm/Ver)](https://github.com/SegFault-Verm/Ver/projects/1)
 
-![](https://cdn.discordapp.com/attachments/548683437524123660/779798235421081640/versmall.png)
+![](https://cdn.discordapp.com/attachments/548683437524123660/783284170016161803/verheadshotsmall.png)
 
 In development. Artwork by Loyola.
 
