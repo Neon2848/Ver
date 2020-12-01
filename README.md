@@ -1,13 +1,11 @@
-<img style='float:right;' src='https://cdn.discordapp.com/attachments/548683437524123660/779798235421081640/versmall.png' style="text-align: right">
-<div style='margin-bottom:158px;'></div>
-
 # Ver
-
 [![Maintainability](https://api.codeclimate.com/v1/badges/409e726dc858ae9e6df5/maintainability)](https://codeclimate.com/github/SegFault-Verm/Ver/maintainability)
 [![Code Climate issues](https://img.shields.io/codeclimate/issues/SegFault-Verm/Ver?color=45d298)](https://codeclimate.com/github/SegFault-Verm/Ver/maintainability)
 [![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/SegFault-Verm/Ver?color=45d298)](https://codeclimate.com/github/SegFault-Verm/Ver/maintainability)
 
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/SegFault-Verm/Ver)](https://github.com/SegFault-Verm/Ver/projects/1)
+
+![](https://cdn.discordapp.com/attachments/548683437524123660/779798235421081640/versmall.png)
 
 In development. Artwork by Loyola.
 
