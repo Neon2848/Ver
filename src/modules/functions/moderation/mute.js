@@ -5,7 +5,7 @@ const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 
 const muteMember = async (guild, member, details, message) => {
   const insertMute = await upsertMute(guild.id, member.id, details)
-  const muteRole = await guild.roles.fetch(guild.giuseppe.roles.muted)
+  const muteRole = await guild.roles.fetch(guild.ver.roles.muted)
 
   if (member.roles) { // Could be member or author, if the member left.
     await member.roles.add(muteRole).catch(() => {
@@ -30,14 +30,14 @@ const unmuteMembers = async (guild) => {
   muteDebounce = true
 
   const allRoles = await guild.roles.fetch()
-  const mutedMembers = allRoles.cache.get(guild.giuseppe.roles.muted).members
+  const mutedMembers = allRoles.cache.get(guild.ver.roles.muted).members
   const mutedIds = mutedMembers.map((m) => m.id)
   // Send a list of currently muted members to the database, which will return the list of those
   // specific members who need to be unmuted.
   const unmutedMembers = await getAndUnmute(guild.id, mutedIds)
   mutedMembers.forEach(async (memb) => {
     if (unmutedMembers.includes(memb.id)) {
-      await memb.roles.remove(guild.giuseppe.roles.muted).catch(() => {})
+      await memb.roles.remove(guild.ver.roles.muted).catch(() => {})
     }
   })
   muteDebounce = false

@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest something for Giuseppe 2
+about: Suggest something for Ver
 title: ''
 labels: enhancement
 assignees: SegFault-Verm

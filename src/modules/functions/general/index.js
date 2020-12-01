@@ -39,6 +39,7 @@ const sendResult = async (resultMsg, caller, resultTitle) => {
       description: errorReasonTransform(resultMsg),
       color: 13441048,
       author: { name: resultTitle, icon_url: config.images.v3rmLogo },
+      thumbnail: { url: config.images.botAvatar },
     },
   }
   const send = await (caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb))
@@ -92,7 +93,7 @@ discordCreated: '${moment(member.user.createdAt).fromNow()} (${moment(member.use
 })
 
 const performBasicLookup = async (member) => {
-  const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
+  const { guild: { channels: { cache }, ver: { channels: { activationLog } } } } = member
   const aChannel = cache.get(activationLog)
 
   const logLookup = await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`))
@@ -165,7 +166,7 @@ const inCachePerform = (memb, theCache, fetchIndex, member, date, expireSecs) =>
 
 const inCacheUpsert = (type, message, expireSecs) => {
   const member = message.member.id
-  const theCache = message.guild.giuseppe.queues[type]
+  const theCache = message.guild.ver.queues[type]
   let fetchIndex = -1
   const memb = theCache.filter((entry, i) => {
     if (entry.member === member) { fetchIndex = i; return true } return false

@@ -41,11 +41,13 @@ const getAndUnmute = async (serverId, ids) => {
   ]).catch((_) => { throw _ })
 
   // Find muted users whose time has expred, or who aren't in the muted list at all.
+  const notInDB = ids.filter((i) => !mutedMembers.map((m) => m.id).includes(i))
   const unMM = mutedMembers.filter((un) => !un.muted?.[0] || un.muted[0].unmuteTime <= now)
   const unmutedIds = unMM.map((m) => m.id)
   const unmutedV3rmIds = unMM.map((m) => m.v3rmId)
+
   await Muted.deleteMany({ v3rmId: { $in: unmutedV3rmIds } })
-  return unmutedIds || []
+  return [...unmutedIds, ...notInDB] || notInDB
 }
 
 module.exports = { upsertMute, getAndUnmute }

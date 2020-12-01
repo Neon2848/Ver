@@ -86,7 +86,7 @@ const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 // For when the user has reacted in welcome but
 // for some reason hasn't been looked up yet.
 const reactLookup = async (guildid, member) => {
-  const { guild: { channels: { cache }, giuseppe: { channels: { activationLog } } } } = member
+  const { guild: { channels: { cache }, ver: { channels: { activationLog } } } } = member
   const activationChannel = cache.get(activationLog)
 
   if (Date.now() - member.user.createdAt < 259200000) {
@@ -112,7 +112,7 @@ const welcomeReaction = async (partialReaction, sender) => {
   const r = await partialReaction.fetch()
   const m = await r.message.fetch()
   const {
-    guild, guild: { giuseppe: { channels } }, id, channel,
+    guild, guild: { ver: { channels } }, id, channel,
   } = m
   if (channel.id !== channels.welcome) return
 
@@ -158,7 +158,7 @@ module.exports = async (...args) => {
     parts,
     parts: {
       message: {
-        channel, member, guild, guild: { giuseppe: { channels: { welcomeChannel } } },
+        channel, member, guild, guild: { ver: { channels: { welcomeChannel } } },
       }, messageReaction: { emoji: { id } },
     },
   } = data
