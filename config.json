@@ -4,7 +4,7 @@
     "maxStatQueue": 10
   },
   "slowmode": {
-    "messagesPer": 8,
+    "messagesPer": 1,
     "pollingRate": 4,
     "seconds": 6
   },
@@ -26,8 +26,8 @@
     }
   },
   "images": {
-    "botAvatar": "https://cdn.discordapp.com/attachments/548683437524123660/779793507786686524/vertransparentheadshot.png",
-    "v3rmLogo": "https://cdn.discordapp.com/attachments/548683437524123660/779793507786686524/vertransparentheadshot.png",
+    "botAvatar": "https://cdn.discordapp.com/attachments/548683437524123660/783282705176854578/verheadshot.png",
+    "v3rmLogo": "https://cdn.discordapp.com/attachments/548683437524123660/768952398835744787/v3rm_logo.png",
     "loader": "https://cdn.discordapp.com/attachments/548683437524123660/768952202681122856/loading.gif",
     "raysA": "https://cdn.discordapp.com/attachments/548683437524123660/774685397736226846/raysABackup.png",
     "raysCool": "https://cdn.discordapp.com/attachments/548683437524123660/774783468772917268/662337147126153227.gif"

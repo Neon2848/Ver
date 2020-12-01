@@ -39,6 +39,7 @@ const sendResult = async (resultMsg, caller, resultTitle) => {
       description: errorReasonTransform(resultMsg),
       color: 13441048,
       author: { name: resultTitle, icon_url: config.images.v3rmLogo },
+      thumbnail: { url: config.images.botAvatar },
     },
   }
   const send = await (caller.edit ? caller.message.edit(emb) : caller.message.channel.send(emb))
