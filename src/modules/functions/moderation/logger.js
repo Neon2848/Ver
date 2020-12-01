@@ -24,7 +24,7 @@ const generateTextFields = (message, customcContent = null) => {
     const mapped = parts.map((value, i) => genTextFields(value, i))
     return generateAdditionalFields(message, mapped)
   }
-  return []
+  return [{ name: 'Logger Error', value: 'There was an unknown error logging this message.' }]
 }
 
 const getDiff = (oldm, newm) => Diff.diffWords(oldm.cleanContent, newm.cleanContent).map((c) => {

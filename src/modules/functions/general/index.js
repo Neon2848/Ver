@@ -71,17 +71,23 @@ const genSpinner = (spinnerInfo) => (
 
 const genericLinkInfo = (member, title, v3rmId = null) => ({
   embed: {
-    title,
-    description: `**Tag:** ${member}\n\`\`\`ARM\n
-${v3rmId ? `v3rmId: '${v3rmId}'\n` : ''}\
-discordId: '${member.id}'
-discordCreated: '${moment(member.user.createdAt).fromNow()} (${moment(member.user.createdAt).format('lll')})'\`\`\``,
     color: 13441048,
     author: {
       name: member.displayName,
       icon_url: member.user.displayAvatarURL(),
       url: v3rmId ? `https://v3rm.net/m/${v3rmId}` : null,
     },
+    fields: [
+      { name: 'Action', value: `\`${title}\``, inline: true },
+      { name: 'Tag', value: `${member.user}\n${member.user.tag}`, inline: true },
+      {
+        name: 'User Info',
+        value: `\`\`\`ARM\n
+${v3rmId ? `v3rmId: '${v3rmId}'\n` : ''}\
+discordId: '${member.id}'
+discordCreated: '${moment(member.user.createdAt).fromNow()} (${moment(member.user.createdAt).format('lll')})'\`\`\``,
+      },
+    ],
     timestamp: new Date(),
   },
 })

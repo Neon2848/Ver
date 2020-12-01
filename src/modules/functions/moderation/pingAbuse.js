@@ -2,10 +2,7 @@ const { sendResult, inCacheUpsert } = require('../general')
 const { muteMember } = require('./mute')
 
 const checkPings = async (client, message) => {
-  let { config: { maxPings } } = client
-  const quotePos = message.cleanContent.indexOf('>')
-  // If they are quoting with ">" or " >"
-  if (quotePos === 0 || quotePos === 1) maxPings += 1
+  const { config: { maxPings } } = client
   const nonSelf = message.mentions.users.filter((m) => m.id !== message.author.id)
   if (nonSelf.size < maxPings) return
   if (inCacheUpsert('pingAbuse', message, 3600)) {
