@@ -25,7 +25,7 @@
     "diff": "^5.0.0",
     "discord.js": "^12.5.1",
     "enmap": "^5.8.2",
-    "file-type": "^16.0.1",
+    "file-type": "^16.1.0",
     "moment": "^2.29.1",
     "mongoose": "^5.11.9",
     "node-fetch": "^2.6.1",
