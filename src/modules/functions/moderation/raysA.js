@@ -100,7 +100,7 @@ const isBotAndMuteChuu = (message) => {
   if (!message.author.bot) return false
   if (message.member.roles.cache.find((role) => role.id === message.guild.ver.roles.chuu)) {
     if (Date.now() >= nextChuu) {
-      nextChuu = Date.now() + 600000
+      nextChuu = Date.now() + 60000
       safeDelete(message, 0)
     }
   }
