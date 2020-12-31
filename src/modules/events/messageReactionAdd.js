@@ -1,5 +1,6 @@
 const Discord = require('discord.js') // eslint-disable-line no-unused-vars
 const moment = require('moment')
+const { fetchJoin, deleteJoin } = require('../../mongo/joins')
 const { getV3rmId } = require('../../mongo/members')
 const {
   safeDelete, basicLookup, genericLinkInfo, basicKickUser,
@@ -86,22 +87,25 @@ const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 // For when the user has reacted in welcome but
 // for some reason hasn't been looked up yet.
 const reactLookup = async (guildid, member) => {
-  const { guild: { channels: { cache }, ver: { channels: { activationLog } } } } = member
+  const {
+    id, user, guild: { channels: { cache }, ver: { channels: { activationLog } } },
+  } = member
   const activationChannel = cache.get(activationLog)
-
+  const joinMessageId = await fetchJoin(guildid, id)
+  const messagetoUpdate = await activationChannel.messages.fetch(joinMessageId)
   if (Date.now() - member.user.createdAt < 259200000) {
-    await activationChannel.send(genericLinkInfo(member, `User tried to activate, but their was created ${moment(member.user.createdAt).fromNow()}.`))
+    await messagetoUpdate.edit(genericLinkInfo(member, `User tried to activate, but their was created ${moment(user.createdAt).fromNow()}.`))
+    await deleteJoin(guildid, id) // Remove the log from the joinlog.
     await basicKickUser(member, "Sorry! Your Discord account is less than 3 days old, so we can't activate you quite yet. You're welcome to rejoin later at https://v3rm.net/discord.", guildid)
     return false
   }
-
-  const existingDetails = await getV3rmId(guildid, member.id)
+  const existingDetails = await getV3rmId(guildid, id)
   if (existingDetails) {
-    activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms.', existingDetails))
+    messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', existingDetails))
     return true
   }
   await basicLookup(member)
-  const newDetails = await getV3rmId(guildid, member.id)
+  const newDetails = await getV3rmId(guildid, id)
   if (newDetails) {
     activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', newDetails))
   }
