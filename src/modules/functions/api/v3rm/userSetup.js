@@ -39,7 +39,10 @@ const addtoRoleQueue = async (id, member, nickChange, rolesToAdd = []) => {
 
 // Try to the new role/nickname
 const basicUserSetup = async (details, member) => {
-  const rolesToAdd = details.roles.map((role) => member.guild.roles.cache.find((guildRole) => guildRole.name === role && guildRole.name !== 'Member')).filter((r) => !!r)
+  const dropRoles = ['cute people', '@everyone', 'Member']
+  const rolesToAdd = details.roles.map((role) => member.guild.roles.cache
+    .find((guildRole) => guildRole.name === role && !dropRoles.includes(guildRole.name)))
+    .filter((r) => !!r)
   if (details.username) await member.setNickname(member.user.username === details.username ? `${member.user.username}\u200E` : details.username).catch((e) => { throw e })
   if (rolesToAdd.length) await member.roles.add(rolesToAdd).catch((e) => { throw e })
   return member

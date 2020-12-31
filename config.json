@@ -10,7 +10,7 @@
   },
   "maxPings": 3,
   "roleTranslations": {
-      "Administrator": 4,
+      "Owner": 4,
       "Advisor": 14,
       "Moderator": 6,
       "Esoterica": 28,
