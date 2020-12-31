@@ -9,6 +9,7 @@ const secrets = require('../../../../secrets.json')
 const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 const { logMember } = require('../database/members')
 const log = require('../../../mongo/log')
+const { logJoin } = require('../../../mongo/joins')
 
 const errorReasonTransform = (err) => {
   if (err === 'Input malformed') return 'There was an issue with your input. Please use `!lookup @User` or `!lookup id`.'
@@ -97,6 +98,7 @@ const performBasicLookup = async (member) => {
   const aChannel = cache.get(activationLog)
 
   const logLookup = await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`))
+  await logJoin(member.guild.id, member.id, logLookup.id) // Save to database
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => { })
   if (!details) {
     logLookup.edit(genericLinkInfo(member, 'User is not linked.'))
