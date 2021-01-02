@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const joinSchema = require('./schemas/joinlog')
+const log = require('./log')
 
 const Joinlog = mongoose.model('joinlog', joinSchema)
 
@@ -23,7 +24,7 @@ const fetchJoin = async (serverId, id) => {
 
 const deleteJoin = async (serverId, id) => {
   const query = { serverId, id }
-  await Joinlog.deleteOne(query)
+  await Joinlog.deleteOne(query).catch((_) => log(serverId, 'error', 'deleting joinlog', 'database issue', _))
 }
 
 module.exports = { logJoin, fetchJoin, deleteJoin }

@@ -86,30 +86,46 @@ const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 
 // For when the user has reacted in welcome but
 // for some reason hasn't been looked up yet.
-const reactLookup = async (guildid, member) => {
-  const {
-    id, user, guild: { channels: { cache }, ver: { channels: { activationLog } } },
-  } = member
-  const activationChannel = cache.get(activationLog)
-  const joinMessageId = await fetchJoin(guildid, id)
-  const messagetoUpdate = await activationChannel.messages.fetch(joinMessageId)
+const doReactLookup = async (guildid, member) => {
+  const { id } = member
   if (Date.now() - member.user.createdAt < 259200000) {
-    await messagetoUpdate.edit(genericLinkInfo(member, `User tried to activate, but their was created ${moment(user.createdAt).fromNow()}.`))
-    await deleteJoin(guildid, id) // Remove the log from the joinlog.
     await basicKickUser(member, "Sorry! Your Discord account is less than 3 days old, so we can't activate you quite yet. You're welcome to rejoin later at https://v3rm.net/discord.", guildid)
-    return false
+    return { success: false, result: 'ACCOUNT_AGE' }
   }
-  const existingDetails = await getV3rmId(guildid, id)
-  if (existingDetails) {
-    messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', existingDetails))
-    return true
-  }
+  const details = await getV3rmId(guildid, id)
+  if (details) return { success: true, result: 'ALREADY_LOOKED', details }
   await basicLookup(member)
   const newDetails = await getV3rmId(guildid, id)
-  if (newDetails) {
-    activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', newDetails))
+  return { success: !!newDetails, result: 'SECOND_ATTEMPT', details: newDetails }
+}
+
+const updateJoinMessage = (reactSuccess, messagetoUpdate, member) => {
+  const { user } = member
+
+  switch (reactSuccess.result) {
+    case 'ACCOUNT_AGE':
+      messagetoUpdate.edit(genericLinkInfo(member, `User tried to activate, but their was created ${moment(user.createdAt).fromNow()}.`))
+      break
+    case 'ALREADY_LOOKED':
+      if (messagetoUpdate) messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', reactSuccess.details))
+      break
+    default:
+      if (reactSuccess.success) messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', reactSuccess.details))
   }
-  return !!newDetails
+}
+
+const reactLookup = async (guildid, member) => {
+  const {
+    id, guild: { channels: { cache }, ver: { channels: { activationLog } } },
+  } = member
+
+  const activationChannel = cache.get(activationLog)
+  const joinMsgId = await fetchJoin(guildid, id)
+  const messagetoUpdate = joinMsgId ? await activationChannel.messages.fetch(joinMsgId) : null
+
+  const reactSuccess = await doReactLookup(guildid, member)
+  if (messagetoUpdate) updateJoinMessage()
+  return reactSuccess.success
 }
 
 const welcomeReaction = async (partialReaction, sender) => {
@@ -130,6 +146,7 @@ const welcomeReaction = async (partialReaction, sender) => {
     await partialReaction.users.remove(sender)
     return
   }
+  await deleteJoin(guild.id, sender.id) // Remove the log from the joinlog.
   const roleToAdd = await guild.roles.cache.find((rol) => rol.name === 'Member')
   await s.roles.add(roleToAdd).catch((_) => knownErrors.userOperation(_, guild.id, 'assigning roles'))
 }
