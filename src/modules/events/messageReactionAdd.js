@@ -99,17 +99,9 @@ const doReactLookup = async (guildid, member) => {
   return { success: !!newDetails, result: 'SECOND_ATTEMPT', details: newDetails }
 }
 
-const reactLookup = async (guildid, member) => {
-  const {
-    id, user, guild: { channels: { cache }, ver: { channels: { activationLog } } },
-  } = member
+const updateJoinMessage = (reactSuccess, messagetoUpdate, member) => {
+  const { user } = member
 
-  const activationChannel = cache.get(activationLog)
-  const joinMsgId = await fetchJoin(guildid, id)
-  const messagetoUpdate = joinMsgId ? await activationChannel.messages.fetch(joinMsgId) : null
-
-  const reactSuccess = await doReactLookup(guildid, member)
-  if (!messagetoUpdate) return reactSuccess.success
   switch (reactSuccess.result) {
     case 'ACCOUNT_AGE':
       messagetoUpdate.edit(genericLinkInfo(member, `User tried to activate, but their was created ${moment(user.createdAt).fromNow()}.`))
@@ -118,8 +110,21 @@ const reactLookup = async (guildid, member) => {
       if (messagetoUpdate) messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', reactSuccess.details))
       break
     default:
-      if (reactSuccess.success) activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', reactSuccess.details))
+      if (reactSuccess.success) messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', reactSuccess.details))
   }
+}
+
+const reactLookup = async (guildid, member) => {
+  const {
+    id, guild: { channels: { cache }, ver: { channels: { activationLog } } },
+  } = member
+
+  const activationChannel = cache.get(activationLog)
+  const joinMsgId = await fetchJoin(guildid, id)
+  const messagetoUpdate = joinMsgId ? await activationChannel.messages.fetch(joinMsgId) : null
+
+  const reactSuccess = await doReactLookup(guildid, member)
+  if (messagetoUpdate) updateJoinMessage()
   return reactSuccess.success
 }
 
