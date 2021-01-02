@@ -102,7 +102,7 @@ const checkFunctions = {
 }
 
 const checkWordFilters = (client, message) => {
-  if (!message.member || message.member.hasPermission('KICK_MEMBERS')) return
+  if (!message.member) return // || message.member.hasPermission('KICK_MEMBERS')
   const { secrets } = client
   const { config: { images: { v3rmLogo } } } = client
   const keys = Object.keys(secrets.wordFilters)

@@ -34,8 +34,8 @@ const warnPrompt = async (reaction, sender, message, client) => {
   const emb = new Discord.MessageEmbed({ ...message.embeds[0] })
   let warnReason = null
   if (reaction.emoji.name === '❌') emb.setFooter(`This message has been ignored by: ${sender.user.tag}.`)
-  else if (reaction.emoji.name === '🇲') warnReason = '2M - Hate Speech and/or Derogatory Terms'
-  else if (reaction.emoji.name === '🇱') warnReason = '2L - Filter Evasion'
+  else if (reaction.emoji.name === '🇲') warnReason = '2M - Hate Speech / Derogatory Terms (Slur)'
+  else if (reaction.emoji.name === '🇱') warnReason = '2L - Filter Evasion (Slur)'
   else return
 
   emb.color = 0
@@ -44,7 +44,7 @@ const warnPrompt = async (reaction, sender, message, client) => {
     emb.setFooter(`This user has been warned by ${sender.user.tag}.`)
     const user = emb.fields[0].value.replace(/[^0-9]/g, '')
     await client.commands.get('warn')
-      .run(null, message, { argMap: { users: [user] } }, warnReason)
+      .run(null, message, { argMap: { users: [user] } }, warnReason, true)
   }
   await message.edit(emb).catch(() => {})
 }
@@ -54,7 +54,7 @@ const botModerationReactions = async (client, parts) => {
   const embedFooter = parts.message.embeds?.[0]?.footer || null
   if (embedDesc && embedDesc.indexOf('React below to ban them for') > -1) {
     banPrompt(parts.messageReaction, parts.sendMember, parts.message, embedDesc, client)
-  } if (embedFooter && embedFooter.text.indexOf('React below to warn for 2M, 2O, or ignore respestively') > -1) {
+  } if (embedFooter && embedFooter.text.indexOf('React below to warn for 2M, 2L, or ignore respestively') > -1) {
     warnPrompt(parts.messageReaction, parts.sendMember, parts.message, client)
   }
 }
@@ -124,7 +124,7 @@ const reactLookup = async (guildid, member) => {
   const messagetoUpdate = joinMsgId ? await activationChannel.messages.fetch(joinMsgId) : null
 
   const reactSuccess = await doReactLookup(guildid, member)
-  if (messagetoUpdate) updateJoinMessage()
+  if (messagetoUpdate) updateJoinMessage(reactSuccess, messagetoUpdate, member)
   return reactSuccess.success
 }
 
