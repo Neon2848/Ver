@@ -86,29 +86,41 @@ const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)
 
 // For when the user has reacted in welcome but
 // for some reason hasn't been looked up yet.
+const doReactLookup = async (guildid, member) => {
+  const { id } = member
+  if (Date.now() - member.user.createdAt < 259200000) {
+    await basicKickUser(member, "Sorry! Your Discord account is less than 3 days old, so we can't activate you quite yet. You're welcome to rejoin later at https://v3rm.net/discord.", guildid)
+    return { success: false, result: 'ACCOUNT_AGE' }
+  }
+  const details = await getV3rmId(guildid, id)
+  if (details) return { success: true, result: 'ALREADY_LOOKED', details }
+  await basicLookup(member)
+  const newDetails = await getV3rmId(guildid, id)
+  return { success: !!newDetails, result: 'SECOND_ATTEMPT', details: newDetails }
+}
+
 const reactLookup = async (guildid, member) => {
   const {
     id, user, guild: { channels: { cache }, ver: { channels: { activationLog } } },
   } = member
+
   const activationChannel = cache.get(activationLog)
   const joinMsgId = await fetchJoin(guildid, id)
   const messagetoUpdate = joinMsgId ? await activationChannel.messages.fetch(joinMsgId) : null
-  if (Date.now() - member.user.createdAt < 259200000) {
-    await messagetoUpdate.edit(genericLinkInfo(member, `User tried to activate, but their was created ${moment(user.createdAt).fromNow()}.`))
-    await basicKickUser(member, "Sorry! Your Discord account is less than 3 days old, so we can't activate you quite yet. You're welcome to rejoin later at https://v3rm.net/discord.", guildid)
-    return false
+
+  const reactSuccess = await doReactLookup(guildid, member)
+  if (!messagetoUpdate) return reactSuccess.success
+  switch (reactSuccess.result) {
+    case 'ACCOUNT_AGE':
+      messagetoUpdate.edit(genericLinkInfo(member, `User tried to activate, but their was created ${moment(user.createdAt).fromNow()}.`))
+      break
+    case 'ALREADY_LOOKED':
+      if (messagetoUpdate) messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', reactSuccess.details))
+      break
+    default:
+      if (reactSuccess.success) activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', reactSuccess.details))
   }
-  const existingDetails = await getV3rmId(guildid, id)
-  if (existingDetails) {
-    if (messagetoUpdate) messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', existingDetails))
-    return true
-  }
-  await basicLookup(member)
-  const newDetails = await getV3rmId(guildid, id)
-  if (newDetails && messagetoUpdate) {
-    activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', newDetails))
-  }
-  return !!newDetails
+  return reactSuccess.success
 }
 
 const welcomeReaction = async (partialReaction, sender) => {
@@ -129,7 +141,7 @@ const welcomeReaction = async (partialReaction, sender) => {
     await partialReaction.users.remove(sender)
     return
   }
-  await deleteJoin(guild.id, id) // Remove the log from the joinlog.
+  await deleteJoin(guild.id, sender.id) // Remove the log from the joinlog.
   const roleToAdd = await guild.roles.cache.find((rol) => rol.name === 'Member')
   await s.roles.add(roleToAdd).catch((_) => knownErrors.userOperation(_, guild.id, 'assigning roles'))
 }

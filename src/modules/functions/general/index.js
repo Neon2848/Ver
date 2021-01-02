@@ -59,6 +59,8 @@ const kickUser = (member, editable, reasons) => {
   })
 }
 
+// Debounce basic lookup (per user), as it only takes a react to be called.
+// Also limit the queue size to 5, so that if 5 or more users are being looked up at once
 const basicLookupTable = []
 
 const basicKickUser = (member, reason, gid) => {
@@ -98,34 +100,49 @@ discordCreated: '${moment(member.user.createdAt).fromNow()} (${moment(member.use
   },
 })
 
-const performBasicLookup = async (member) => {
-  const { guild: { channels: { cache }, ver: { channels: { activationLog } } } } = member
-  const aChannel = cache.get(activationLog)
-
-  // logLookup will be null if there are 5 or more people in the join queue, to avoid mass DM/Log.
-  // this is to stop the bot getting disabled for mass PMs during a raid.
-  const logLookup = basicLookupTable.length < 5 ? await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`)) : null
-  if (logLookup) await logJoin(member.guild.id, member.id, logLookup.id) // Save to database
+const doBasicLookup = async (member) => {
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => { })
   if (!details) {
-    if (logLookup) logLookup.edit(genericLinkInfo(member, 'User is not linked.'))
-    return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
+    basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
+    return { fail: true, result: 'LOOKUP_FAILED', details: null }
   }
   if (details.roles.includes('Banned') || !details.roles.length) {
-    if (logLookup) logLookup.edit(genericLinkInfo(member, 'User found, but they are banned/unactivated or don\'t qualify.', details.uid))
-    return basicKickUser(member, `To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn't meet these standards yet, or you're currently banned onsite. You're welcome to join when you do. (Your profile: https://v3rm.net/m/${details.uid} )`, member.guild.id)
+    basicKickUser(member, `To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn't meet these standards yet, or you're currently banned onsite. You're welcome to join when you do. (Your profile: https://v3rm.net/m/${details.uid} )`, member.guild.id)
+    return { fail: true, result: 'NOT_ELIGIBLE', details }
   }
   await logMember(member.guild.id, member, details.uid)
   await addtoRoleQueue(member.id, member, details.username, details.roles)
-  const finishedMember = await attemptRoleQueue()
-  if (logLookup) logLookup.edit(genericLinkInfo(member, 'User successfully linked.', details.uid))
+  const result = await attemptRoleQueue()
+  return { fail: false, result, details }
+}
+
+const performBasicLookup = async (member) => {
+  const raid = basicLookupTable.length > 5
+  const { guild: { channels: { cache }, ver: { channels: { activationLog } } } } = member
+  const aChannel = cache.get(activationLog)
+
+  if (raid) { // If the lookup queue is full, don't DM/Log.
+    const finishedMember = await doBasicLookup(member)
+    return finishedMember.result
+  }
+
+  const logLookup = await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`))
+  await logJoin(member.guild.id, member.id, logLookup.id) // db save id of join msg
+  const finishedMember = await doBasicLookup(member)
+  switch (finishedMember.result) {
+    case 'LOOKUP_FAILED':
+      logLookup.edit(genericLinkInfo(member, 'User is not linked.'))
+      break
+    case 'NOT_ELIGIBLE':
+      logLookup.edit(genericLinkInfo(member, 'User found, but they are banned/unactivated or don\'t qualify.', finishedMember.details.uid))
+      break
+    default:
+      logLookup.edit(genericLinkInfo(member, 'User successfully linked.', finishedMember.details.uid))
+  }
   return finishedMember
 }
 
-// Debounce basic lookup (per user), as it only takes a react to be called.
-// Also limit the queue size to 5, so that if 5 or more users are being looked up at once
 // We wait 5.1s and re-call the function. This should avoid API abuse if join raid.
-// Why? at most, this will cause 2 send calls, 1 v3rmApi call, and 1 DM call... which is a lot.
 const basicLookup = async (member) => {
   if (basicLookupTable.includes(member.id)) return null
   if (basicLookupTable.length >= 4) {
@@ -249,5 +266,4 @@ module.exports = {
   sendFile,
   genericLinkInfo,
   basicKickUser,
-  basicLookupTable,
 }
