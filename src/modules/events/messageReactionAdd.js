@@ -91,22 +91,21 @@ const reactLookup = async (guildid, member) => {
     id, user, guild: { channels: { cache }, ver: { channels: { activationLog } } },
   } = member
   const activationChannel = cache.get(activationLog)
-  const joinMessageId = await fetchJoin(guildid, id)
-  const messagetoUpdate = await activationChannel.messages.fetch(joinMessageId)
+  const joinMsgId = await fetchJoin(guildid, id)
+  const messagetoUpdate = joinMsgId ? await activationChannel.messages.fetch(joinMsgId) : null
   if (Date.now() - member.user.createdAt < 259200000) {
     await messagetoUpdate.edit(genericLinkInfo(member, `User tried to activate, but their was created ${moment(user.createdAt).fromNow()}.`))
-    await deleteJoin(guildid, id) // Remove the log from the joinlog.
     await basicKickUser(member, "Sorry! Your Discord account is less than 3 days old, so we can't activate you quite yet. You're welcome to rejoin later at https://v3rm.net/discord.", guildid)
     return false
   }
   const existingDetails = await getV3rmId(guildid, id)
   if (existingDetails) {
-    messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', existingDetails))
+    if (messagetoUpdate) messagetoUpdate.edit(genericLinkInfo(member, 'User successfully agreed to terms.', existingDetails))
     return true
   }
   await basicLookup(member)
   const newDetails = await getV3rmId(guildid, id)
-  if (newDetails) {
+  if (newDetails && messagetoUpdate) {
     activationChannel.send(genericLinkInfo(member, 'User successfully agreed to terms (second attempt).', newDetails))
   }
   return !!newDetails
@@ -130,6 +129,7 @@ const welcomeReaction = async (partialReaction, sender) => {
     await partialReaction.users.remove(sender)
     return
   }
+  await deleteJoin(guild.id, id) // Remove the log from the joinlog.
   const roleToAdd = await guild.roles.cache.find((rol) => rol.name === 'Member')
   await s.roles.add(roleToAdd).catch((_) => knownErrors.userOperation(_, guild.id, 'assigning roles'))
 }

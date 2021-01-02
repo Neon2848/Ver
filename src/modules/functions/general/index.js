@@ -59,8 +59,13 @@ const kickUser = (member, editable, reasons) => {
   })
 }
 
+const basicLookupTable = []
+
 const basicKickUser = (member, reason, gid) => {
   if (member.user.bot) return null
+  // If joins are being flooded, kick without DM.
+  if (basicLookupTable.length > 5) return member.kick('User does not have permissions.').catch((_) => knownErrors.userOperation(_, gid))
+
   return member.send(reason).finally(() => {
     member.kick('User does not have permissions.').catch((_) => knownErrors.userOperation(_, gid))
   }).catch(() => { })
@@ -97,21 +102,23 @@ const performBasicLookup = async (member) => {
   const { guild: { channels: { cache }, ver: { channels: { activationLog } } } } = member
   const aChannel = cache.get(activationLog)
 
-  const logLookup = await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`))
-  await logJoin(member.guild.id, member.id, logLookup.id) // Save to database
+  // logLookup will be null if there are 5 or more people in the join queue, to avoid mass DM/Log.
+  // this is to stop the bot getting disabled for mass PMs during a raid.
+  const logLookup = basicLookupTable.length < 5 ? await aChannel.send(genSpinner(`Looking up new member: ${member.user.tag} / ${member.user.id}`)) : null
+  if (logLookup) await logJoin(member.guild.id, member.id, logLookup.id) // Save to database
   const details = await lookup(member.id, member.guild.id, { bypass: true, type: 'basicLookup' }).catch(() => { })
   if (!details) {
-    logLookup.edit(genericLinkInfo(member, 'User is not linked.'))
+    if (logLookup) logLookup.edit(genericLinkInfo(member, 'User is not linked.'))
     return basicKickUser(member, 'There was an issue connecting your account to our website. Please double check that you are linked on https://v3rm.net/discord.', member.guild.id)
   }
   if (details.roles.includes('Banned') || !details.roles.length) {
-    logLookup.edit(genericLinkInfo(member, 'User found, but they are banned/unactivated or don\'t qualify.', details.uid))
+    if (logLookup) logLookup.edit(genericLinkInfo(member, 'User found, but they are banned/unactivated or don\'t qualify.', details.uid))
     return basicKickUser(member, `To prevent botting, you need to have been a site member for at least 1 month and have at least 40 posts on our website to use our Discord (or be a VIP/Elite member). Either you donn't meet these standards yet, or you're currently banned onsite. You're welcome to join when you do. (Your profile: https://v3rm.net/m/${details.uid} )`, member.guild.id)
   }
   await logMember(member.guild.id, member, details.uid)
   await addtoRoleQueue(member.id, member, details.username, details.roles)
   const finishedMember = await attemptRoleQueue()
-  logLookup.edit(genericLinkInfo(member, 'User successfully linked.', details.uid))
+  if (logLookup) logLookup.edit(genericLinkInfo(member, 'User successfully linked.', details.uid))
   return finishedMember
 }
 
@@ -119,8 +126,6 @@ const performBasicLookup = async (member) => {
 // Also limit the queue size to 5, so that if 5 or more users are being looked up at once
 // We wait 5.1s and re-call the function. This should avoid API abuse if join raid.
 // Why? at most, this will cause 2 send calls, 1 v3rmApi call, and 1 DM call... which is a lot.
-const basicLookupTable = []
-
 const basicLookup = async (member) => {
   if (basicLookupTable.includes(member.id)) return null
   if (basicLookupTable.length >= 4) {
@@ -244,4 +249,5 @@ module.exports = {
   sendFile,
   genericLinkInfo,
   basicKickUser,
+  basicLookupTable,
 }
