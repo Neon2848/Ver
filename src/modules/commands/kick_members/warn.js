@@ -22,8 +22,9 @@ const doWarn = async (discordid, reason, editable) => {
     .catch((e) => catchWarnError(e, editable, reason, discordid))
   if (!attemptWarn) return null
 
+  const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
+  attemptWarn.isGuildMember = !!guildMember
   if (attemptWarn.isBeingBanned) {
-    const guildMember = editable.guild.members.cache.find((m) => m.id === discordid)
     if (guildMember) {
       kickUser(guildMember, editable, {
         dm: `You have been kicked because you just received a site warning: \`${reason}\`, and are now at max warning level.`,
@@ -31,21 +32,20 @@ const doWarn = async (discordid, reason, editable) => {
         log: `Max warning level: ${reason}`,
       })
     }
-    attemptWarn.isGuildMember = !!guildMember
-  }
+  } else if (guildMember) guildMember.send(`You have just been warned for: \`${reason}\`. This is an on-site warning.`)
   return attemptWarn
 }
 
-const prepareDoWarn = async (id, justQuote, editable) => {
+const prepareDoWarn = async (id, justQuote, editable, timeout) => {
   const warned = await doWarn(id, justQuote, editable)
   if (!warned) return null
   if (warned.isBeingBanned && !warned.isGuildMember) {
-    return sendResult(`<@${id}> has been banned (100% warning) for: \`${justQuote}\`. They aren't in the server, so haven't been kicked`, { message: editable, edit: true }, 'User warned')
+    return sendResult(`<@${id}> has been banned (100% warning) for: \`${justQuote}\`. They aren't in the server, so haven't been kicked`, { message: editable, edit: true, timeout }, 'User warned')
   }
-  return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true }, 'User warned')
+  return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true, timeout }, 'User warned')
 }
 
-exports.run = async (client, message, args, externalReason = null) => {
+exports.run = async (client, message, args, externalReason = null, timeout) => {
   const spinner = genSpinner('Attempting to warn...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
@@ -57,5 +57,6 @@ exports.run = async (client, message, args, externalReason = null) => {
     return null
   }
 
-  return prepareDoWarn(id, justQuote, editable)
+  const result = prepareDoWarn(id, justQuote, editable, timeout)
+  return result
 }

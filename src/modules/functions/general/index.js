@@ -241,7 +241,7 @@ const sendFile = async (buffer, editable, sDF = null, eDF = null) => {
   }
 
   const theMessage = sDF
-    ? `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC. \`\`\`diff\n- Note: This is development data, and is not accurate at all. The bot hasn't been running most of the time, and when it has it's only been collecting partial data. It will also be reset several times.\`\`\``
+    ? `Message Activity Between: \`${sDF.toLocaleTimeString('en-gb', dtOptions)}\` and \`${eDF.toLocaleTimeString('en-gb', dtOptions)}\` UTC.`
     : '`Number of approved votemutes per user:`'
 
   const file = new MessageAttachment(buffer, 'chart.png')
