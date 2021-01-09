@@ -36,16 +36,16 @@ const doWarn = async (discordid, reason, editable) => {
   return attemptWarn
 }
 
-const prepareDoWarn = async (id, justQuote, editable, cleanup) => {
+const prepareDoWarn = async (id, justQuote, editable, timeout) => {
   const warned = await doWarn(id, justQuote, editable)
   if (!warned) return null
   if (warned.isBeingBanned && !warned.isGuildMember) {
-    return sendResult(`<@${id}> has been banned (100% warning) for: \`${justQuote}\`. They aren't in the server, so haven't been kicked`, { message: editable, edit: true, timeout: cleanup ? 1000 : null }, 'User warned')
+    return sendResult(`<@${id}> has been banned (100% warning) for: \`${justQuote}\`. They aren't in the server, so haven't been kicked`, { message: editable, edit: true, timeout }, 'User warned')
   }
-  return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true, timeout: cleanup ? 1000 : null }, 'User warned')
+  return sendResult(`<@${id}> has been warned for: \`${justQuote}\``, { message: editable, edit: true, timeout }, 'User warned')
 }
 
-exports.run = async (client, message, args, externalReason = null, cleanup = false) => {
+exports.run = async (client, message, args, externalReason = null, timeout) => {
   const spinner = genSpinner('Attempting to warn...')
   const editable = await message.channel.send(spinner)
   const id = args.argMap.users[0] || null
@@ -57,6 +57,6 @@ exports.run = async (client, message, args, externalReason = null, cleanup = fal
     return null
   }
 
-  const result = prepareDoWarn(id, justQuote, editable, cleanup)
+  const result = prepareDoWarn(id, justQuote, editable, timeout)
   return result
 }

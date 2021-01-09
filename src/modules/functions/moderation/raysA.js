@@ -128,8 +128,7 @@ const userVoteBonus = (u, guild) => {
   const { ver: { roles: { leaderboardLord, nitro, esoterica } } } = guild
   const m = guild.members.cache.get(u.id)
   if (m) {
-    if (m.roles.cache.filter((r) => r.permissions.has('KICK_MEMBERS')).size) return 5
-    if (m.roles.cache.filter((r) => r.id === leaderboardLord).size) return 5
+    if (m.roles.cache.filter((r) => r.id === leaderboardLord || r.permissions.has('KICK_MEMBERS')).size) return 5
     if (m.roles.cache.filter((r) => r.id === esoterica || r.id === nitro)) return 2
   }
   return 1
