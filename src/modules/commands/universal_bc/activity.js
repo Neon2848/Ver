@@ -82,17 +82,43 @@ const mapDataToHours = (h, hours, sStats) => {
   return sStats[hourIndex]
 }
 
+const hourDataToDayData = (data) => {
+  // data from mongo filled with confusing hidden keys,
+  // so I can't spread this object normally ¯\_(ツ)_/¯
+  const dupedData = data.map((e) => ({
+    date: new Date(e.date.setHours(0)),
+    messages: e.messages,
+    pTo: e.pTo,
+    pFrom: e.pFrom,
+    v3rmId: e.v3rmId,
+    serverId: e.serverId,
+  }))
+
+  const days = []
+  dupedData.forEach((dupe) => {
+    const existing = days.findIndex((day) => day.date.getTime() === dupe.date.getTime())
+    if (existing === -1) return days.push(dupe)
+    days[existing].messages += dupe.messages
+    days[existing].pTo += dupe.pTo
+    days[existing].pFrom += dupe.pFrom
+    return null
+  })
+  return days
+}
+
+// eslint-disable-next-line max-lines-per-function
 const convertDataToLine = (sStats, sDF) => {
   const hours = sStats.map((stat) => stat.date.getTime())
 
   const tempMap = getAllHoursSinceDate(sDF)
     .map((h) => mapDataToHours(h, hours, sStats))
     .filter((_) => !!_)
+  const dayMap = hourDataToDayData(tempMap)
 
-  const tHours = tempMap.map((stat) => new Date(stat.date).toLocaleTimeString('en-gb', { dateStyle: 'short', timeStyle: 'short' }).replace(/\/20([0-9][0-9]),/, '/$1,'))
-  const tMsgs = toFieldArray(tempMap, 'messages')
-  const tPTo = toFieldArray(tempMap, 'pTo')
-  const tPFrom = toFieldArray(tempMap, 'pFrom')
+  const tHours = dayMap.map((stat) => new Date(stat.date).toLocaleTimeString('en-gb', { dateStyle: 'short' }).replace(/\/20([0-9][0-9])$/, '/$1'))
+  const tMsgs = toFieldArray(dayMap, 'messages')
+  const tPTo = toFieldArray(dayMap, 'pTo')
+  const tPFrom = toFieldArray(dayMap, 'pFrom')
 
   const datasets = [{
     label: 'Messages', data: tMsgs, borderColor: '#a4bdf4', pointRadius: 1,

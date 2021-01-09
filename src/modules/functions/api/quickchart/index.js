@@ -100,7 +100,7 @@ const barChartWithPings = () => ({
 const lineGraph = () => ({
   legend: {
     labels: {
-      fontColor: 'rgba(255, 255, 255, 0.7)',
+      fontColor: 'rgba(0, 255, 255, 0.7)',
       fontSize: 12,
       fontStyle: 'bold',
     },
@@ -108,12 +108,13 @@ const lineGraph = () => ({
   scales: {
     xAxes: [{
       gridLines: {
-        color: 'rgba(255, 255, 255, 0.1)',
+        color: 'rgba(0, 255, 255, 0.1)',
         drawTicks: false,
       },
       ticks: {
-        fontColor: 'rgba(255, 255, 255, 0.5)',
+        fontColor: 'rgba(0, 255, 255, 0.5)',
         fontStyle: 'bold',
+        fontSize: 14,
         padding: 8,
       },
     }],
