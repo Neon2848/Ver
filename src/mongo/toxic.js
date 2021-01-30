@@ -45,18 +45,21 @@ const getNextToxicLength = async ({ serverId, id }) => {
 const getAndDetox = async (serverId, ids) => {
   const now = Date.now()
 
-  const toxicMembers = await Members.aggregate([
+  const toxFromDB = await Members.aggregate([
     { $match: { serverId, id: { $in: ids } } },
     {
       $lookup: {
-        from: 'toxiclists', localField: 'v3rmId', foreignField: 'v3rmId', as: 'toxic',
+        from: 'toxiclists',
+        localField: 'v3rmId',
+        foreignField: 'v3rmId',
+        as: 'toxic',
       },
     },
   ]).catch((_) => { throw _ })
 
   // Find toxic users whose time has expired or aren't in the toxic list at all.
-  const notInToxic = ids.filter((i) => !toxicMembers.map((m) => m.id).includes(i))
-  const unTox = toxicMembers.filter((de) => !de.toxic?.[0] || de.toxic[0].expireTime <= now)
+  const notInToxic = ids.filter((id) => !toxFromDB.map((member) => member.id).includes(id))
+  const unTox = toxFromDB.filter((r) => !r.toxic?.[0] || r.toxic[0].expireTime <= now)
   const deToxIds = unTox.map((m) => m.id)
 
   return [...deToxIds, ...notInToxic] || notInToxic
