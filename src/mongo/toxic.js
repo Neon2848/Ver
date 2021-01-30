@@ -46,16 +46,12 @@ const notToxFilter = (id, toxFromDB) => !toxFromDB.map((member) => member.id).in
 const unToxFilter = (r) => !r.toxic?.[0] || r.toxic[0].expireTime <= Date.now()
 
 const getAndDetox = async (serverId, ids) => {
+  const lookupData = {
+    from: 'toxiclists', localField: 'v3rmId', as: 'toxic', foreignField: 'v3rmId',
+  }
   const toxFromDB = await Members.aggregate([
     { $match: { serverId, id: { $in: ids } } },
-    {
-      $lookup: {
-        foreignField: 'v3rmId',
-        localField: 'v3rmId',
-        as: 'toxic',
-        from: 'toxiclists',
-      },
-    },
+    { $lookup: lookupData },
   ]).catch((_) => { throw _ })
 
   // Find toxic users whose time has expired or aren't in the toxic list at all.
