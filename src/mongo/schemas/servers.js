@@ -8,7 +8,7 @@ const serversSchema = new Schema({
   settings: {
     lastLookup: { type: Date, default: Date.now },
     lookupTimeout: { type: Number, default: 30 },
-    allowUsersToLookup: { type: Boolean, default: false },
+    allowUsersToLookup: { type: Boolean, default: true },
   },
   channels: {
     staffVC: { type: String, default: 'Staff' },
