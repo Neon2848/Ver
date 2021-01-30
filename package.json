@@ -27,7 +27,7 @@
     "enmap": "^5.8.2",
     "file-type": "^16.1.0",
     "moment": "^2.29.1",
-    "mongoose": "^5.11.11",
+    "mongoose": "^5.11.14",
     "node-fetch": "^2.6.1",
     "path": "^0.12.7",
     "recursive-readdir": "^2.2.2"
