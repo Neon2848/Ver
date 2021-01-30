@@ -5,7 +5,7 @@ const { attemptRoleQueue } = require('../functions/api/v3rm/userSetup')
 const { messageStatQueue } = require('../functions/database/stats')
 const { checkWordFilters } = require('../functions/moderation')
 const { checkPings } = require('../functions/moderation/pingAbuse')
-const { unmuteMembers } = require('../functions/moderation/mute')
+const { unpunishMembers } = require('../functions/moderation/mute')
 const { preventFlood } = require('../functions/moderation/preventFlood')
 const { safeDelete, msgIntegrityCheck, basicLookup } = require('../functions/general')
 const { getV3rmId } = require('../../mongo/members')
@@ -43,7 +43,7 @@ const runCommand = (client, message) => {
 const runTasks = async (client, message) => {
   attemptRoleQueue()
   messageStatQueue(client, message)
-  if (message.createdTimestamp % 2 === 0) unmuteMembers(message.guild)
+  if (message.createdTimestamp % 2 === 0) unpunishMembers(message.guild)
 }
 
 module.exports = async (client, message) => {

@@ -2,6 +2,7 @@ const moment = require('moment')
 const { sendResult } = require('../general')
 const { upsertMute, getAndUnmute } = require('../../../mongo/mute')
 const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
+const { getAndDetox } = require('../../../mongo/toxic')
 
 const muteMember = async (guild, member, details, message) => {
   const insertMute = await upsertMute(guild.id, member.id, details)
@@ -24,23 +25,32 @@ const muteMember = async (guild, member, details, message) => {
   return insertMute
 }
 
+const unpunishLoop = async (members, removeMembers, removeRole) => {
+  members.forEach(async (memb) => {
+    if (removeMembers.includes(memb.id)) {
+      await memb.roles.remove(removeRole).catch(() => {})
+    }
+  })
+  return true
+}
+
 let muteDebounce = false
-const unmuteMembers = async (guild) => {
+const unpunishMembers = async (guild) => {
   if (muteDebounce) return
   muteDebounce = true
 
   const allRoles = await guild.roles.fetch()
   const mutedMembers = allRoles.cache.get(guild.ver.roles.muted).members
+  const toxicMembers = allRoles.cache.get(guild.ver.roles.toxic).members
   const mutedIds = mutedMembers.map((m) => m.id)
-  // Send a list of currently muted members to the database, which will return the list of those
-  // specific members who need to be unmuted.
+  const toxicIds = toxicMembers.map((m) => m.id)
+  // Send a list of currently muted punished to the database, which will return the list of those
+  // specific members who need to be unpunished.
+  const detoxMembers = await getAndDetox(guild.id, toxicIds)
   const unmutedMembers = await getAndUnmute(guild.id, mutedIds)
-  mutedMembers.forEach(async (memb) => {
-    if (unmutedMembers.includes(memb.id)) {
-      await memb.roles.remove(guild.ver.roles.muted).catch(() => {})
-    }
-  })
+  await unpunishLoop(mutedMembers, unmutedMembers, guild.ver.roles.muted)
+  await unpunishLoop(toxicMembers, detoxMembers, guild.ver.roles.toxic)
   muteDebounce = false
 }
 
-module.exports = { muteMember, unmuteMembers }
+module.exports = { muteMember, unpunishMembers }
