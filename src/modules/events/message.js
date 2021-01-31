@@ -10,20 +10,24 @@ const { preventFlood } = require('../functions/moderation/preventFlood')
 const { safeDelete, msgIntegrityCheck, basicLookup } = require('../functions/general')
 const { getV3rmId } = require('../../mongo/members')
 
+const specialChannelCheck = (cmdPerms, message) => {
+  const { channel: { id }, guild: { ver: { channels: { botCommands, detoxChamber } } } } = message
+  const isBC = cmdPerms.indexOf('_BC') !== -1
+  const isTox = cmdPerms.indexOf('_TOX') !== -1
+  if ((isBC && botCommands !== id) || (isTox && detoxChamber !== id)) {
+    safeDelete(message, 0)
+    return false
+  }
+  return true
+}
+
 const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
 
   const { channel: { id }, guild: { ver: { channels: { botCommands, detoxChamber } } } } = message
   const permissionLevel = cmd.permissionLevel.replace(/(_BC)|(_TOX)$/, '')
-  const isBC = cmd.permissionLevel.indexOf('_BC') !== -1
-  const isTox = cmd.permissionLevel.indexOf('_TOX') !== -1
   // The command is a bot-commands only command
-  if (cmd.permissionLevel !== permissionLevel) {
-    if ((isBC && botCommands !== id) || (isTox && detoxChamber !== id)) {
-      safeDelete(message, 0)
-      return false
-    }
-  }
+  if (specialChannelCheck(cmd.permissionLevel, message) === false) return false
   if (permissionLevel === 'UNIVERSAL') return true
   return message.member.hasPermission(cmd.permissionLevel)
 }
