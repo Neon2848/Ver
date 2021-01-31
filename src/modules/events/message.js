@@ -13,12 +13,13 @@ const { getV3rmId } = require('../../mongo/members')
 const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
 
-  const { guild: { ver: { channels: { botCommands } } } } = message
-  const permissionLevel = cmd.permissionLevel.replace(/_BC$/, '')
-
+  const { channel: { id }, guild: { ver: { channels: { botCommands, detoxChamber } } } } = message
+  const permissionLevel = cmd.permissionLevel.replace(/(_BC)|(_TOX)$/, '')
+  const isBC = cmd.permissionLevel.indexOf('_BC') !== -1
+  const isTox = cmd.permissionLevel.indexOf('_TOX') !== -1
   // The command is a bot-commands only command
   if (cmd.permissionLevel !== permissionLevel) {
-    if (botCommands !== message.channel.id) {
+    if ((isBC && botCommands !== id) || (isTox && detoxChamber !== id)) {
       safeDelete(message, 0)
       return false
     }

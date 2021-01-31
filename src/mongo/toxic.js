@@ -62,6 +62,13 @@ const getAndDetox = async (serverId, ids) => {
   return [...deToxIds, ...notInToxic] || notInToxic
 }
 
+const getToxicDetails = async ({ serverId, id }) => {
+  const v3rmId = await getV3rmId(serverId, id)
+  const result = await Toxic.findOne({ serverId, v3rmId })
+  if (!result || result.expireTime < Date.now()) return null
+  return { expireTime: result.expireTime, lastReason: result.lastReason }
+}
+
 module.exports = {
-  addToToxic, getNextToxicLength, getAndDetox,
+  addToToxic, getNextToxicLength, getAndDetox, getToxicDetails,
 }
