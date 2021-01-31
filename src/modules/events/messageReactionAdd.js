@@ -7,6 +7,7 @@ const {
 } = require('../functions/general')
 const { raysAStart, raysAVote } = require('../functions/moderation/raysA')
 const { ignoreRays, denyRays, approveRays } = require('../functions/moderation/raysApprovals')
+const toxicReaction = require('../functions/moderation/spray')
 const knownErrors = require('../knownErrors')
 
 /**
@@ -80,6 +81,7 @@ const botReactions = async (client, parts) => {
 const userReactions = async (client, parts) => {
   if (parts.message.partial || parts.message?.createdAt < (Date.now() - 604800000)) return
   if (parts.messageReaction.emoji.name === 'raysA') raysAStart(client, parts)
+  if (parts.messageReaction.emoji.name === 'spray') toxicReaction(client, parts)
 }
 
 const isServerReaction = (guild, rId) => !!guild.emojis.cache.get(rId)

@@ -5,24 +5,27 @@ const { attemptRoleQueue } = require('../functions/api/v3rm/userSetup')
 const { messageStatQueue } = require('../functions/database/stats')
 const { checkWordFilters } = require('../functions/moderation')
 const { checkPings } = require('../functions/moderation/pingAbuse')
-const { unmuteMembers } = require('../functions/moderation/mute')
+const { unpunishMembers } = require('../functions/moderation/mute')
 const { preventFlood } = require('../functions/moderation/preventFlood')
 const { safeDelete, msgIntegrityCheck, basicLookup } = require('../functions/general')
 const { getV3rmId } = require('../../mongo/members')
 
+const specialChannelCheck = (cmdPerms, message) => {
+  const { channel: { id }, guild: { ver: { channels: { botCommands, detoxChamber } } } } = message
+  const isBC = cmdPerms.indexOf('_BC') !== -1
+  const isTox = cmdPerms.indexOf('_TOX') !== -1
+  if ((isBC && botCommands !== id) || (isTox && detoxChamber !== id)) {
+    safeDelete(message, 0)
+    return false
+  }
+  return true
+}
+
 const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
-
-  const { guild: { ver: { channels: { botCommands } } } } = message
-  const permissionLevel = cmd.permissionLevel.replace(/_BC$/, '')
-
+  const permissionLevel = cmd.permissionLevel.replace(/(_BC)|(_TOX)$/, '')
   // The command is a bot-commands only command
-  if (cmd.permissionLevel !== permissionLevel) {
-    if (botCommands !== message.channel.id) {
-      safeDelete(message, 0)
-      return false
-    }
-  }
+  if (specialChannelCheck(cmd.permissionLevel, message) === false) return false
   if (permissionLevel === 'UNIVERSAL') return true
   return message.member.hasPermission(cmd.permissionLevel)
 }
@@ -43,7 +46,7 @@ const runCommand = (client, message) => {
 const runTasks = async (client, message) => {
   attemptRoleQueue()
   messageStatQueue(client, message)
-  if (message.createdTimestamp % 2 === 0) unmuteMembers(message.guild)
+  if (message.createdTimestamp % 2 === 0) unpunishMembers(message.guild)
 }
 
 module.exports = async (client, message) => {
