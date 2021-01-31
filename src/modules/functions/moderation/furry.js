@@ -1,5 +1,4 @@
 const { sendResult } = require('../general')
-const { addtoRoleQueue, attemptRoleQueue } = require('../api/v3rm/userSetup')
 
 const checkFurry = async (client, message) => {
   const { guild, member } = message
@@ -9,12 +8,9 @@ const checkFurry = async (client, message) => {
   if (!member.roles.has(furryRole)) {
     if (new RegExp(furryStrings.join('|')).test(message.content)) {
       if (member.roles) {
-        await member.roles.add(furryRole).catch(() => {
-          addtoRoleQueue(member.id, member, null, [furryRole.name])
-            .then(() => attemptRoleQueue())
-        })
+        await member.roles.add(furryRole)
       }
-      sendResult(`<@${message.author.id}>, you've yee'd your last haw.`,
+      sendResult(`<@${member.id}>, you've yee'd your last haw.`,
         { message, timeout: 5000 }, 'You Darned Furry!')
     }
   }
