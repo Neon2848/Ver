@@ -23,8 +23,6 @@ const specialChannelCheck = (cmdPerms, message) => {
 
 const checkCmdPerms = (message, cmd) => {
   if (!cmd) return false
-
-  const { channel: { id }, guild: { ver: { channels: { botCommands, detoxChamber } } } } = message
   const permissionLevel = cmd.permissionLevel.replace(/(_BC)|(_TOX)$/, '')
   // The command is a bot-commands only command
   if (specialChannelCheck(cmd.permissionLevel, message) === false) return false
