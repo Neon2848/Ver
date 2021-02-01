@@ -6,14 +6,14 @@ const results = (code, message, details) => {
     case 1:
       msgs = {
         title: 'Success',
-        desc: `Successfully ${details.targetUser} from the toxic channel.`,
+        desc: `Successfully ${details.targetUser} from the toxic channel`,
       }
       break
     case -1:
-      msgs = { title: 'Unable to detox', desc: 'The user needs to be in the server.' }
+      msgs = { title: 'Unable to detox', desc: 'The user needs to be in the server' }
       break
     default:
-      msgs = { title: 'Unable to toxic', desc: 'An unknown error occured.' }
+      msgs = { title: 'Unable to toxic', desc: 'An unknown error occured' }
       break
   }
   sendResult(msgs.desc, { edit: true, message }, msgs.title)

@@ -23,7 +23,7 @@ const users = (args) => {
 }
 
 // Match "quotes" "with-basic" "ASCII!" "inside" (asci 33, 35 - 126)
-const inQuotes = (args) => args.filter((arg) => /^"[!\21-\x7E]+"$/gm.test(arg)).map((a) => a.substring(1, a.length - 1))
+const inQuotes = (args) => args.filter((arg) => /^[“”""””][!\21-\x7E]+[“”""””]$/gm.test(arg)).map((a) => a.substring(1, a.length - 1))
 
 // Match regex `/regex/` and convert to regular expression (or error).
 const regexs = (args) => {
