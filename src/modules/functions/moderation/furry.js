@@ -7,13 +7,10 @@ const checkFurry = async (client, message) => {
 
   if (!member.roles.has(furryRole)) {
     const contentArray = message.content.split(' ')
-    for (const word of contentArray) {
-      if (furryStrings.indexOf(word)) {
-        member.roles.add(furryRole)
-        sendResult(`<@${member.id}>, you've yee'd your last haw.`,
-          { message, timeout: 5000 }, 'You Darned Furry!')
-        break
-      }
+    if (contentArray.some((word) => furryStrings.includes(word))) {
+      member.roles.add(furryRole)
+      sendResult(`<@${member.id}>, you've yee'd your last haw.`,
+        { message, timeout: 5000 }, 'You Darned Furry!')
     }
   }
 }
