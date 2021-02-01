@@ -6,12 +6,14 @@ const checkFurry = async (client, message) => {
   const furryStrings = ['owo', 'uwu', 'awoo']
 
   if (!member.roles.has(furryRole)) {
-    if (new RegExp(furryStrings.join('|')).test(message.content)) {
-      if (member.roles) {
-        await member.roles.add(furryRole)
+    const contentArray = message.content.split(' ')
+    for (const word of contentArray) {
+      if (furryStrings.indexOf(word)) {
+        member.roles.add(furryRole)
+        sendResult(`<@${member.id}>, you've yee'd your last haw.`,
+          { message, timeout: 5000 }, 'You Darned Furry!')
+        break
       }
-      sendResult(`<@${member.id}>, you've yee'd your last haw.`,
-        { message, timeout: 5000 }, 'You Darned Furry!')
     }
   }
 }
