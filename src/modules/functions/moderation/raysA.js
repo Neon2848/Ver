@@ -124,14 +124,16 @@ const raysAStart = async (client, content) => {
   message.raysA = { sourceMessage: editable.id }
 }
 
+const getRoleBonus = (cache, { roles: { leaderboardLord, nitro } }) => {
+  if (cache.filter((r) => r.permissions.has('KICK_MEMBERS')).size) return 5
+  if (cache.filter((r) => r.id === leaderboardLord).size) return 4
+  if (cache.filter((r) => r.id === nitro)) return 2
+  return 1
+}
+
 const userVoteBonus = (u, guild) => {
-  const { ver: { roles: { leaderboardLord, nitro, esoterica } } } = guild
   const m = guild.members.cache.get(u.id)
-  if (m) {
-    if (m.roles.cache.filter((r) => r.permissions.has('KICK_MEMBERS')).size) return 5
-    if (m.roles.cache.filter((r) => r.id === leaderboardLord).size) return 4
-    if (m.roles.cache.filter((r) => r.id === esoterica || r.id === nitro)) return 2
-  }
+  if (m) return getRoleBonus(m.roles.cache, guild.ver)
   return 1
 }
 
