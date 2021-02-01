@@ -3,7 +3,7 @@ const { sendResult } = require('../general')
 const checkFurry = async (client, message) => {
   const { guild, member } = message
   const furryRole = await guild.roles.fetch(guild.ver.roles.furry)
-  const furryStrings = ['owo', 'uwu', 'awoo', 'rawr', 'nuzzles', 'x3', 'x3c', ':3', ':3c']
+  const furryStrings = ['owo', 'uwu', 'awoo', 'rawr', 'nuzzles', 'x3', 'x3c', ':3', ':3c', 'yiff', 'meow', 'raccoon']
 
   if (!member.roles.cache.has(furryRole.id)) {
     const contentArray = message.content.split(' ')
