@@ -157,7 +157,7 @@ const basicLookup = async (member) => {
 }
 
 const quoteRegex = (msg) => {
-  const regParts = new RegExp(/([“"])(.+)(\1)/, 'gm').exec(msg)
+  const regParts = new RegExp(/([“”""””])(.+)([“”""””])/, 'gm').exec(msg)
   if (regParts) return regParts[2].replace(/`/gm, '')
   return null
 }

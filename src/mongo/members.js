@@ -48,7 +48,7 @@ const getExtraRoles = async (serverId, id, v3rmId = null) => {
 const findPartialUsers = async (serverId) => {
   const membs = await Members.find({
     serverId,
-    $or: [{ v3rmId: { $exists: false } }, { v3rmId: null }],
+    $or: [{ v3rmId: { $exists: false } }, { v3rmId: null }, { v3rmId: undefined }],
   })
   const membIds = membs.map((m) => m.id)
 

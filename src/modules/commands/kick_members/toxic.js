@@ -1,6 +1,5 @@
 const moment = require('moment')
 const { addToToxic, getNextToxicLength } = require('../../../mongo/toxic')
-const { addtoRoleQueue, attemptRoleQueue } = require('../../functions/api/v3rm/userSetup')
 const { genSpinner, sendResult } = require('../../functions/general')
 
 const results = (code, message, details) => {
@@ -9,7 +8,7 @@ const results = (code, message, details) => {
     case 1:
       msgs = {
         title: 'Success',
-        desc: `Placed ${details.targetUser} in toxic for:\`\`\`${details.lastReason}\`\`\`\nTheir sentence will expire in ${moment(details.expireTime).fromNow()}`,
+        desc: `Placed ${details.targetUser} in toxic for:\`\`\`${details.lastReason || 'General Toxicity'}\`\`\`\nTheir sentence will expire in ${moment(details.expireTime).fromNow()}`,
       }
       break
     case -1:
@@ -30,10 +29,9 @@ const getTime = async ({ timeArgs, numbers }, toxicInfo) => {
 
 const maxInt = 360000000000000
 exports.run = async (client, message, { argMap }) => { // eslint-disable-line no-unused-vars
-  const { guild, member, member: { id } } = message
+  const { guild } = message
   const { users, inQuotes, specialReason } = argMap
   const pendingMsg = await message.channel.send(genSpinner('Placing user in toxic...'))
-  const toxicRole = await guild.roles.fetch(guild.ver.roles.toxic)
   const targetUser = await guild.members.fetch(users[0]).catch(() => {})
   if (!targetUser) { results(-1, pendingMsg, null); return }
   const eTime = await getTime(argMap, { serverId: guild.id, id: targetUser.id })
@@ -47,7 +45,6 @@ exports.run = async (client, message, { argMap }) => { // eslint-disable-line no
     expireTime,
   })
 
-  await addtoRoleQueue(id, member, null, [toxicRole.name])
-  await attemptRoleQueue()
+  targetUser.roles.add(await guild.roles.fetch(guild.ver.roles.toxic))
   results(1, pendingMsg, { targetUser, expireTime, lastReason })
 }
