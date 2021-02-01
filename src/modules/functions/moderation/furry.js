@@ -5,12 +5,12 @@ const checkFurry = async (client, message) => {
   const furryRole = await guild.roles.fetch(guild.ver.roles.furry)
   const furryStrings = ['owo', 'uwu', 'awoo', 'rawr', 'nuzzles', 'x3', 'x3c', ':3', ':3c']
 
-  if (!member.roles.has(furryRole)) {
+  if (!member.roles.cache.has(furryRole.id)) {
     const contentArray = message.content.split(' ')
     if (contentArray.some((word) => furryStrings.includes(word.toLowerCase()))) {
       member.roles.add(furryRole)
-      sendResult(`<@${member.id}>, you've yee'd your last haw.`,
-        { message, timeout: 5000 }, 'You Darned Furry!')
+      sendResult(`<@${member.id}>, you've yee'd your last haw.\n\nThe furry role has been applied, and cannot be revoked`,
+        { message }, 'You Darned Furry!')
     }
   }
 }

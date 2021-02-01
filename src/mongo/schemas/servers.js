@@ -28,6 +28,7 @@ const serversSchema = new Schema({
     leaderboardLord: { type: String, default: 'Leaderboard Lord' },
     esoterica: { type: String, default: 'Esoterica' },
     chuu: { type: String, default: 'Chuu.fm' },
+    furry: { type: String, default: 'furry' },
   },
 })
 
